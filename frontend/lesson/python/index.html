@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Mọi template gốc đều có meta này; course_detail.js/course_db_design.js đọc
+       .content KHÔNG guard nên thẻ phải tồn tại (rỗng — auth giờ là JWT). -->
+  <meta name="csrf-token" content="">
+  <title>Python - Phân Loại Gói Hàng</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+  <!-- Origin backend cho pe-bridge.js — PHẢI nạp trước mọi script khác -->
+  <script src="/static/js/pe-config.js"></script>
+  <link rel="stylesheet" href="/static/css/lesson.css">
+  <link rel="stylesheet" href="/static/css/pages/lesson_python.inline.css">
+  <link rel="stylesheet" href="/static/css/chatbot.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="lesson-page">
+  <div class="lesson-page h-screen flex flex-col overflow-hidden">
+
+    <nav class="h-20 border-b-2 border-gray-100 flex items-center justify-between px-10 bg-white shrink-0">
+      <div class="flex items-center gap-8">
+        <div class="flex items-center gap-2">
+          <div class="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center text-white text-xl shadow-lg shadow-red-100">
+            <i class="fa-brands fa-python"></i>
+          </div>
+          <span class="text-2xl font-extrabold tracking-tight text-gray-800">CODE<span class="text-brand-primary">GEN Z</span></span>
+        </div>
+        <div id="streak-badge" class="hidden md:flex items-center gap-3 px-4 py-2 rounded-2xl border transition-all duration-500 streak-badge-off">
+          <i id="streak-fire" class="fa-solid fa-fire text-xl transition-all duration-500 text-gray-300 streak-fire-off"></i>
+          <div class="flex flex-col leading-tight">
+            <span id="streak-count" class="font-extrabold text-sm text-gray-400">0 ngày</span>
+            <span id="streak-status" class="text-xs text-gray-300">Học ngay để giữ chuỗi</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2 bg-red-50 px-4 py-2 rounded-2xl border border-red-100">
+          <i class="fa-solid fa-gem text-brand-primary"></i>
+          <span id="gems-count" class="font-bold text-brand-primary">0</span>
+        </div>
+        <a href="/dashboard" class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-2xl text-sm font-bold text-gray-600 hover:bg-gray-200 transition-colors">
+          <i class="fa-solid fa-arrow-left"></i> Dashboard
+        </a>
+      </div>
+    </nav>
+
+    <main class="flex-1 flex overflow-hidden">
+      <section class="w-1/2 p-12 overflow-y-auto bg-white flex flex-col items-center">
+        <div class="w-full max-w-xl">
+          <div class="mb-10 text-center">
+            <h2 class="text-4xl font-extrabold text-gray-800 mb-4">Phân Loại Gói Hàng! 📦</h2>
+            <p class="text-gray-500 text-lg font-medium">Kéo các khối lệnh để giúp robot giao hàng quyết định khi nào giao ngay.</p>
+          </div>
+
+          <div class="bg-gray-50 rounded-[32px] p-10 border-2 border-gray-100 shadow-sm relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-400 to-orange-400"></div>
+            <div class="space-y-10">
+              <div class="flex items-center flex-wrap gap-4">
+                <span class="text-2xl font-extrabold text-gray-400">NẾU</span>
+                <div class="drop-target" id="zone-cond">
+                  <span class="text-gray-500 text-sm placeholder-pulse">Thả điều kiện...</span>
+                </div>
+                <span class="text-2xl font-extrabold text-gray-400">:</span>
+              </div>
+              <div class="flex items-center gap-4 pl-12">
+                <div class="w-10 h-10 border-l-4 border-b-4 border-gray-200 rounded-bl-2xl"></div>
+                <span class="text-xl font-bold text-brand-primary">THÌ</span>
+                <div class="drop-target" id="zone-act">
+                  <span class="text-gray-500 text-sm placeholder-pulse">Thả hành động...</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-4">
+                <span class="text-2xl font-extrabold text-gray-400">NGƯỢC LẠI:</span>
+              </div>
+              <div class="flex items-center gap-4 pl-12">
+                <div class="w-10 h-10 border-l-4 border-b-4 border-gray-200 rounded-bl-2xl"></div>
+                <span class="text-xl font-bold text-gray-400">THÌ</span>
+                <div class="lesson-else-default px-6 py-3 bg-white border-2 border-gray-200 rounded-2xl text-gray-400 font-bold italic shadow-sm">
+                  &quot;schedule_later()&quot;
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-12 bg-white rounded-3xl p-6 border-2 border-dashed border-gray-200">
+            <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6 text-center">Túi đồ của bạn 🎒</h4>
+            <div class="flex flex-wrap justify-center gap-4">
+              <div class="logic-card block-red" draggable data-type="cond" data-val="km <= 10">
+                <i class="fa-solid fa-location-dot"></i> km &lt;= 10
+              </div>
+              <div class="logic-card block-red" draggable data-type="cond" data-val="km > 100">
+                <i class="fa-solid fa-road"></i> km &gt; 100
+              </div>
+              <div class="logic-card block-blue" draggable data-type="act" data-val="deliver_now()">
+                <i class="fa-solid fa-truck-fast"></i> Giao ngay
+              </div>
+              <div class="logic-card block-blue" draggable data-type="act" data-val="schedule_later()">
+                <i class="fa-solid fa-calendar"></i> Hẹn lịch
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="w-1/2 p-12 bg-[#F7F9FC] flex flex-col items-center">
+        <div class="w-full max-w-xl h-full flex flex-col code-window shadow-2xl shadow-red-900/10">
+          <div class="h-12 border-b border-white/5 flex items-center px-6 gap-2">
+            <div class="w-3 h-3 rounded-full bg-[#FF5F56]"></div>
+            <div class="w-3 h-3 rounded-full bg-[#FFBD2E]"></div>
+            <div class="w-3 h-3 rounded-full bg-[#27C93F]"></div>
+            <span class="ml-4 text-white/30 font-mono text-xs font-bold uppercase tracking-widest">Python 3.12</span>
+          </div>
+
+          <div class="flex-1 p-10 font-mono text-xl leading-relaxed overflow-y-auto">
+            <div class="flex items-center gap-3 mb-6">
+              <span class="text-brand-primary">distance</span>
+              <span class="text-white/40">=</span>
+              <span class="text-orange-400">5</span>
+              <span class="text-white/20 text-sm italic"># km</span>
+            </div>
+            <div class="space-y-4">
+              <div class="flex items-center gap-3">
+                <span class="text-pink-500 font-bold">if</span>
+                <span id="code-cond" class="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-white/20">________</span>
+                <span class="text-white/40">:</span>
+              </div>
+              <div class="pl-12 flex items-center gap-3">
+                <span id="code-act" class="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-white/20">________</span>
+              </div>
+              <div class="text-pink-500 font-bold">else:</div>
+              <div class="pl-12 text-green-400">schedule_later()</div>
+            </div>
+            <div class="mt-16 pt-10 border-t border-white/5">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-[10px] text-white/30 font-black uppercase tracking-widest">Output Terminal</span>
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+              </div>
+              <div id="output-text" class="text-sm text-white/40 italic leading-loose">
+                &gt; Đang đợi lệnh từ bạn...
+              </div>
+            </div>
+          </div>
+
+          <div class="p-8 bg-[#222222] border-t border-white/5 flex justify-between items-center rounded-b-[16px]">
+            <p id="hint-box" class="text-xs text-white/30 font-medium max-w-[200px]">Hãy kéo thử khối &apos;km &lt;= 10&apos; vào ô điều kiện nhé!</p>
+            <button onclick="runMission()" class="btn-3d px-10 py-4 bg-brand-primary text-white font-extrabold rounded-2xl flex items-center gap-3 hover:bg-brand-secondary shadow-lg shadow-red-900/20 active:scale-95 transition-all uppercase tracking-tight">
+              Kiểm tra <i class="fa-solid fa-rocket"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="success-modal" class="fixed inset-0 z-50 bg-white/90 backdrop-blur-md hidden flex items-center justify-center">
+      <div class="text-center p-12 bg-white rounded-[40px] shadow-2xl border-4 border-brand-primary max-w-sm w-full mx-4">
+        <div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 text-5xl">🎉</div>
+        <h3 class="text-3xl font-black text-gray-800 mb-2">QUÁ ĐỈNH!</h3>
+        <p class="text-gray-500 font-medium mb-8">Bạn đã hiểu câu lệnh điều kiện Python rồi! +50 XP</p>
+        <button onclick="closeModal()" class="btn-3d w-full py-4 bg-brand-primary text-white font-black rounded-2xl uppercase">Tiếp tục nào</button>
+      </div>
+    </div>
+
+      <!-- Floating Chat Button -->
+    <button id="chatbot-toggle" class="chatbot-floating-btn" aria-label="Mở trợ lý AI">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" class="chatbot-btn-icon">
+        <path d="M12 1L13.8 9.2L22 11L13.8 12.8L12 21L10.2 12.8L2 11L10.2 9.2L12 1Z"></path>
+        <path d="M19.5 2L20.5 6L24 7L20.5 8L19.5 12L18.5 8L15 7L18.5 6L19.5 2Z" opacity="0.75"></path>
+        <path d="M5 15L5.8 17.7L8.5 18.5L5.8 19.3L5 22L4.2 19.3L1.5 18.5L4.2 17.7L5 15Z" opacity="0.65"></path>
+      </svg>
+      <div class="chatbot-badge">
+        <span class="chatbot-pulse"></span>
+      </div>
+    </button>
+
+    <!-- Chat Window -->
+    <div id="chatbot-window" class="chatbot-window chatbot-hidden">
+      <div class="chatbot-header">
+        <div class="chatbot-header-left">
+          <div class="chatbot-avatar">
+            <i class="fas fa-robot"></i>
+          </div>
+          <div class="chatbot-header-text">
+            <h3>Ichatbot</h3>
+            <span class="chatbot-status"><span class="chatbot-status-dot"></span> Trực tuyến</span>
+          </div>
+        </div>
+        <button id="chatbot-close" class="chatbot-close-btn" aria-label="Đóng chat">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chatbot-message chatbot-message-ai">
+          <div class="chatbot-message-avatar">
+            <i class="fas fa-sparkles"></i>
+          </div>
+          <div class="chatbot-message-content">
+            <div class="chatbot-message-bubble">
+              Chào bạn! 👋 Tôi là Ichatbot, trợ lý AI của bạn. Hãy hỏi tôi bất kỳ điều gì về lập trình hoặc học tập! 🚀
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="chatbot-image-preview" class="chatbot-image-preview chatbot-hidden">
+        <div class="chatbot-preview-item">
+          <!-- Không đặt src="" (browser có thể tải lại cả trang); chatbot.js gán .src khi user đính kèm ảnh -->
+          <img id="chatbot-preview-img" alt="Preview">
+          <button class="chatbot-preview-remove" onclick="removeChatbotImage()" aria-label="Xóa hình ảnh">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="chatbot-input-area">
+        <div class="chatbot-quick-actions">
+          <button class="chatbot-quick-btn" onclick="quickChatbotAsk('Giải thích code này')">
+            <i class="fas fa-lightbulb"></i>
+            <span>Giải thích</span>
+          </button>
+          <button class="chatbot-quick-btn" onclick="quickChatbotAsk('Tối ưu code')">
+            <i class="fas fa-wand-magic-sparkles"></i>
+            <span>Tối ưu</span>
+          </button>
+          <button class="chatbot-quick-btn" onclick="generateChatbotRoadmap()">
+            <i class="fas fa-map"></i>
+            <span>Lộ trình</span>
+          </button>
+        </div>
+
+        <div class="chatbot-input-box">
+          <label for="chatbot-image-upload" class="chatbot-attach-btn" title="Đính kèm hình ảnh">
+            <i class="fas fa-paperclip"></i>
+            <input type="file" id="chatbot-image-upload" class="chatbot-hidden" accept="image/*" title="Chọn hình ảnh">
+          </label>
+          <input
+            id="chatbot-input"
+            type="text"
+            placeholder="Nhập câu hỏi..."
+            class="chatbot-input"
+            autocomplete="off">
+          <button id="chatbot-send-btn" class="chatbot-send-btn" aria-label="Gửi">
+            <i class="fas fa-arrow-up"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/js/pe-bridge.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/static/js/pages/lesson_python.tailwind.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <script src="/static/js/pages/lesson_python.inline.js"></script>
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/chatbot.js"></script>
+  <script src="/static/js/pages/lesson-topbar.hydrate.js"></script>
+</body>
+</html>

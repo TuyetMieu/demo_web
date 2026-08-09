@@ -6,6 +6,12 @@
 > MIGRATION_NOTES.md (mọi khác biệt có chủ đích + lý do), UI_PARITY_CHECKLIST.md
 > (checklist đối chiếu bằng mắt).
 
+> ⚠️ **Tài liệu lịch sử.** Lớp Next.js/React mô tả dưới đây đã được gỡ bỏ:
+> frontend hiện là **HTML/CSS/JS thuần** (mỗi route một thư mục `index.html`,
+> không build step) — xem `frontend/README.md`. Backend Django và lớp JS legacy
+> giữ nguyên. Đường dẫn `frontend/public/static/*` trong báo cáo này nay là
+> `frontend/static/*`.
+
 ## 1. Những gì ĐÃ port
 
 ### Backend — Django 5.2 + DRF (`backend/`)

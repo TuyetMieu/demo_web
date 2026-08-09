@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Mọi template gốc đều có meta này; course_detail.js/course_db_design.js đọc
+       .content KHÔNG guard nên thẻ phải tồn tại (rỗng — auth giờ là JWT). -->
+  <meta name="csrf-token" content="">
+  <title>Concept Card</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+  <!-- Origin backend cho pe-bridge.js — PHẢI nạp trước mọi script khác -->
+  <script src="/static/js/pe-config.js"></script>
+  <link rel="stylesheet" href="/static/css/pages/concept_card.inline.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-card-id="nc_card_dump_backup">
+    <div class="cc-top">
+      <a class="cc-back" id="cc-back-link" href="/courses/db_design_tc">← Về roadmap khóa học</a>
+    </div>
+    <main id="card-root"><div class="cc-missing">Đang mở hồ sơ…</div></main>
+
+
+  <script src="/static/js/pe-bridge.js"></script>
+  <script src="/static/js/lesson_content_tc.js"></script>
+  <script src="/static/js/lesson_content_nc.js"></script>
+  <script src="/static/js/pages/concept_card.inline.js"></script>
+</body>
+</html>

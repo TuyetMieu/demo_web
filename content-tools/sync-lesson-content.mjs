@@ -3,7 +3,7 @@
  * ─────────────────────────────────────────────────────────────
  * Port Node của db/seed_lesson_content.py (Flask) — Giai đoạn 4 migration.
  *
- * Đồng bộ nội dung bài học từ frontend/public/static/js/lesson_content*.js
+ * Đồng bộ nội dung bài học từ frontend/static/js/lesson_content*.js
  * vào DB (lessons.content_json + lesson_code/subtitle/estimated_minutes).
  * Nguồn chân lý vẫn là file JS (FE render trực tiếp); DB giữ bản sao cho
  * backend (quiz ôn tập đọc step_2, trang Kỹ năng, thống kê...).
@@ -29,9 +29,9 @@ import pg from 'pg';
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url))); // Programming_EDU_next/
 
 const JS_FILES = [
-  'frontend/public/static/js/lesson_content.js',
-  'frontend/public/static/js/lesson_content_tc.js',
-  'frontend/public/static/js/lesson_content_nc.js',
+  'frontend/static/js/lesson_content.js',
+  'frontend/static/js/lesson_content_tc.js',
+  'frontend/static/js/lesson_content_nc.js',
 ];
 
 function loadEnv() {

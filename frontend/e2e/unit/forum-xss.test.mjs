@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SRC = join(__dirname, '..', '..', 'public', 'static', 'js', 'dashboard.js');
+const SRC = join(__dirname, '..', '..', 'static', 'js', 'dashboard.js');
 const code = readFileSync(SRC, 'utf8');
 
 let failures = 0;

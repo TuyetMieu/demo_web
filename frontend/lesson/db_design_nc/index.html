@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Mọi template gốc đều có meta này; course_detail.js/course_db_design.js đọc
+       .content KHÔNG guard nên thẻ phải tồn tại (rỗng — auth giờ là JWT). -->
+  <meta name="csrf-token" content="">
+  <title>Database Design — Bài học</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+  <!-- Origin backend cho pe-bridge.js — PHẢI nạp trước mọi script khác -->
+  <script src="/static/js/pe-config.js"></script>
+  <link rel="stylesheet" href="/static/css/lesson_db_design.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.7/lib/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.7/theme/material-darker.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="lesson-focus-mode" data-course="db_design_nc">
+    <!-- PERF 2026-07-19: trang này tải 4 script + 2 css từ jsdelivr và css từ
+        cdnjs — preconnect cắt DNS+TLS handshake khỏi đường găng nạp engine -->
+
+    <!-- Scroll progress bar (4.8) -->
+    <div class="scroll-progress" id="scroll-progress"></div>
+
+    <!-- ════════════ FOCUS HEADER ════════════ -->
+    <header class="lesson-header">
+      <button class="exit-btn" onclick="exitLesson()" title="Thoát bài học">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+
+      <div class="header-center">
+        <div class="progress-track" id="progress-track">
+          <div class="progress-step" data-step="1">
+            <span class="step-num">1</span>
+            <span class="step-label-tiny">Lý thuyết</span>
+            <span class="step-check"><i class="fa-solid fa-check"></i></span>
+          </div>
+          <div class="progress-connector"></div>
+          <div class="progress-step" data-step="2">
+            <span class="step-num">2</span>
+            <span class="step-label-tiny">Trắc nghiệm</span>
+            <span class="step-check"><i class="fa-solid fa-check"></i></span>
+          </div>
+          <div class="progress-connector"></div>
+          <div class="progress-step" data-step="3">
+            <span class="step-num">3</span>
+            <span class="step-label-tiny">Kéo thả</span>
+            <span class="step-check"><i class="fa-solid fa-check"></i></span>
+          </div>
+          <div class="progress-connector"></div>
+          <div class="progress-step" data-step="4">
+            <span class="step-num">4</span>
+            <span class="step-label-tiny">Tự code</span>
+            <span class="step-check"><i class="fa-solid fa-check"></i></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="hearts" id="hearts-display" title="Mạng — mất 1 khi sai">
+          <i class="fa-solid fa-heart"></i>
+          <i class="fa-solid fa-heart"></i>
+          <i class="fa-solid fa-heart"></i>
+        </div>
+
+        <div class="xp-pill" title="Streak — chuỗi ngày học liên tiếp">
+          <span class="streak-fire">🔥</span>
+          <span id="streak-count">0</span>
+        </div>
+
+        <div class="player-pill" id="player-card" title="Code Wizard — SQL Apprentice">
+          <div class="player-avatar">
+            <i class="fa-solid fa-hat-wizard"></i>
+          </div>
+          <div class="player-info">
+            <div class="player-name">Code Wizard</div>
+            <div class="player-meta">
+              <span class="player-level">L4</span>
+              <span class="player-class">SQL Apprentice</span>
+              <span class="xp-text">0/2000</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="report-btn" onclick="reportBug()" title="Báo lỗi">
+          <i class="fa-regular fa-flag"></i>
+        </button>
+      </div>
+    </header>
+
+    <main class="lesson-stage">
+      <!-- ═══════════ STEP 1: THEORY ═══════════ -->
+      <section class="step-pane active" data-step="1">
+        <article class="step-1-content">
+          <div class="eyebrow-row">
+            <span class="step-pill">Bước 1 / 4</span>
+            <span class="topic-tag">Lý thuyết bite-sized + Trực quan Database</span>
+          </div>
+
+          <h1 class="lesson-title" id="lesson-title">Entity Set &amp; Primary Key</h1>
+
+          <div id="story-banner" class="story-banner" hidden></div>
+          <div id="lesson-hero" class="lesson-hero" role="img" aria-label="Hero illustration"></div>
+          <div id="concept-cards-hero"></div>
+          <div id="primer-flow-mount"></div>
+
+          <p class="lesson-intro" id="lesson-intro"></p>
+          <p class="lesson-example" id="lesson-example"></p>
+
+          <!-- SVG icon library — nạp nguyên văn từ template gốc (symbol defs) -->
+          <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+            <defs>
+              <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="8" cy="15" r="4"></circle><path d="m10.85 12.15 8.65 8.65M18 5l2 2M15 8l2 2M19 6l2 2"></path>
+              </symbol>
+              <symbol id="i-cube" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><path d="m3.3 7 8.7 5 8.7 5M12 22V12"></path>
+              </symbol>
+              <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </symbol>
+              <symbol id="i-puzzle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.024-.79-.038-.79-.038s-.32-.018-.79.038a.98.98 0 0 1-.837-.276l-1.613-1.612a2.01 2.01 0 0 0-1.413-.587H9.414a2.01 2.01 0 0 1-1.413-.587L6.395 12.93a.99.99 0 0 1-.276-.837c.025-.482.038-.794.038-.794s.018-.32-.038-.794a.99.99 0 0 1 .276-.837l1.613-1.613a2 2 0 0 0 0-2.828L6.396 4.79a2 2 0 0 1 0-2.828l1.611-1.61A2 2 0 0 1 9.85 0h6.302a2 2 0 0 1 1.414.586l1.61 1.61a2 2 0 0 0 2.83 0l1.6-1.6a2 2 0 0 1 2.83 0l1.6 1.6a2 2 0 0 0 2.83 0"></path>
+              </symbol>
+              <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </symbol>
+              <symbol id="i-stack" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12.83 2.18 8.99 4.99c.13.07.18.21.18.33v9.99c0 .12-.05.25-.18.33l-8.99 4.99c-.12.07-.27.07-.39 0L3.46 17.82c-.13-.07-.18-.21-.18-.33V7.5c0-.12.05-.25.18-.33l8.99-4.99c.12-.07.27-.07.39 0M7 7.07v10M17 7.07v10"></path>
+              </symbol>
+              <symbol id="i-arrow-split" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 3h5v5M8 3H3v5M12 22V8M21 3l-5 5M3 3l5 5"></path>
+              </symbol>
+              <symbol id="i-crown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path>
+              </symbol>
+              <symbol id="i-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+              </symbol>
+              <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 12 14z"></path>
+              </symbol>
+              <symbol id="i-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14a9 3 0 0 0 18 0V5"></path><path d="M3 12a9 3 0 0 0 18 0"></path>
+              </symbol>
+              <symbol id="i-git-branch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 3v12M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
+              </symbol>
+              <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="11" x="3" y="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </symbol>
+              <symbol id="i-bug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m8 2 1.88 1.88M14.12 3.88 16 2M9 7.13v-1a3.003 3.003 0 1 1 6 0v1M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6M12 20v-9M6.53 9C4.6 8.8 3 7.1 3 5M6 13H2M3 21c0-2.1 1.7-3.9 3.8-4M20.97 5c0 2.1-1.6 3.8-3.5 4M17 13h4M21 21c0-2.1-1.7-3.9-3.8-4"></path>
+              </symbol>
+              <symbol id="i-atom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="1"></circle><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z"></path><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z"></path>
+              </symbol>
+              <symbol id="i-scissors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="6" cy="6" r="3"></circle><path d="M8.12 8.12 12 12M20 4 8.12 15.88M14.83 14.83 20 20M14.83 9.17 20 4"></path><circle cx="6" cy="18" r="3"></circle>
+              </symbol>
+              <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </symbol>
+              <symbol id="i-location" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle>
+              </symbol>
+              <symbol id="i-explosion" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 12 14zM12 2v3M12 22v-3M2 12h3M22 12h-3M19 5l-2 2M7 17l-2 2M19 19l-2-2M7 7 5 5"></path>
+              </symbol>
+              <symbol id="i-scale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10M12 3v18M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path>
+              </symbol>
+              <symbol id="i-brackets" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3H7a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-1"></path>
+              </symbol>
+              <symbol id="i-table" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M3 9h18M3 15h18M9 3v18M15 3v18"></path>
+              </symbol>
+            </defs>
+          </svg>
+
+          <div class="theory-extended" id="theory-extended" hidden>
+            <div class="theory-extended-label">
+              <i class="fa-solid fa-lightbulb"></i> Hiểu sâu hơn
+            </div>
+            <div class="theory-extended-content" id="theory-extended-content"></div>
+          </div>
+
+          <div class="syntax-example" id="syntax-example" hidden>
+            <div class="syntax-example-label">
+              <i class="fa-solid fa-code"></i> Ví dụ minh họa
+            </div>
+            <div class="syntax-example-code" id="syntax-example-code"></div>
+            <div class="syntax-example-explain" id="syntax-example-explain"></div>
+          </div>
+
+          <div id="decomp-game-mount"></div>
+          <div id="primer-svg-mount"></div>
+          <div id="plan-visual-mount" hidden></div>
+
+          <!-- Visual DB Panel -->
+          <div class="visual-db" id="visual-db-panel">
+            <div class="db-panel schema-panel">
+              <div class="panel-head">
+                <span class="panel-title"><i class="fa-solid fa-table"></i> Schema</span>
+                <span class="panel-sub" id="schema-table-name"></span>
+              </div>
+              <div class="schema-table" id="schema-table"></div>
+            </div>
+
+            <div class="db-panel data-panel">
+              <div class="panel-head">
+                <span class="panel-title"><i class="fa-solid fa-database"></i> Sample Data</span>
+                <span class="panel-sub" id="data-row-count"></span>
+              </div>
+              <div class="data-table-wrap">
+                <table class="data-table" id="data-table"></table>
+              </div>
+            </div>
+          </div>
+
+          <div class="mission-card">
+            <div class="mission-label">🎯 Nhiệm vụ</div>
+            <div class="mission-text" id="mission-text"></div>
+          </div>
+
+          <button class="next-btn primary" id="step1-inline-cta" onclick="goToStep(2)" style="display:none" aria-hidden="true">
+            Đã hiểu, tiếp tục
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </article>
+      </section>
+
+      <!-- ═══════════ STEP 2: MCQ ═══════════ -->
+      <section class="step-pane" data-step="2">
+        <article class="step-2-content">
+          <div class="eyebrow-row">
+            <span class="step-pill">Bước 2 / 4</span>
+            <span class="topic-tag">Kiểm tra nhanh — Đừng sai nhé!</span>
+          </div>
+
+          <h2 class="mcq-question" id="mcq-question"></h2>
+
+          <div class="mcq-options" id="mcq-options"></div>
+
+          <div class="inline-hint hidden" id="inline-hint">
+            <i class="fa-solid fa-lightbulb"></i>
+            <div>
+              <strong>AI Hint:</strong>
+              <span id="inline-hint-text"></span>
+            </div>
+          </div>
+
+          <div class="mcq-explain hidden" id="mcq-explain">
+            <i class="fa-solid fa-circle-check"></i>
+            <span id="mcq-explain-text"></span>
+          </div>
+
+          <!-- Mini-game bonus: drag correct/wrong -->
+          <div class="mini-game" id="mini-game" hidden>
+            <div class="mini-game-head">
+              <span class="mini-game-tag"><i class="fa-solid fa-gamepad"></i> Mini-game bonus</span>
+              <h3 class="mini-game-title" id="mini-game-title"></h3>
+              <p class="mini-game-instruction" id="mini-game-instruction"></p>
+            </div>
+            <div class="mini-game-board">
+              <div class="mini-game-chips" id="mini-game-chips"></div>
+              <div class="mini-game-bins" id="mini-game-bins"></div>
+            </div>
+            <div class="mini-game-actions">
+              <button class="icon-btn" id="btn-mini-reset" title="Bắt đầu lại mini-game"><i class="fa-solid fa-rotate-left"></i></button>
+              <button class="next-btn primary small" id="btn-mini-check" onclick="checkMiniGame()">
+                <i class="fa-solid fa-check"></i> Kiểm tra
+              </button>
+            </div>
+            <div class="mini-game-feedback hidden" id="mini-game-feedback"></div>
+          </div>
+
+          <button id="btn-next-step3" class="next-btn primary hidden" onclick="goToStep(3)">
+            <span class="cta-label">Tiếp tục → Kéo Thả Logic</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </article>
+      </section>
+
+      <!-- ═══════════ STEP 3: PIPELINE-AS-FEATURE (v6.2, 45/55) ═══════════ -->
+      <section class="step-pane" data-step="3">
+        <div class="step3-exercise" data-step3-wrapper="">
+          <div class="split-pane step3-two-col">
+            <div class="step3-topbar">
+              <div class="mission-sticky" id="step3-mission">
+                <span class="mission-sticky-icon"><i class="fa-solid fa-bullseye"></i></span>
+                <div class="mission-sticky-text" id="step3-mission-text"></div>
+              </div>
+            </div>
+
+            <div class="step3-pipeline-map">
+              <div id="drag-game-mount"></div>
+              <div class="data-preview" id="step3-data-preview">
+                <div class="data-preview-content" id="step3-data-content"></div>
+              </div>
+            </div>
+
+            <div class="step3-editor">
+              <div class="drop-zone-stack" id="drop-zones"></div>
+
+              <div class="reveal-strip" id="reveal-strip" hidden>
+                <span class="reveal-strip-icon" aria-hidden="true">🔎</span>
+                <div class="reveal-strip-text" id="reveal-hint-text"></div>
+              </div>
+
+              <div class="block-bank-wrap">
+                <div class="bank-label">Kho khối lệnh</div>
+                <div class="block-bank" id="block-bank"></div>
+              </div>
+            </div>
+
+            <div class="ide-pane step3-ide">
+              <header class="pane-head ide-head">
+                <div class="terminal-chrome">
+                  <div class="chrome-dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                  </div>
+                  <div class="filename-tab">
+                    <i class="fa-solid fa-code"></i>
+                    <span>query.sql</span>
+                  </div>
+                </div>
+                <div class="ide-tools">
+                  <span class="ide-type-hint" title="Bạn có thể gõ SQL trực tiếp vào đây"><i class="fa-solid fa-pen"></i> Tự gõ được</span>
+                  <span class="char-count" id="ide-char-count">0 ký tự</span>
+                  <button class="icon-btn" id="btn-drag-reset" title="Bắt đầu lại" onclick="handleDragReset()">
+                    <i class="fa-solid fa-rotate-left"></i>
+                  </button>
+                </div>
+              </header>
+              <div class="ide-display pixel-terminal">
+                <div class="ide-line-numbers" id="ide-line-numbers">1</div>
+                <div
+                  class="ide-content"
+                  id="ide-code"
+                  contentEditable
+                  data-placeholder="✎ Gõ SQL trực tiếp ở đây, hoặc kéo khối lệnh phía trên…"
+                  suppressContentEditableWarning
+                ><span class="ide-cursor"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════ STEP 4: CODECADEMY 3-COL ═══════════ -->
+      <section class="step-pane" data-step="4">
+        <div class="split-pane codecademy-layout">
+          <!-- CỘT 1: Hướng dẫn -->
+          <div class="pane pane-left">
+            <header class="pane-head">
+              <div>
+                <div class="eyebrow-row tight">
+                  <span class="step-pill small">Bước 4 / 4</span>
+                </div>
+                <h2 class="pane-title problem-title">
+                  <span class="problem-number">1.</span>
+                  <span id="step4-title">Entity Set &amp; Primary Key</span>
+                </h2>
+              </div>
+            </header>
+            <div class="pane-scroll">
+              <div class="prompt-block" id="step4-prompt"></div>
+              <div class="instructions-block" id="step4-instructions"></div>
+              <details class="hint-collapsible" id="step4-hint-details">
+                <summary>💡 Cần gợi ý?</summary>
+                <div class="hint-collapsible-content" id="step4-hint-mount"></div>
+              </details>
+            </div>
+          </div>
+
+          <!-- CỘT 2: IDE -->
+          <div class="pane pane-middle">
+            <header class="pane-head ide-head">
+              <div class="ide-head-title">
+                <i class="fa-solid fa-code"></i> Code
+              </div>
+              <div class="ide-tools">
+                <select class="lang-selector">
+                  <option>SQL</option>
+                  <option>Python</option>
+                  <option>PostgreSQL</option>
+                </select>
+                <button class="icon-btn" title="Reset" onclick="handleChallengeReset && handleChallengeReset()"><i class="fa-solid fa-rotate-left"></i></button>
+                <button class="icon-btn" title="Format"><i class="fa-solid fa-indent"></i></button>
+              </div>
+            </header>
+
+            <div class="challenge-host">
+              <div class="challenge-pane" data-challenge="full_ide">
+                <div id="code-editor"></div>
+              </div>
+              <div class="challenge-pane" data-challenge="mcq_code" hidden>
+                <div class="mcq-code-host" id="mcq-code-host"></div>
+              </div>
+              <div class="challenge-pane" data-challenge="fill_blank" hidden>
+                <div class="fill-blank-host" id="fill-blank-host"></div>
+              </div>
+              <div class="challenge-pane" data-challenge="bug_fix" hidden>
+                <div class="bug-fix-host" id="bug-fix-host"></div>
+              </div>
+            </div>
+
+            <div class="terminal leetcode-terminal">
+              <div class="terminal-head">
+                <span class="terminal-title">
+                  <i class="fa-solid fa-terminal"></i> Console
+                </span>
+                <div class="run-actions">
+                  <button class="run-btn secondary btn btn-ghost" id="btn-run" onclick="handleChallengeRun && handleChallengeRun(false)">
+                    <i class="fa-solid fa-play"></i> Run
+                  </button>
+                  <button class="run-btn primary btn btn-primary" id="btn-submit" onclick="handleChallengeRun && handleChallengeRun(true)">
+                    <i class="fa-solid fa-paper-plane"></i> Submit
+                  </button>
+                </div>
+              </div>
+              <div class="terminal-output" id="terminal-output">
+                <span class="prompt-arrow">$</span> Đang chờ bạn gõ lệnh...
+              </div>
+            </div>
+          </div>
+
+          <!-- CỘT 3: Kết quả -->
+          <div class="pane pane-right">
+            <div class="results-pane results-pane--full">
+              <header class="pane-head results-head">
+                <i class="fa-solid fa-square-poll-vertical"></i> Kết quả truy vấn
+              </header>
+              <div class="results-table" id="step4-results">
+                <div class="results-empty">Bấm <strong>Run</strong> để xem kết quả.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ════════════ STICKY NAV FOOTER ════════════ -->
+    <nav class="lesson-nav-footer" id="lesson-nav-footer">
+      <!-- Khởi tạo disabled; updateNavFooter() của engine sẽ bỏ khi có bài trước -->
+      <button
+        class="nav-btn nav-back"
+        id="nav-back"
+        onclick="navBack?.()"
+        disabled
+        aria-label="Quay lại"
+      >
+        <i class="fa-solid fa-arrow-left"></i>
+        <span class="nav-btn-label">Quay lại</span>
+      </button>
+
+      <button class="nav-btn nav-next" id="nav-next" onclick="navNext()" aria-label="Tiếp theo">
+        <span class="nav-btn-label">Tiếp theo</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </nav>
+
+    <!-- ════════════ SUCCESS MODAL ════════════ -->
+    <div id="success-modal" class="modal-overlay hidden">
+      <div class="success-card">
+        <div class="confetti-burst"></div>
+        <div class="success-icon">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+        <h2 class="success-title">Hoàn thành bài học!</h2>
+        <div class="success-lesson-tag">
+          <span class="success-lesson-num" id="success-lesson-num">Bài 1/20</span>
+          <span class="success-lesson-title" id="success-lesson-title">Entity Set &amp; Primary Key</span>
+        </div>
+        <p class="success-message" id="success-message"></p>
+
+        <div class="success-xp-breakdown" id="success-xp-breakdown">
+          <div class="success-xp-row"><span>Trắc nghiệm</span><span>+15 XP</span></div>
+          <div class="success-xp-row"><span>Mini-game</span><span>+15 XP</span></div>
+          <div class="success-xp-row"><span>Kéo thả SQL</span><span>+30 XP</span></div>
+          <div class="success-xp-row"><span>Viết code</span><span id="success-xp-code">+50 XP</span></div>
+          <div class="success-xp-total"><span>Tổng</span><span class="success-xp-num" id="success-xp-total">+0</span></div>
+        </div>
+
+        <div class="success-next-preview" id="success-next-preview">
+          <span class="success-next-label">Bài tiếp theo</span>
+          <span class="success-next-title" id="success-next-title">—</span>
+        </div>
+
+        <div class="achievement-unlock" id="achievement-unlock-block" hidden>
+          <div class="achievement-icon">
+            <i class="fa-solid fa-key"></i>
+          </div>
+          <div class="achievement-info">
+            <div class="achievement-name" id="achievement-name">—</div>
+            <div class="achievement-desc" id="achievement-desc">—</div>
+          </div>
+        </div>
+
+        <div class="success-rewards">
+          <div class="reward">
+            <div class="reward-icon"><i class="fa-solid fa-bolt"></i></div>
+            <div class="reward-info">
+              <div class="reward-value" id="reward-xp">+50</div>
+              <div class="reward-label">XP</div>
+            </div>
+          </div>
+          <div class="reward">
+            <div class="reward-icon gem"><i class="fa-solid fa-gem"></i></div>
+            <div class="reward-info">
+              <div class="reward-value">+10</div>
+              <div class="reward-label">Gems</div>
+            </div>
+          </div>
+          <div class="reward">
+            <div class="reward-icon streak-icon"><i class="fa-solid fa-fire"></i></div>
+            <div class="reward-info">
+              <div class="reward-value" id="reward-streak">+1</div>
+              <div class="reward-label">Streak</div>
+            </div>
+          </div>
+        </div>
+        <div class="success-actions">
+          <button class="next-btn ghost" onclick="closeSuccess()">Ôn lại</button>
+          <button class="next-btn primary" onclick="nextLesson()">
+            Bài tiếp theo
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════ EXIT CONFIRM MODAL (thay confirm() mặc định) ════════════ -->
+    <div
+      id="exit-confirm-modal"
+      class="modal-overlay hidden"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="exit-confirm-title"
+      onclick="exitLessonCancel?.()"
+    >
+      <div class="exit-card" onclick="event.stopPropagation()">
+        <div class="exit-icon">
+          <i class="fa-solid fa-door-open"></i>
+        </div>
+        <h2 class="exit-title" id="exit-confirm-title">Rời bài học?</h2>
+        <p class="exit-message">
+          Tiến độ bài này <strong>chưa được lưu</strong> — bạn sẽ phải làm lại từ
+          đầu khi quay lại.
+        </p>
+        <p class="exit-note">Hoàn thành cả 4 bước để nhận XP và giữ chuỗi streak 🔥</p>
+        <div class="exit-actions">
+          <button class="next-btn primary" onclick="exitLessonCancel?.()" autoFocus>
+            Ở lại học tiếp
+          </button>
+          <button class="next-btn danger-ghost" onclick="exitLessonConfirm?.()">
+            Thoát bài học
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- B7 Mobile: Step 3 drag-drop fallback notice -->
+    <div id="mobile-step3-notice" class="mobile-step3-notice" role="alertdialog" aria-labelledby="mobile-step3-title">
+      <div class="mobile-step3-icon"><i class="fa-solid fa-mobile-screen"></i></div>
+      <div class="mobile-step3-content">
+        <h3 id="mobile-step3-title" class="mobile-step3-title">Kéo-thả không hỗ trợ trên mobile</h3>
+        <p class="mobile-step3-text">Step 3 cần thao tác chuột (kéo thả). Bạn có thể bỏ qua Step 3 để xem Step 4, hoặc dùng máy tính.</p>
+        <div class="mobile-step3-actions">
+          <button class="btn btn-ghost" type="button" id="mobile-step3-close-btn">Đóng</button>
+          <button class="btn btn-primary" type="button" id="mobile-step3-skip-btn">Bỏ qua → Step 4</button>
+        </div>
+      </div>
+    </div>
+
+  <script src="/static/js/pe-bridge.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.7/lib/codemirror.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.7/mode/sql/sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.7/addon/display/placeholder.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <script src="/static/js/lesson_content.js"></script>
+  <script src="/static/js/lesson_content_nc.js"></script>
+  <script src="/static/js/table_explorer.js"></script>
+  <script src="/static/js/drag_game.js"></script>
+  <script src="/static/js/decomp_game.js"></script>
+  <script src="/static/js/lesson_db_design.js"></script>
+  <script src="/static/js/pages/lesson_db.hydrate.js"></script>
+</body>
+</html>

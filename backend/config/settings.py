@@ -2,7 +2,7 @@
 Django settings — port từ Flask app.py/config.py của Programming_EDU.
 
 Nguyên tắc: giữ nguyên hành vi nghiệp vụ (rate-limit, security headers, CORS,
-error JSON tiếng Việt); thay session-cookie auth bằng JWT vì frontend Next.js
+error JSON tiếng Việt); thay session-cookie auth bằng JWT vì frontend tĩnh
 nằm ở domain khác (lý do chi tiết: MIGRATION_NOTES.md §Auth).
 """
 import os
@@ -31,7 +31,7 @@ DEBUG = os.environ.get('DJANGO_DEBUG', os.environ.get('FLASK_DEBUG', '0')) == '1
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-# Frontend Next.js (origin khác) — dùng cho CORS + redirect sau OAuth
+# Frontend tĩnh (origin khác) — dùng cho CORS + redirect sau OAuth
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 ALLOWED_ORIGINS = os.environ.get('ALLOWED_ORIGINS', FRONTEND_URL).split(',')
 
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    'drf_spectacular',
 
     'allauth',
     'allauth.account',
@@ -119,7 +120,13 @@ DATABASES = {
     # Pool chia sẻ kết nối ấm giữa mọi thread → chỉ còn RTT query (~260ms/câu
     # khi dev từ VN; <5ms khi backend deploy cùng region với DB).
     # Lưu ý: Django cấm dùng pool chung với conn_max_age ≠ 0.
-    'default': dj_database_url.parse(DATABASE_URL, conn_max_age=0)
+    # conn_health_checks: FIX 2026-07-20 — mạng đứt/máy sleep từng làm cả pool
+    # đầy kết nối chết (SSL SYSCALL 10053) → mọi request 500 vĩnh viễn tới khi
+    # restart. Bật health check = Django ping kết nối khi checkout khỏi pool,
+    # loại kết nối chết và mở lại tự động (psycopg_pool check_connection).
+    # Phí: 1 round-trip nhẹ mỗi request (<5ms khi deploy cùng region DB).
+    'default': dj_database_url.parse(DATABASE_URL, conn_max_age=0,
+                                     conn_health_checks=True)
 }
 # TCP keepalive như db/connection.py cũ (chống Neon proxy drop connection idle)
 DATABASES['default'].setdefault('OPTIONS', {}).update({
@@ -171,12 +178,13 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     'EXCEPTION_HANDLER': 'common.errors.api_exception_handler',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     # Rate limit đếm PER-ENDPOINT per-IP (common/throttling.py).
     # PERF 2026-07-19: nâng từ 200/day + 50/hour (port nguyên từ Flask-Limiter
     # defaults) — mức cũ giết trải nghiệm nhiều user thật: cả lớp học sau 1 NAT
     # chia nhau 50 request/giờ/endpoint, và login 5/phút chặn từ người thứ 6
     # đăng nhập đầu giờ. Mức mới vẫn chặn được vét cạn/scrape per-endpoint.
-    # Static KHÔNG đi qua DRF (Next.js serve) nên bug 429 file tĩnh
+    # Static KHÔNG đi qua DRF (static server của frontend serve) nên bug 429 file tĩnh
     # (AUDIT-FIX 2026-07-07) không thể tái diễn ở kiến trúc mới.
     'DEFAULT_THROTTLE_CLASSES': [
         'common.throttling.DailyIPThrottle',
@@ -295,3 +303,23 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ── OpenAPI + máy chủ giả ────────────────────────────────────────────────
+# Hợp đồng dữ liệu là backend/openapi.yaml VIẾT TAY (23 route, 9 thực thể).
+# drf-spectacular ở đây KHÔNG sinh schema từ view — nó chỉ dựng giao diện
+# Swagger UI đọc chính file đó (/api/docs/ ← /api/schema/), vì view mock
+# không có serializer nên schema tự sinh sẽ rỗng.
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Programming EDU — API',
+    'VERSION': '1.0.0',
+    'OAS_VERSION': '3.1.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SWAGGER_UI_SETTINGS': {'defaultModelsExpandDepth': 3},
+}
+
+# MOCK_API=1 → nạp 23 route giả trong common/mock.py TRƯỚC urlconf app thật,
+# nên chúng che route thật cùng đường dẫn (cố ý: frontend chạy trọn luồng trên
+# dữ liệu mẫu trước khi backend thật xong). MOCK_API=0/không đặt → không nạp,
+# backend hoạt động y như cũ.
+MOCK_API = os.environ.get('MOCK_API', '0') == '1'

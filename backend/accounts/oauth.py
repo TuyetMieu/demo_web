@@ -63,7 +63,7 @@ class LegacySocialAccountAdapter(DefaultSocialAccountAdapter):
 
 
 def oauth_complete(request):
-    """LOGIN_REDIRECT_URL của allauth: cấp JWT rồi bàn giao về frontend Next."""
+    """LOGIN_REDIRECT_URL của allauth: cấp JWT rồi bàn giao về frontend tĩnh."""
     if not request.user.is_authenticated:
         return HttpResponseRedirect(f'{settings.FRONTEND_URL}/login?error=oauth_failed')
     refresh = RefreshToken.for_user(request.user)

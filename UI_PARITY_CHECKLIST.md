@@ -1,7 +1,7 @@
-# UI_PARITY_CHECKLIST.md — đối chiếu bằng mắt Flask ↔ Next.js
+# UI_PARITY_CHECKLIST.md — đối chiếu bằng mắt Flask ↔ bản mới
 
 > Giai đoạn 5. Mở 2 tab cạnh nhau: Flask (`python app.py` → :9000) và bản mới
-> (backend Django :9000* + `pnpm dev` → :3000). So từng trang, cả LIGHT và DARK
+> (backend Django :9000* + `python frontend/serve.py` → :3000). So từng trang, cả LIGHT và DARK
 > theme, ở 1600px và 960px. CSS là bản copy byte-identical nên lệch nếu có sẽ
 > đến từ markup/JS — ghi lại mọi khác biệt vào cột Ghi chú.
 >
@@ -10,7 +10,7 @@
 
 Đăng nhập cùng 1 tài khoản ở cả 2 bản (chung DB nên số liệu phải Y HỆT).
 
-| # | Trang cũ (Flask :9000) | Trang mới (Next :3000) | Điểm phải giống | ☐ |
+| # | Trang cũ (Flask :9000) | Trang mới (tĩnh :3000) | Điểm phải giống | ☐ |
 |---|---|---|---|---|
 | 1 | `/` | `/` | Hero neon, particles, 4 stat (số khóa/giờ từ API), grid 6 project card, CTA cuối | ☐ |
 | 2 | `/login` | `/login` | Split 50/50, particles rơi, toggle mắt, overlay success khi login, toast lỗi sai mật khẩu, lỗi field đỏ | ☐ |

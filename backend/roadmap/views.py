@@ -1,5 +1,6 @@
 """Port routes/roadmap.py."""
 import json
+import re
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -111,6 +112,9 @@ class AiRoadmapView(APIView):
                          'message': 'Tính năng này chỉ dành cho tài khoản Premium'}, status=402)
 
 
+_SLUG_RE = re.compile(r'^[a-z0-9_-]{1,64}$')
+
+
 class UpdateRoadmapItemView(APIView):
     def put(self, request, item_id):
         uid = request.user.id
@@ -119,6 +123,14 @@ class UpdateRoadmapItemView(APIView):
         roadmap_id = body.get('roadmap_id')
         if not roadmap_id:
             return Response({'error': 'roadmap_id là bắt buộc'}, status=400)
+        if not _SLUG_RE.match(roadmap_id):
+            return Response({'error': 'roadmap_id không hợp lệ'}, status=400)
+        # roadmap_progress.roadmap_id có FK tới roadmaps.id. Lộ trình catalogue
+        # tĩnh (slug từ ROADMAP_LIST frontend, vd 'frontend-web') không có sẵn
+        # row → tạo stub dùng chung (user_id NULL, source='catalog') khi cần.
+        x('''INSERT INTO roadmaps (id, user_id, source, updated_at)
+             VALUES (%s, NULL, 'catalog', now())
+             ON CONFLICT (id) DO NOTHING''', (roadmap_id,))
         x('''INSERT INTO roadmap_progress (user_id, roadmap_id, item_id, done, completed_at)
              VALUES (%s,%s,%s,%s, CASE WHEN %s THEN now() END)
              ON CONFLICT (user_id, roadmap_id, item_id) DO UPDATE

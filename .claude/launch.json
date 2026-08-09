@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backend",
+      "runtimeExecutable": "D:\\EDU\\Programming_EDU_next\\backend\\.venv\\Scripts\\python.exe",
+      "runtimeArgs": ["manage.py", "runserver", "9000", "--noreload"],
+      "cwd": "D:\\EDU\\Programming_EDU_next\\backend",
+      "port": 9000
+    },
+    {
+      "name": "frontend",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["exec", "next", "dev"],
+      "cwd": "D:\\EDU\\Programming_EDU_next\\frontend",
+      "port": 3000
+    }
+  ]
+}

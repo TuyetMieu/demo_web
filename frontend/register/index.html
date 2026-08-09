@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Mọi template gốc đều có meta này; course_detail.js/course_db_design.js đọc
+       .content KHÔNG guard nên thẻ phải tồn tại (rỗng — auth giờ là JWT). -->
+  <meta name="csrf-token" content="">
+  <title>Đăng ký — Programming Edu</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+  <!-- Origin backend cho pe-bridge.js — PHẢI nạp trước mọi script khác -->
+  <script src="/static/js/pe-config.js"></script>
+  <link rel="stylesheet" href="/static/css/register.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="prefetch" href="/login">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="bg-canvas">
+      <div class="bg-blob b1"></div>
+      <div class="bg-blob b2"></div>
+      <div class="bg-blob b3"></div>
+      <div class="bg-blob b4"></div>
+    </div>
+    <div class="grid-overlay"></div>
+    <div class="particles" id="particles"></div>
+
+    <div class="page">
+      <div class="auth-split">
+        <!-- LEFT 50%: Form -->
+        <div class="auth-form-side">
+          <div class="card">
+            <div class="logo">
+              <div class="logo-icon">
+                <svg viewBox="0 0 24 24" fill="white">
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <path
+                    d="M8 6l4-4 4 4M8 18l4 4 4-4M4 12H2m20 0h-2M6.3 6.3l-1.4-1.4M19.1 19.1l-1.4-1.4M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"
+                    stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round"></path>
+                </svg>
+              </div>
+              <span class="logo-text">Programming Edu</span>
+            </div>
+
+            <p class="form-title">Tạo tài khoản</p>
+            <p class="form-subtitle">Tham gia cộng đồng lập trình viên hàng ngàn người 🚀</p>
+
+            <div class="field" id="field-group-name">
+              <label class="field-label" for="reg-name">Họ và tên</label>
+              <div class="field-wrap">
+                <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <input type="text" id="reg-name" placeholder="Nguyễn Văn A" autocomplete="name">
+              </div>
+              <span class="field-error" id="reg-name-error"></span>
+            </div>
+
+            <div class="field" id="field-group-email">
+              <label class="field-label" for="reg-email">Email</label>
+              <div class="field-wrap">
+                <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                </svg>
+                <input type="email" id="reg-email" placeholder="email@example.com" autocomplete="email">
+              </div>
+              <span class="field-error" id="reg-email-error"></span>
+            </div>
+
+            <div class="field" id="field-group-phone">
+              <label class="field-label" for="reg-phone">Số điện thoại</label>
+              <div class="field-wrap">
+                <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+                <input type="tel" id="reg-phone" placeholder="0912345678" autocomplete="tel">
+              </div>
+              <span class="field-error" id="reg-phone-error"></span>
+            </div>
+
+            <div class="field" id="field-group-password">
+              <label class="field-label" for="reg-password">Mật khẩu</label>
+              <div class="field-wrap">
+                <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" id="reg-password" placeholder="Ít nhất 8 ký tự" autocomplete="new-password">
+                <button class="toggle-eye" onclick="togglePwd('reg-password', this)" type="button">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+              <span class="field-error" id="reg-password-error"></span>
+            </div>
+
+            <p class="terms">
+              Bằng cách đăng ký, bạn đồng ý với <a href="#">Điều khoản</a> và <a href="#">Chính sách bảo mật</a>.
+            </p>
+
+            <button class="btn-main" id="regBtn" onclick="handleRegister(event)" type="button">
+              <span class="btn-bg"></span>
+              <span class="btn-bg-hover"></span>
+              <span class="btn-label">
+                <span id="regBtnText">Tạo tài khoản</span>
+                <div class="btn-spinner" id="regSpinner"></div>
+              </span>
+            </button>
+
+            <div class="divider"><span>hoặc tiếp tục với</span></div>
+
+            <div class="socials">
+              <button class="btn-social" type="button" onclick="oauthStart('google')">
+                <svg width="16" height="16" viewBox="0 0 24 24">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+                </svg>
+                Google
+              </button>
+              <button class="btn-social" type="button" onclick="oauthStart('facebook')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#1877F2">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path>
+                </svg>
+                Facebook
+              </button>
+            </div>
+
+            <p class="switch-text">
+              Đã có tài khoản? <a href="/login" onmouseover="prefetchRoute('/login')">Đăng nhập ngay</a>
+            </p>
+
+            <!-- Success Overlay -->
+            <div class="success-overlay" id="successOverlay">
+              <div class="check-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline class="check-path" points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <p class="success-title">Đăng ký thành công!</p>
+              <p class="success-sub">Chào mừng bạn đến với Programming Edu 🎉</p>
+            </div>
+
+            <!-- Error Toast -->
+            <div class="error-toast" id="errorToast">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span id="errorMsg">Có lỗi xảy ra.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT 50%: Brand canvas (re-use login.css brand classes) -->
+        <aside class="auth-brand-side">
+          <div class="brand-canvas">
+            <div class="brand-glow brand-glow--amber"></div>
+            <div class="brand-glow brand-glow--indigo"></div>
+            <div class="brand-glow brand-glow--emerald"></div>
+            <div class="brand-canvas-content">
+              <div class="brand-canvas-eyebrow">
+                <span class="brand-canvas-dot"></span>
+                PE_test · Database Design
+              </div>
+              <h1 class="brand-canvas-title">
+                Bắt đầu<br>
+                <span class="brand-canvas-grad">hành trình SQL</span>
+              </h1>
+              <p class="brand-canvas-sub">
+                Tham gia cộng đồng lập trình viên, học qua dự án thực tế với
+                schema trực quan, mini-game, và bài tập code chạy thật trên database.
+              </p>
+
+              <div class="brand-canvas-stats">
+                <div class="brand-stat">
+                  <div class="brand-stat-num">Miễn phí</div>
+                  <div class="brand-stat-lbl">100% không thu phí</div>
+                </div>
+                <div class="brand-stat">
+                  <div class="brand-stat-num">20</div>
+                  <div class="brand-stat-lbl">bài học tương tác</div>
+                </div>
+                <div class="brand-stat">
+                  <div class="brand-stat-num">XP</div>
+                  <div class="brand-stat-lbl">streak + gems</div>
+                </div>
+              </div>
+
+              <div class="brand-canvas-foot">
+                <span class="brand-pill">⚡ Nhận XP mỗi bài</span>
+                <span class="brand-pill">🔥 Streak hàng ngày</span>
+                <span class="brand-pill">🏆 Bảng xếp hạng</span>
+                <span class="brand-pill">💎 Gems thưởng</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+  <script src="/static/js/pe-bridge.js"></script>
+  <script>
+    // Nút Google/Facebook trỏ thẳng sang allauth của backend (kiến trúc 2 origin)
+    function oauthStart(provider) {
+      window.location.href = (window.__PE_API_ORIGIN || '') + '/accounts/' + provider + '/login/';
+    }
+  </script>
+  <script src="/static/js/pages/register.inline.js"></script>
+</body>
+</html>

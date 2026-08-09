@@ -29,6 +29,20 @@ def test_progress_toggle_flow(auth_api):
     assert 'rm_1' not in done2
 
 
+def test_progress_on_catalog_slug_autocreates_roadmap_row(auth_api):
+    """Slug catalogue tĩnh (ROADMAP_LIST frontend) chưa có row trong roadmaps —
+    PUT phải tự tạo stub thay vì 500 vì vướng FK roadmap_progress→roadmaps."""
+    r = auth_api.put('/api/roadmap/0-m', {'done': True, 'roadmap_id': 'frontend-web'}, format='json')
+    assert r.status_code == 200
+    done = auth_api.get('/api/roadmap?roadmap_id=frontend-web').json()['doneItems']
+    assert '0-m' in done
+
+
+def test_progress_rejects_invalid_slug(auth_api):
+    r = auth_api.put('/api/roadmap/0-m', {'done': True, 'roadmap_id': 'DROP TABLE;'}, format='json')
+    assert r.status_code == 400
+
+
 def test_my_roadmap_save_and_get(auth_api):
     r = auth_api.post('/api/me/roadmap', {'mermaid_def': 'flowchart TD\n  a --> b'}, format='json')
     assert r.status_code == 200

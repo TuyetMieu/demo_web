@@ -83,6 +83,55 @@ def test_survey_generates_roadmap(auth_api, temp_user):
     assert rm is not None and rm['source'] == 'generated'
 
 
+def _generated_roadmap(auth_api, temp_user, survey):
+    """Nộp khảo sát rồi đọc lại lộ trình sinh ra qua API /api/me/roadmap."""
+    res = auth_api.post('/api/survey', survey, format='json')
+    assert res.status_code == 200
+    data = auth_api.get('/api/me/roadmap').json()
+    assert data['mermaid_def']
+    return data
+
+
+def test_roadmap_engine_backend_composition(auth_api, temp_user):
+    """Hướng backend: xương sống Java (đã biết Java) + trọn chuỗi khóa CSDL."""
+    data = _generated_roadmap(auth_api, temp_user, {
+        'career_target': 'Backend Developer',
+        'experience': 'Có (cơ bản)', 'language': 'Java',
+        'time': '5–10h/tuần',
+    })
+    assert data['title'] == 'Lộ trình Backend Developer'
+    course_ids = [n.get('course_id') for n in data['nodes'].values()]
+    assert 'java' in course_ids
+    assert 'db_design' in course_ids and 'db_design_tc' in course_ids and 'db_design_nc' in course_ids
+
+
+def test_roadmap_engine_skips_known_skills(auth_api, temp_user):
+    """Đã biết HTML/CSS + Database → lộ trình frontend bỏ 2 chặng đó."""
+    data = _generated_roadmap(auth_api, temp_user, {
+        'career_target': 'Frontend Developer',
+        'experience': 'Có (trung cấp trở lên)', 'language': 'JavaScript',
+        'skill_detail': 'HTML / CSS, Database (SQL, NoSQL)',
+        'time': '> 10h/tuần',
+    })
+    course_ids = [n.get('course_id') for n in data['nodes'].values()]
+    assert 'htmlcss' not in course_ids
+    assert 'db_design' not in course_ids
+
+
+def test_roadmap_engine_goal_job_adds_final_stage(auth_api, temp_user):
+    """Mục tiêu 'Có việc làm' → chặng cuối là chuẩn bị đi làm."""
+    data = _generated_roadmap(auth_api, temp_user, {
+        'career_target': 'AI / ML Engineer', 'goal': 'Có việc làm',
+        'experience': 'Chưa từng', 'time': '< 5h/tuần',
+    })
+    assert data['title'] == 'Lộ trình Data & AI'
+    titles = [n['title'] for n in data['nodes'].values()]
+    assert any('Chuẩn bị đi làm' in t for t in titles)
+    # Người mới → chặng khóa học đầu tiên có ghi chú bắt đầu từ số 0
+    descs = ' '.join(n['desc'] for n in data['nodes'].values())
+    assert 'từ số 0' in descs
+
+
 # ── memory-plan T4.2: đổi email trùng phải trả 400 (không phải 500 IntegrityError) ──
 def test_update_profile_duplicate_email_returns_400(auth_api, temp_user):
     """users.email có UNIQUE constraint. Đổi email sang email người khác phải báo

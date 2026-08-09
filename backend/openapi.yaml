@@ -1,0 +1,1106 @@
+openapi: 3.1.0
+
+info:
+  title: Programming EDU — API
+  version: "1.0.0"
+  description: |
+    Hợp đồng dữ liệu cho 23 route theo sheet "API".
+
+    ## Quy ước bắt buộc
+
+    1. **Mỗi route trỏ tới ĐÚNG MỘT schema.** Route trả danh sách thì dùng
+       `array` với `items.$ref` tới cùng schema đó — không có schema riêng cho
+       bản list. Route không có thân phản hồi trả `204`.
+    2. **Không có trường tự do.** Mọi schema đặt `additionalProperties: false`
+       và liệt kê TOÀN BỘ trường trong `required`. Trường "không có giá trị"
+       không được phép vắng mặt — phải xuất hiện với giá trị `null`
+       (kiểu khai là `[<type>, 'null']`). Nhờ vậy client không bao giờ phải
+       kiểm tra `undefined`, và mọi phản hồi kiểm chứng được bằng JSON Schema.
+    3. Dùng **OpenAPI 3.1** (không phải 3.0) vì 3.1 là JSON Schema 2020-12 hợp
+       lệ — `common/tests.py` validate được từng phản hồi mock trực tiếp bằng
+       thư viện `jsonschema`, không cần lớp dịch trung gian.
+
+    ## 9 thực thể
+
+    `User` · `Course` · `Lesson` · `Quiz` · `QuizResult` · `QuizStats` ·
+    `Progress` · `Announcement` · `Certificate`
+
+    Ngoài 9 thực thể trên còn 4 schema **khung** — không phải thực thể mới, chỉ
+    bọc/tổng hợp từ 9 cái trên vì 4 route này trả về thứ không phải một thực thể
+    đơn lẻ: `Session` (token + `User`), `Comparison` (`Progress` của tôi + số
+    liệu lớp), `Roster` (cặp `User` × `Progress`), `Error`.
+
+    ## Xác thực
+
+    JWT Bearer. Route "Công khai" khai `security: []`.
+
+servers:
+  - url: http://localhost:9000
+
+tags:
+  - name: Tài khoản
+  - name: Khóa học
+  - name: Bài giảng
+  - name: Trắc nghiệm
+  - name: Tiến độ
+  - name: Thông báo
+  - name: Chứng nhận
+  - name: Giảng viên
+
+security:
+  - bearerAuth: []
+
+paths:
+
+  # ── 1 ─────────────────────────────────────────────────────────────────
+  /auth/register:
+    post:
+      operationId: register
+      tags: [Tài khoản]
+      summary: Đăng ký tài khoản sinh viên
+      security: []
+      x-route: 1
+      x-cong-viec: B-04
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [name, email, password]
+              properties:
+                name:     { type: string, minLength: 2, maxLength: 100 }
+                email:    { type: string, format: email }
+                password: { type: string, minLength: 8 }
+      responses:
+        '201':
+          description: Đã tạo tài khoản, cấp luôn phiên đăng nhập
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Session' }
+        '400': { $ref: '#/components/responses/Error400' }
+        '409': { $ref: '#/components/responses/Error409' }
+        '422': { $ref: '#/components/responses/Error422' }
+        '429': { $ref: '#/components/responses/Error429' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 2 ─────────────────────────────────────────────────────────────────
+  /auth/login:
+    post:
+      operationId: login
+      tags: [Tài khoản]
+      summary: Đăng nhập
+      security: []
+      x-route: 2
+      x-cong-viec: B-01
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [email, password]
+              properties:
+                email:    { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Phiên đăng nhập
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Session' }
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '429': { $ref: '#/components/responses/Error429' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 3 ─────────────────────────────────────────────────────────────────
+  /auth/refresh:
+    post:
+      operationId: refreshToken
+      tags: [Tài khoản]
+      summary: Làm mới access token
+      description: Refresh token xoay vòng — bản cũ vào blacklist.
+      security: []
+      x-route: 3
+      x-cong-viec: B-01
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [refresh]
+              properties:
+                refresh: { type: string }
+      responses:
+        '200':
+          description: Phiên mới
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Session' }
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 4 ─────────────────────────────────────────────────────────────────
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [Tài khoản]
+      summary: Đăng xuất
+      x-route: 4
+      x-cong-viec: B-01
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [refresh]
+              properties:
+                refresh: { type: string }
+      responses:
+        '204': { description: Đã thu hồi refresh token }
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 5 ─────────────────────────────────────────────────────────────────
+  /api/user:
+    get:
+      operationId: getMe
+      tags: [Tài khoản]
+      summary: Hồ sơ cá nhân
+      x-route: 5
+      x-cong-viec: B-05
+      responses:
+        '200':
+          description: Hồ sơ của người gọi
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '500': { $ref: '#/components/responses/Error500' }
+    put:
+      operationId: updateMe
+      tags: [Tài khoản]
+      summary: Cập nhật hồ sơ cá nhân
+      description: '`email` và `role` không sửa được qua route này.'
+      x-route: 5
+      x-cong-viec: B-05
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [name]
+              properties:
+                name:       { type: string, minLength: 2, maxLength: 100 }
+                avatar_url: { type: [string, 'null'] }
+      responses:
+        '200':
+          description: Hồ sơ sau khi cập nhật
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 6 ─────────────────────────────────────────────────────────────────
+  /api/user/password:
+    put:
+      operationId: changePassword
+      tags: [Tài khoản]
+      summary: Đổi mật khẩu
+      description: Đổi xong thu hồi toàn bộ refresh token đang phát hành.
+      x-route: 6
+      x-cong-viec: B-05
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [current_password, new_password]
+              properties:
+                current_password: { type: string }
+                new_password:     { type: string, minLength: 8 }
+      responses:
+        '204': { description: Đã đổi mật khẩu }
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 7 ─────────────────────────────────────────────────────────────────
+  /api/courses:
+    get:
+      operationId: listCourses
+      tags: [Khóa học]
+      summary: Danh sách khóa học
+      description: |
+        Công khai — xem được khi chưa đăng nhập. Hệ thống có 02 khóa nên KHÔNG
+        phân trang. Chưa đăng nhập / chưa ghi danh thì `progress` = `null`.
+      security: []
+      x-route: 7
+      x-cong-viec: B-05
+      responses:
+        '200':
+          description: Mảng khóa học
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Course' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 8 ─────────────────────────────────────────────────────────────────
+  /api/courses/{courseId}:
+    parameters:
+      - $ref: '#/components/parameters/CourseId'
+    get:
+      operationId: getCourse
+      tags: [Khóa học]
+      summary: Chi tiết khóa học
+      description: MỚI — cấp dữ liệu cho trang chi tiết khóa. Công khai.
+      security: []
+      x-route: 8
+      x-cong-viec: B-05
+      responses:
+        '200':
+          description: Chi tiết khóa
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Course' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 9 ─────────────────────────────────────────────────────────────────
+  /api/courses/{courseId}/enroll:
+    parameters:
+      - $ref: '#/components/parameters/CourseId'
+    post:
+      operationId: enrollCourse
+      tags: [Khóa học]
+      summary: Ghi danh khóa học
+      description: |
+        Sinh viên. Trả về chính khóa vừa ghi danh với `progress` đã khởi tạo —
+        client không cần gọi lại route 8.
+      x-route: 9
+      x-cong-viec: B-05
+      responses:
+        '201':
+          description: Khóa đã ghi danh
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Course' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '409': { $ref: '#/components/responses/Error409' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 10 ────────────────────────────────────────────────────────────────
+  /api/me/courses:
+    get:
+      operationId: listMyCourses
+      tags: [Khóa học]
+      summary: Khóa học của tôi
+      description: |
+        Sinh viên. Gộp `/api/enrolled` + `/api/courses-enrolled` cũ: thông tin
+        khóa và tiến độ nằm trong CÙNG một phần tử, `progress` luôn khác `null`.
+      x-route: 10
+      x-cong-viec: B-05
+      responses:
+        '200':
+          description: Khóa đã ghi danh kèm tiến độ
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Course' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 11 ────────────────────────────────────────────────────────────────
+  /api/courses/{courseId}/lessons:
+    parameters:
+      - $ref: '#/components/parameters/CourseId'
+    get:
+      operationId: listLessons
+      tags: [Bài giảng]
+      summary: Mục lục bài giảng (lộ trình học)
+      description: |
+        Chung. Sắp theo `order` tăng dần — mục lục có sẵn thứ tự CHÍNH LÀ
+        "lộ trình học" ở mục 3 đề. Bản mục lục trả `content` = `null`
+        (nội dung đầy đủ lấy ở route 12).
+      x-route: 11
+      x-cong-viec: B-05
+      responses:
+        '200':
+          description: Mục lục đã sắp thứ tự
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Lesson' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '500': { $ref: '#/components/responses/Error500' }
+    post:
+      operationId: createLesson
+      tags: [Bài giảng, Giảng viên]
+      summary: Thêm bài giảng vào khóa
+      description: Giảng viên. Thiếu `order` thì đẩy xuống cuối mục lục.
+      x-route: 11
+      x-cong-viec: B-10
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LessonInput' }
+      responses:
+        '201':
+          description: Bài giảng vừa tạo
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Lesson' }
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '409': { $ref: '#/components/responses/Error409' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 12 ────────────────────────────────────────────────────────────────
+  /api/lessons/{lessonId}:
+    parameters:
+      - $ref: '#/components/parameters/LessonId'
+    get:
+      operationId: getLesson
+      tags: [Bài giảng]
+      summary: Nội dung một bài giảng
+      description: |
+        Chung. Thay toàn bộ app `courseadmin` cũ — đọc và sửa/xóa cùng một
+        đường dẫn, chỉ khác quyền theo method.
+      x-route: 12
+      x-cong-viec: B-05
+      responses:
+        '200':
+          description: Bài giảng đầy đủ nội dung
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Lesson' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '500': { $ref: '#/components/responses/Error500' }
+    put:
+      operationId: updateLesson
+      tags: [Bài giảng, Giảng viên]
+      summary: Sửa bài giảng
+      x-route: 12
+      x-cong-viec: B-10
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LessonInput' }
+      responses:
+        '200':
+          description: Bài giảng sau khi sửa
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Lesson' }
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '409': { $ref: '#/components/responses/Error409' }
+        '500': { $ref: '#/components/responses/Error500' }
+    delete:
+      operationId: deleteLesson
+      tags: [Bài giảng, Giảng viên]
+      summary: Xóa bài giảng
+      x-route: 12
+      x-cong-viec: B-10
+      responses:
+        '204': { description: Đã xóa }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '409': { $ref: '#/components/responses/Error409' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 13 ────────────────────────────────────────────────────────────────
+  /api/lessons/{lessonId}/complete:
+    parameters:
+      - $ref: '#/components/parameters/LessonId'
+    post:
+      operationId: completeLesson
+      tags: [Bài giảng]
+      summary: Đánh dấu hoàn thành bài giảng
+      description: |
+        Sinh viên. **Bỏ cộng XP** — chỉ ghi trạng thái + cập nhật tiến độ.
+        Idempotent. Trả về `Progress` của khóa chứa bài này để client cập nhật
+        thanh tiến độ ngay, không phải gọi thêm route 17.
+      x-route: 13
+      x-cong-viec: B-05
+      responses:
+        '200':
+          description: Tiến độ khóa sau khi ghi nhận
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Progress' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 14 ────────────────────────────────────────────────────────────────
+  /api/lessons/{lessonId}/quiz:
+    parameters:
+      - $ref: '#/components/parameters/LessonId'
+    get:
+      operationId: getQuiz
+      tags: [Trắc nghiệm]
+      summary: Đề trắc nghiệm của bài
+      description: |
+        Đã đăng nhập. 5 câu cố định. Schema `Quiz` KHÔNG có trường đáp án —
+        đáp án chỉ xuất hiện trong `QuizResult` (route 15), sau khi đã nộp.
+      x-route: 14
+      x-cong-viec: B-06
+      responses:
+        '200':
+          description: Đề 5 câu, đã lọc bỏ đáp án
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Quiz' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 15 ────────────────────────────────────────────────────────────────
+  /api/lessons/{lessonId}/quiz/submit:
+    parameters:
+      - $ref: '#/components/parameters/LessonId'
+    post:
+      operationId: submitQuiz
+      tags: [Trắc nghiệm]
+      summary: Nộp bài trắc nghiệm
+      description: Sinh viên. Chấm phía máy chủ; phản hồi kèm đáp án đúng để xem lại.
+      x-route: 15
+      x-cong-viec: B-06
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [answers]
+              properties:
+                answers:
+                  type: array
+                  minItems: 5
+                  maxItems: 5
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required: [question_id, selected]
+                    properties:
+                      question_id: { type: integer }
+                      selected:    { type: string }
+      responses:
+        '200':
+          description: Kết quả chấm + đáp án đúng
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuizResult' }
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '429': { $ref: '#/components/responses/Error429' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 16 ────────────────────────────────────────────────────────────────
+  /api/lessons/{lessonId}/quiz/stats:
+    parameters:
+      - $ref: '#/components/parameters/LessonId'
+    get:
+      operationId: getQuizStats
+      tags: [Trắc nghiệm, Giảng viên]
+      summary: Thống kê trắc nghiệm của lớp
+      description: Giảng viên. Điểm cả lớp + tỉ lệ sai theo từng câu.
+      x-route: 16
+      x-cong-viec: B-10
+      responses:
+        '200':
+          description: Thống kê tổng hợp
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuizStats' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 17 ────────────────────────────────────────────────────────────────
+  /api/me/progress:
+    get:
+      operationId: getMyProgress
+      tags: [Tiến độ]
+      summary: Tiến độ học của tôi
+      description: Sinh viên. Thay app `stats` đã xóa. Một phần tử cho mỗi khóa đã ghi danh.
+      x-route: 17
+      x-cong-viec: B-07
+      responses:
+        '200':
+          description: Tiến độ theo từng khóa
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Progress' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 18 ────────────────────────────────────────────────────────────────
+  /api/courses/{courseId}/comparison:
+    parameters:
+      - $ref: '#/components/parameters/CourseId'
+    get:
+      operationId: getCourseComparison
+      tags: [Tiến độ]
+      summary: So sánh tiến độ với lớp (ẩn danh)
+      description: |
+        Sinh viên. Không trả tên/ID của bất kỳ ai khác.
+        Lớp dưới 5 người → vẫn `200` nhưng `suppressed = true`,
+        `class_average = null`, `my_percentile = null`,
+        `reason = "class_too_small"`.
+      x-route: 18
+      x-cong-viec: B-07
+      responses:
+        '200':
+          description: Vị trí của tôi so với lớp
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Comparison' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 19 ────────────────────────────────────────────────────────────────
+  /api/announcements:
+    get:
+      operationId: listAnnouncements
+      tags: [Thông báo]
+      summary: Danh sách thông báo
+      description: Chung. Sinh viên chỉ thấy thông báo của khóa đã ghi danh. Mới nhất trước.
+      x-route: 19
+      x-cong-viec: B-08
+      responses:
+        '200':
+          description: Mảng thông báo
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Announcement' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '500': { $ref: '#/components/responses/Error500' }
+    post:
+      operationId: createAnnouncement
+      tags: [Thông báo, Giảng viên]
+      summary: Đăng thông báo
+      description: Giảng viên, chỉ cho khóa mình dạy.
+      x-route: 19
+      x-cong-viec: B-08
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [course_id, title, body]
+              properties:
+                course_id: { type: string }
+                title:     { type: string, minLength: 1, maxLength: 200 }
+                body:      { type: string, minLength: 1 }
+      responses:
+        '201':
+          description: Thông báo vừa đăng
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Announcement' }
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 20 ────────────────────────────────────────────────────────────────
+  /api/announcements/{announcementId}/read:
+    parameters:
+      - name: announcementId
+        in: path
+        required: true
+        schema: { type: integer, minimum: 1 }
+    post:
+      operationId: markAnnouncementRead
+      tags: [Thông báo]
+      summary: Đánh dấu đã đọc
+      description: Đã đăng nhập. Idempotent — `read_at` giữ nguyên lần đầu.
+      x-route: 20
+      x-cong-viec: B-08
+      responses:
+        '204': { description: Đã ghi nhận }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 21 ────────────────────────────────────────────────────────────────
+  /api/courses/{courseId}/certificate:
+    parameters:
+      - $ref: '#/components/parameters/CourseId'
+    post:
+      operationId: issueCertificate
+      tags: [Chứng nhận]
+      summary: Cấp chứng nhận hoàn thành khóa
+      description: |
+        Sinh viên. Chưa đủ điều kiện → `409` với `error.lessons_remaining`
+        là số bài còn thiếu (trường có kiểu rõ ràng trong `Error`, client không
+        phải bóc chuỗi). Đã cấp trước đó → `200` trả lại bản cũ, không cấp mã trùng.
+      x-route: 21
+      x-cong-viec: B-09
+      responses:
+        '201':
+          description: Cấp mới thành công
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Certificate' }
+        '200':
+          description: Đã cấp trước đó — trả lại chứng nhận cũ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Certificate' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '409':
+          description: Chưa hoàn thành đủ bài — `error.lessons_remaining` là số bài còn thiếu
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 22 ────────────────────────────────────────────────────────────────
+  /api/certificates/{code}:
+    parameters:
+      - name: code
+        in: path
+        required: true
+        schema: { type: string, pattern: '^[A-Z0-9-]{8,32}$' }
+        example: PE-2026-7QK4-9ZR1
+    get:
+      operationId: verifyCertificate
+      tags: [Chứng nhận]
+      summary: Tra cứu / xác minh chứng nhận
+      description: |
+        **CÔNG KHAI — không cần đăng nhập.** Đây là thứ làm giấy chứng nhận có
+        giá trị: nhà tuyển dụng cầm mã tra được mà không cần tài khoản.
+        Mã sai và mã đã thu hồi đều trả `404` (tránh dò mã hợp lệ).
+      security: []
+      x-route: 22
+      x-cong-viec: B-09
+      responses:
+        '200':
+          description: Chứng nhận hợp lệ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Certificate' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '429': { $ref: '#/components/responses/Error429' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+  # ── 23 ────────────────────────────────────────────────────────────────
+  /api/courses/{courseId}/roster:
+    parameters:
+      - $ref: '#/components/parameters/CourseId'
+    get:
+      operationId: getCourseRoster
+      tags: [Giảng viên]
+      summary: Danh sách sinh viên của khóa
+      description: Giảng viên. Sinh viên + tiến độ + lần học gần nhất.
+      x-route: 23
+      x-cong-viec: B-10
+      responses:
+        '200':
+          description: Danh sách sinh viên
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Roster' }
+        '401': { $ref: '#/components/responses/Error401' }
+        '403': { $ref: '#/components/responses/Error403' }
+        '404': { $ref: '#/components/responses/Error404' }
+        '500': { $ref: '#/components/responses/Error500' }
+
+# ═══════════════════════════════ COMPONENTS ═══════════════════════════════
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    CourseId:
+      name: courseId
+      in: path
+      required: true
+      schema: { type: string, pattern: '^[a-z0-9_]+$' }
+      example: python
+    LessonId:
+      name: lessonId
+      in: path
+      required: true
+      schema: { type: integer, minimum: 1 }
+      example: 3
+
+  responses:
+    Error400:
+      description: Dữ liệu vào sai định dạng hoặc thiếu trường bắt buộc
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Error401:
+      description: Thiếu token, token sai hoặc hết hạn
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Error403:
+      description: Sai vai trò, hoặc chưa ghi danh khóa liên quan
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Error404:
+      description: Tài nguyên không tồn tại
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Error409:
+      description: Xung đột trạng thái
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Error422:
+      description: Vi phạm ràng buộc nghiệp vụ
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Error429:
+      description: Vượt giới hạn số lần gọi
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Error500:
+      description: Lỗi máy chủ
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+
+  schemas:
+
+    # ─────────────── THỰC THỂ 1/9 · User ───────────────
+    User:
+      type: object
+      additionalProperties: false
+      required: [id, name, email, role, avatar_url, created_at]
+      properties:
+        id:         { type: integer }
+        name:       { type: string }
+        email:      { type: string, format: email }
+        role:       { type: string, enum: [student, teacher] }
+        avatar_url: { type: [string, 'null'] }
+        created_at: { type: string, format: date-time }
+
+    # ─────────────── THỰC THỂ 2/9 · Course ───────────────
+    Course:
+      type: object
+      additionalProperties: false
+      required:
+        [id, title, subtitle, description, level, objectives,
+         teacher_name, lesson_count, enrolled, progress]
+      properties:
+        id:          { type: string, examples: [python] }
+        title:       { type: string }
+        subtitle:    { type: [string, 'null'] }
+        description: { type: string }
+        level:       { type: [string, 'null'] }
+        objectives:
+          type: array
+          items: { type: string }
+        teacher_name: { type: [string, 'null'] }
+        lesson_count: { type: integer, minimum: 0 }
+        enrolled:     { type: boolean }
+        progress:
+          description: '`null` khi chưa đăng nhập hoặc chưa ghi danh.'
+          oneOf:
+            - { $ref: '#/components/schemas/Progress' }
+            - { type: 'null' }
+
+    # ─────────────── THỰC THỂ 3/9 · Lesson ───────────────
+    Lesson:
+      type: object
+      additionalProperties: false
+      required:
+        [id, course_id, title, order, content, has_quiz, published,
+         completed, updated_at]
+      properties:
+        id:        { type: integer }
+        course_id: { type: string }
+        title:     { type: string }
+        order:     { type: integer, minimum: 1 }
+        content:
+          description: '`null` ở bản mục lục (route 11); có giá trị ở route 12.'
+          type: [string, 'null']
+        has_quiz:  { type: boolean }
+        published: { type: boolean }
+        completed:
+          description: '`null` khi người gọi là giảng viên (không có tiến độ cá nhân).'
+          type: [boolean, 'null']
+        updated_at: { type: string, format: date-time }
+
+    LessonInput:
+      description: Thân yêu cầu cho route 11 POST và route 12 PUT.
+      type: object
+      additionalProperties: false
+      required: [title, content]
+      properties:
+        title:     { type: string, minLength: 1, maxLength: 200 }
+        content:   { type: string }
+        order:     { type: [integer, 'null'], minimum: 1 }
+        published: { type: boolean, default: true }
+
+    # ─────────────── THỰC THỂ 4/9 · Quiz ───────────────
+    Quiz:
+      description: Đề trắc nghiệm — KHÔNG chứa đáp án đúng.
+      type: object
+      additionalProperties: false
+      required: [lesson_id, lesson_title, question_count, questions]
+      properties:
+        lesson_id:      { type: integer }
+        lesson_title:   { type: string }
+        question_count: { type: integer, const: 5 }
+        questions:
+          type: array
+          minItems: 5
+          maxItems: 5
+          items:
+            type: object
+            additionalProperties: false
+            required: [id, text, options]
+            properties:
+              id:   { type: integer }
+              text: { type: string }
+              options:
+                type: array
+                minItems: 2
+                items:
+                  type: object
+                  additionalProperties: false
+                  required: [key, text]
+                  properties:
+                    key:  { type: string, examples: [A] }
+                    text: { type: string }
+
+    # ─────────────── THỰC THỂ 5/9 · QuizResult ───────────────
+    QuizResult:
+      description: Kết quả MỘT lần nộp. Chỗ duy nhất đáp án đúng rời khỏi máy chủ.
+      type: object
+      additionalProperties: false
+      required:
+        [lesson_id, attempt_no, score, correct_count, total, submitted_at, review]
+      properties:
+        lesson_id:     { type: integer }
+        attempt_no:    { type: integer, minimum: 1 }
+        score:         { type: number, minimum: 0, maximum: 10 }
+        correct_count: { type: integer, minimum: 0 }
+        total:         { type: integer, const: 5 }
+        submitted_at:  { type: string, format: date-time }
+        review:
+          type: array
+          minItems: 5
+          maxItems: 5
+          items:
+            type: object
+            additionalProperties: false
+            required: [question_id, text, selected, correct_option, is_correct, explanation]
+            properties:
+              question_id:    { type: integer }
+              text:           { type: string }
+              selected:       { type: [string, 'null'] }
+              correct_option: { type: string }
+              is_correct:     { type: boolean }
+              explanation:    { type: [string, 'null'] }
+
+    # ─────────────── THỰC THỂ 6/9 · QuizStats ───────────────
+    QuizStats:
+      description: |
+        Thống kê cho giảng viên. `answer_counts` là MẢNG cặp key/count chứ không
+        phải map — map sẽ cần `additionalProperties`, vi phạm "không trường tự do".
+      type: object
+      additionalProperties: false
+      required: [lesson_id, lesson_title, submission_count, average_score, questions]
+      properties:
+        lesson_id:        { type: integer }
+        lesson_title:     { type: string }
+        submission_count: { type: integer, minimum: 0 }
+        average_score:    { type: [number, 'null'], minimum: 0, maximum: 10 }
+        questions:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [question_id, text, wrong_rate, answer_counts]
+            properties:
+              question_id: { type: integer }
+              text:        { type: string }
+              wrong_rate:  { type: number, minimum: 0, maximum: 1 }
+              answer_counts:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: false
+                  required: [key, count]
+                  properties:
+                    key:   { type: string }
+                    count: { type: integer, minimum: 0 }
+
+    # ─────────────── THỰC THỂ 7/9 · Progress ───────────────
+    Progress:
+      description: |
+        Tiến độ của MỘT người trong MỘT khóa. Dùng lại ở 5 chỗ: `Course.progress`,
+        route 13, route 17, `Comparison.mine`, `Roster.students[].progress`.
+      type: object
+      additionalProperties: false
+      required:
+        [course_id, course_title, completed_lessons, total_lessons,
+         progress_percent, average_quiz_score, last_active_at, certificate_issued]
+      properties:
+        course_id:         { type: string }
+        course_title:      { type: string }
+        completed_lessons: { type: integer, minimum: 0 }
+        total_lessons:     { type: integer, minimum: 0 }
+        progress_percent:  { type: number, minimum: 0, maximum: 100 }
+        average_quiz_score:
+          description: '`null` khi chưa nộp bài trắc nghiệm nào.'
+          type: [number, 'null']
+        last_active_at:    { type: [string, 'null'], format: date-time }
+        certificate_issued: { type: boolean }
+
+    # ─────────────── THỰC THỂ 8/9 · Announcement ───────────────
+    Announcement:
+      type: object
+      additionalProperties: false
+      required: [id, course_id, course_title, title, body, author_name, created_at, read, read_at]
+      properties:
+        id:           { type: integer }
+        course_id:    { type: string }
+        course_title: { type: string }
+        title:        { type: string }
+        body:         { type: string }
+        author_name:  { type: string }
+        created_at:   { type: string, format: date-time }
+        read:         { type: boolean }
+        read_at:      { type: [string, 'null'], format: date-time }
+
+    # ─────────────── THỰC THỂ 9/9 · Certificate ───────────────
+    Certificate:
+      description: |
+        Route 22 công khai nên schema này CỐ TÌNH không có email, điểm hay tiến độ —
+        chỉ đủ để xác minh.
+      type: object
+      additionalProperties: false
+      required: [code, course_id, course_title, student_name, issued_at, verify_url]
+      properties:
+        code:         { type: string, examples: [PE-2026-7QK4-9ZR1] }
+        course_id:    { type: string }
+        course_title: { type: string }
+        student_name: { type: string }
+        issued_at:    { type: string, format: date-time }
+        verify_url:   { type: string, format: uri }
+
+    # ─────────────── KHUNG 1/4 · Session ───────────────
+    Session:
+      type: object
+      additionalProperties: false
+      required: [access, refresh, user]
+      properties:
+        access:  { type: string }
+        refresh: { type: string }
+        user:    { $ref: '#/components/schemas/User' }
+
+    # ─────────────── KHUNG 2/4 · Comparison ───────────────
+    Comparison:
+      type: object
+      additionalProperties: false
+      required: [course_id, mine, class_size, suppressed, reason, class_average, my_percentile]
+      properties:
+        course_id:  { type: string }
+        mine:       { $ref: '#/components/schemas/Progress' }
+        class_size: { type: integer, minimum: 0 }
+        suppressed:
+          description: '`true` khi lớp dưới 5 người — mọi số liệu tổng hợp bị ẩn.'
+          type: boolean
+        reason:     { type: [string, 'null'], enum: ['class_too_small', null] }
+        class_average:
+          description: '`null` khi `suppressed = true`.'
+          type: [number, 'null']
+        my_percentile:
+          description: '`null` khi `suppressed = true`.'
+          type: [number, 'null']
+
+    # ─────────────── KHUNG 3/4 · Roster ───────────────
+    Roster:
+      type: object
+      additionalProperties: false
+      required: [course_id, course_title, total, students]
+      properties:
+        course_id:    { type: string }
+        course_title: { type: string }
+        total:        { type: integer, minimum: 0 }
+        students:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [student, progress]
+            properties:
+              student:  { $ref: '#/components/schemas/User' }
+              progress: { $ref: '#/components/schemas/Progress' }
+
+    # ─────────────── KHUNG 4/4 · Error ───────────────
+    Error:
+      description: |
+        Thân lỗi DUY NHẤT cho mọi mã 4xx/5xx của cả 23 route.
+        `field` và `lessons_remaining` là trường có kiểu rõ ràng chứ không phải
+        `detail` tự do: `field` chỉ ra trường nào sai khi 400, `lessons_remaining`
+        là số bài còn thiếu khi 409 ở route 21.
+      type: object
+      additionalProperties: false
+      required: [error, request_id]
+      properties:
+        request_id:
+          description: Mã lần gọi để đối chiếu log máy chủ; `null` nếu không có.
+          type: [string, 'null']
+        error:
+          type: object
+          additionalProperties: false
+          required: [status, message, field, lessons_remaining]
+          properties:
+            status:  { type: integer, minimum: 400, maximum: 599 }
+            message: { type: string }
+            field:   { type: [string, 'null'] }
+            lessons_remaining: { type: [integer, 'null'], minimum: 0 }

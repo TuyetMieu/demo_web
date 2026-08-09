@@ -1,5 +1,5 @@
 # CI cho bản migrate (Giai đoạn 6) — thứ project gốc chưa từng có.
-# pytest backend + build/lint/tsc frontend trên mỗi push/PR.
+# pytest backend + kiểm tra tính toàn vẹn frontend tĩnh trên mỗi push/PR.
 name: CI
 
 on:
@@ -32,26 +32,18 @@ jobs:
         run: python -m pytest -q
 
   frontend:
-    name: Frontend (Next.js) — lint + tsc + build
+    # Frontend là HTML/CSS/JS thuần — không build, không bundler, không cài gì.
+    # Thay lint+tsc+build cũ bằng 2 test Node thuần chạy trực tiếp trên source.
+    name: Frontend (tĩnh) — kiểm tra toàn vẹn
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Enable corepack pnpm
-        run: corepack enable
-      - name: Install deps
+      - name: Đường dẫn tài nguyên + route
         working-directory: frontend
-        run: pnpm install --frozen-lockfile
-      - name: Lint
+        run: node e2e/unit/static-assets.test.mjs
+      - name: Chống hồi quy XSS forum
         working-directory: frontend
-        run: pnpm exec eslint src
-      - name: Typecheck
-        working-directory: frontend
-        run: pnpm exec tsc --noEmit
-      - name: Build
-        working-directory: frontend
-        env:
-          NEXT_PUBLIC_API_URL: http://localhost:9000
-        run: pnpm build
+        run: node e2e/unit/forum-xss.test.mjs

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đang đăng xuất…</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+  <script src="/static/js/pe-config.js"></script>
+</head>
+<body>
+  <!--
+    Nút "Đăng xuất" của topbar điều hướng thẳng tới /auth/logout (main.js giữ
+    nguyên nên URL này phải tồn tại trên frontend): thu hồi refresh token ở
+    backend (best-effort), xóa token local rồi về '/' — đúng hành vi Flask cũ
+    (session.clear() + redirect '/').
+  -->
+  <script>
+    (function () {
+      var origin = window.__PE_API_ORIGIN || '';
+      var refresh = null;
+      try {
+        refresh = localStorage.getItem('pe_refresh');
+        localStorage.removeItem('pe_access');
+        localStorage.removeItem('pe_refresh');
+      } catch (e) { /* private mode */ }
+
+      function done() { window.location.replace('/'); }
+
+      if (!refresh) { done(); return; }
+      fetch(origin + '/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh: refresh }),
+      }).then(done, done);
+    })();
+  </script>
+</body>
+</html>
