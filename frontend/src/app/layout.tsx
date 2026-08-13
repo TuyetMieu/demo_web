@@ -45,8 +45,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <style
           dangerouslySetInnerHTML={{
             __html: [
-              /* SPA: chỉ khối .page.active được hiện (style.css:449-450) */
-              '.page{display:none}.page.active{display:block}',
+              /* SPA: chỉ khối .page.active được hiện (style.css:449-450).
+                 PHẢI giới hạn vào các tab của SPA Bảng điều khiển — nhận diện
+                 bằng id="page-*" (page-dashboard, page-courses, page-roadmap…).
+                 Nếu để trần `.page` thì luật này chạm cả /login và /register:
+                 hai trang đó cũng bọc nội dung trong <div class="page"> nhưng
+                 KHÔNG theo quy ước .active (auth.css/login.css chỉ đặt padding,
+                 không hề có display:none) → form đăng nhập bị ẩn vĩnh viễn,
+                 trang trắng trơn. Trang chi tiết khóa học dùng .page active sẵn
+                 nên không phụ thuộc luật này. */
+              '[id^="page-"].page{display:none}[id^="page-"].page.active{display:block}',
               /* tiện ích ẩn dùng khắp nơi (dashboard.css / chatbot.css) */
               '.hidden{display:none!important}.chatbot-hidden{display:none!important}',
               /* hộp thoại: ẩn bằng opacity+visibility, mở bằng .active
