@@ -53,7 +53,7 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   const port = Number(process.env.PORT) || 5000;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 
   logger.log(
     `Server sẵn sàng trên cổng ${port} | UV_THREADPOOL_SIZE=${process.env.UV_THREADPOOL_SIZE ?? '4 (mặc định)'} | rate limit ${process.env.THROTTLE_DISABLED === 'true' ? 'ĐÃ TẮT (chỉ dùng khi đo tải)' : 'đang bật'}`,
