@@ -1,0 +1,95 @@
+/* Trang chi tiết khóa học giờ dùng Sidebar+HeaderBar chung (edu-theme.css/
+   edu-dashboard.css) thay cho .topbar riêng, và hero/nội dung/sidebar mới
+   nằm ở edu-course-detail.css (khung .edu-cd-*, theo màn isCourse của
+   Programming EDU.dc.html). File này chỉ còn phần NỘI DUNG giữ nguyên từ
+   bản cũ (Tổng quan, Yêu cầu, Đánh giá, Quiz ôn tập) — restyle khung
+   .cd-block cho khớp card kính mờ mới, còn bên trong giữ nguyên. */
+
+/* ── Khung khối nội dung (Tổng quan / Yêu cầu / Đánh giá / Quiz) ── */
+.cd-block {
+  border-radius: 24px;
+  background: var(--edu-card-bg);
+  border: 1px solid var(--edu-card-border);
+  box-shadow: var(--edu-card-shadow);
+  overflow: hidden;
+}
+.cd-block-hd {
+  padding: 20px 26px; border-bottom: 1px solid var(--edu-card-border);
+  display: flex; align-items: center; gap: 10px;
+}
+.cd-block-hd h3 { font-size: 16px; font-weight: 700; color: var(--edu-t1); }
+.cd-block-icon {
+  width: 32px; height: 32px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+  background: var(--edu-accent-soft);
+}
+.cd-block-body { padding: 22px 26px; }
+.cd-desc { font-size: 14px; color: var(--edu-t2); line-height: 1.7; }
+
+/* ── Yêu cầu ── */
+.cd-req-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.cd-req-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--edu-t2); }
+.cd-req-list li::before { content: '◆'; color: var(--edu-accent); font-size: 10px; flex-shrink: 0; margin-top: 3px; }
+
+/* ── Đánh giá của học viên ── */
+.cd-reviews-stub { text-align: center; padding: 24px; }
+
+.star-avg-wrap { display: inline-block; margin-bottom: 8px; }
+.star-avg { position: relative; display: inline-block; font-size: 36px; line-height: 1; letter-spacing: 6px; }
+.star-avg-bg { color: var(--edu-track-bg); }
+.star-avg-fill { position: absolute; top: 0; left: 0; overflow: hidden; white-space: nowrap; color: #F59E0B; width: 0; }
+
+.cd-reviews-stub .score { font-size: 40px; font-weight: 800; color: #F59E0B; margin-bottom: 4px; }
+.avg-label { font-size: 14px; color: var(--edu-t3); }
+
+.user-rate-section { margin-top: 24px; border-top: 1px solid var(--edu-card-border); padding-top: 20px; }
+.user-rate-label { font-size: 13px; color: var(--edu-t4); margin-bottom: 12px; }
+.star-interactive { display: inline-flex; gap: 8px; margin-bottom: 10px; }
+
+.si-star {
+  font-size: 38px; line-height: 1; color: var(--edu-track-bg);
+  cursor: pointer; -webkit-user-select: none; user-select: none;
+  transition: transform 0.12s ease;
+}
+.si-star.star-full { color: #F59E0B; transform: scale(1.18); }
+.si-star.star-half {
+  background: linear-gradient(to right, #F59E0B 50%, var(--edu-track-bg) 50%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transform: scale(1.1);
+}
+
+.user-rate-val { font-size: 16px; font-weight: 700; color: #F59E0B; min-height: 22px; transition: opacity 0.15s; }
+.coming-soon-note { font-size: 12px; color: var(--edu-t4); margin-top: 16px; }
+.cd-locked-note { color: var(--edu-t4); font-size: 14px; }
+
+@media (max-width: 900px) {
+  .cd-block-hd, .cd-block-body { padding-left: 20px; padding-right: 20px; }
+}
+
+/* ── Block 6: Quiz ôn tập (FE-06) ── */
+#review-quiz-block .cd-block-body > #quiz-idle p { color: var(--edu-t3); font-size: 14px; margin-bottom: 12px; }
+
+.quiz-btn {
+  padding: 10px 22px; border-radius: 999px; border: none;
+  font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.quiz-btn:disabled { opacity: 0.6; cursor: default; }
+.quiz-btn.primary {
+  background: var(--edu-accent-grad); color: #fff;
+  box-shadow: 0 10px 24px rgba(185,63,240,.3);
+}
+.quiz-btn.primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(185,63,240,.4); }
+.quiz-btn.secondary { background: var(--edu-input-bg); color: var(--edu-t2); border: 1px solid var(--edu-input-border); }
+.quiz-btn.secondary:hover { filter: brightness(0.97); }
+
+.quiz-q { margin-bottom: 16px; }
+.quiz-q-text { font-weight: 600; font-size: 14px; color: var(--edu-t1); margin-bottom: 6px; }
+.quiz-opt { display: block; padding: 6px 0; cursor: pointer; font-size: 14px; color: var(--edu-t2); }
+.quiz-opt input { margin-right: 8px; }
+
+.quiz-score { font-size: 18px; font-weight: 800; color: var(--edu-t1); margin-bottom: 14px; }
+.quiz-review-item { margin-bottom: 14px; padding-left: 10px; font-size: 14px; color: var(--edu-t2); }
+.quiz-review-item.correct { border-left: 3px solid #22c55e; }
+.quiz-review-item.wrong { border-left: 3px solid #ef4444; }
+.quiz-explain { color: var(--edu-t4); font-size: 13px; margin-top: 4px; }

@@ -1,0 +1,252 @@
+/* ══════════════════════════════════════════════════════════════
+   EDU-DB — /courses/db_design* and /lesson/db_design*.
+
+   course_db_design.css and lesson_db_design.css are both built almost
+   entirely on their own :root token set (108 and ~1100 var() uses), so
+   the re-skin is done by redefining those tokens rather than by chasing
+   individual rules. Loaded after both sheets.
+
+   The surface ramp is inverted (dark → light) and the ramp direction of
+   --text-100…600 is flipped with it, so "100 = most prominent" still
+   holds. The cyan --primary becomes the design accent. Semantic colours
+   (success / warning / danger / streak) and the per-module accents that
+   lesson_db_design.js sets at runtime are deliberately left alone.
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* accent — was cyan #06B6D4 */
+  --primary: #b93ff0;
+  --primary-glow: rgba(185, 63, 240, .30);
+  --primary-soft: rgba(185, 63, 240, .10);
+  --primary-deep: #8e2bc0;
+
+  /* surfaces — was #0A0E1A → #232E47 */
+  --ide-bg: #eef3f6;
+  --ide-surface: rgba(255, 255, 255, .58);
+  --ide-surface-2: rgba(255, 255, 255, .74);
+  --ide-glass: rgba(255, 255, 255, .55);
+  --surface-0: #eef3f6;
+  --surface-1: rgba(255, 255, 255, .58);
+  --surface-2: rgba(255, 255, 255, .74);
+  --surface-3: rgba(255, 255, 255, .86);
+
+  /* text ramp inverted: 100 stays the most prominent, now the darkest */
+  --text-100: #221d33;
+  --text-200: #322c48;
+  --text-300: #4b4661;
+  --text-400: #6b6880;
+  --text-500: #7c7894;
+  --text-600: #8b87a0;
+
+  --border-subtle: rgba(150, 140, 190, .14);
+  --border-default: rgba(150, 140, 190, .22);
+  --border-strong: rgba(150, 140, 190, .34);
+
+  --shadow-sm: 0 1px 2px rgba(120, 110, 170, .10), 0 2px 6px rgba(120, 110, 170, .08);
+  --shadow-md: 0 2px 4px rgba(120, 110, 170, .10), 0 8px 20px rgba(120, 110, 170, .12);
+  --shadow-lg: 0 4px 8px rgba(120, 110, 170, .12), 0 16px 40px rgba(120, 110, 170, .16);
+  --shadow-card: 0 10px 30px rgba(120, 110, 170, .12);
+  --shadow-glow: 0 0 24px rgba(185, 63, 240, .18);
+  --shadow-soft: 0 2px 12px rgba(120, 110, 170, .12);
+  --glow-primary: 0 0 0 1px rgba(185, 63, 240, .3), 0 4px 16px rgba(185, 63, 240, .16);
+
+  /* never declared upstream — the files read them only as
+     var(--text-50, #F8FAFC) / var(--module-color, #06B6D4), so the light
+     fallback fires and no token swap can reach it */
+  --text-50: #17132a;
+  --module-color: #b93ff0;
+}
+
+/* course_db_design.js/CourseDbDesign.tsx still toggle a real `body.dark` class
+   (the whole app does — theme-toggle in Sidebar.tsx flips it), but every token
+   above is a flat light-mode value with no dark counterpart. The card SURFACES
+   underneath them already switch correctly on their own — `.cd-block`/`.cd-card`
+   are also targeted by edu-theme.css's shared `background: var(--edu-card-bg)`
+   rule, which DOES have a dark variant (0.55 → 0.045 white) — but every TEXT
+   colour in course_db_design.css/lesson_db_design.css reads --text-100…600 from
+   THIS file, which stayed dark-on-dark: near-black text over a now-correctly-
+   near-black glass card. Re-flip the ramp back for body.dark, mirroring
+   edu-theme.css's own --edu-t1…t6 / --edu-card-bg / --edu-bg-solid dark values
+   so the two token systems agree again. */
+body.dark {
+  --text-50: #f7f5fb;
+  --text-100: #ece9f5;
+  --text-200: #d6d2e4;
+  --text-300: #b8b3cc;
+  --text-400: #a29dbd;
+  --text-500: #8d88a8;
+  --text-600: #6f6a8a;
+
+  --ide-bg: #131019;
+  --ide-surface: rgba(255, 255, 255, .05);
+  --ide-surface-2: rgba(255, 255, 255, .09);
+  --ide-glass: rgba(255, 255, 255, .045);
+  --surface-0: #131019;
+  --surface-1: rgba(255, 255, 255, .05);
+  --surface-2: rgba(255, 255, 255, .09);
+  --surface-3: rgba(255, 255, 255, .13);
+
+  --border-subtle: rgba(255, 255, 255, .07);
+  --border-default: rgba(255, 255, 255, .09);
+  --border-strong: rgba(255, 255, 255, .16);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .35), 0 2px 6px rgba(0, 0, 0, .28);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, .35), 0 8px 20px rgba(0, 0, 0, .4);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, .4), 0 16px 40px rgba(0, 0, 0, .5);
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, .42);
+  --shadow-glow: 0 0 24px rgba(185, 63, 240, .3);
+  --shadow-soft: 0 2px 12px rgba(0, 0, 0, .3);
+  --glow-primary: 0 0 0 1px rgba(185, 63, 240, .4), 0 4px 16px rgba(185, 63, 240, .25);
+}
+
+/* Kèm `body.light` vì course_db_design.css có `body.light { background:#F8FAFC }`
+   — độ đặc trưng (0,1,1) cao hơn `body` (0,0,1) nên nó thắng bất kể thứ tự file,
+   và `background` rút gọn còn xoá luôn background-image. Hậu quả: 3 trang khóa
+   CSDL là chỗ DUY NHẤT trong app mất nền gradient, phẳng lì màu trắng ngà. */
+body,
+body.light {
+  font-family: var(--edu-font);
+  background: var(--edu-bg-solid);
+  background-image: var(--edu-bg-image);
+  background-attachment: fixed;
+  color: var(--edu-t1);
+}
+
+/* ── Text that was hard-coded near-white ─────────────────────────
+   These sit directly on the page (no filled pill behind them), so the
+   surface flip left them white-on-white. Elements whose white text sits
+   on a --success / --danger / gradient fill are correct and untouched. */
+.cfc-title, .scl-link, .pv-query, .pv-op,
+.reveal-strip-text strong, .sv-status strong, .hg-row strong,
+.txn-visual .tx-wallet-val, .mv-visual .mv-val, .storage-visual .sg-cell,
+.recovery-visual .rc-acct-val, .wal-visual .wl-disk-val,
+.aries-visual .ar-page-val, .mco-inc-sym,
+.logic-pill.pill-op,
+.cd-outcomes li strong, .cd-roadmap-module-hd-name, .cd-saga-link:hover {
+  color: var(--text-100);
+}
+
+/* ── Diagram plates stay dark ────────────────────────────────────
+   .lesson-hero holds an inline SVG whose fills are hard-coded amber /
+   cyan on near-black; it cannot be recoloured from CSS. The design does
+   the same thing anyway — a dark art plate inside the light layout. */
+.lesson-hero {
+  background: linear-gradient(160deg, #14102a, #0b0917);
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: var(--shadow-card);
+}
+
+/* The lesson chrome hard-codes rgba(11,17,33,.85); its labels now come
+   from the inverted text ramp, so the bars have to come up to light too. */
+.lesson-header, .lesson-nav-footer {
+  background: var(--edu-nav-bg) !important;
+  border-color: var(--edu-sidebar-border) !important;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+.player-pill {
+  background: var(--edu-pill-bg) !important;
+  border: 1px solid var(--edu-pill-border) !important;
+}
+
+/* course_db_design.css ships a light hero under `body.light`, but the app
+   only ever toggles a `dark` class — so the dark gradient was always the
+   one that applied. Make light the default and keep dark for body.dark. */
+.cd-hero {
+  background:
+    radial-gradient(ellipse at top right, rgba(185, 63, 240, .16), transparent 60%),
+    radial-gradient(ellipse at bottom left, rgba(123, 143, 245, .12), transparent 50%),
+    linear-gradient(135deg, #f7f4fb 0%, #eef1fa 50%, #f6e9f8 100%);
+}
+.cd-hero::after {
+  background:
+    linear-gradient(rgba(185, 63, 240, .05) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgba(185, 63, 240, .05) 1px, transparent 1px) 0 0 / 24px 24px;
+}
+body.dark .cd-hero {
+  background:
+    radial-gradient(ellipse at top right, rgba(185, 63, 240, .20), transparent 60%),
+    linear-gradient(135deg, #171525 0%, #1b1526 50%, #141220 100%);
+}
+
+/* ── Giáo trình (roadmap) — module zone + node đọc không ra chữ ──────────
+   .cd-roadmap-module hard-code nền rgba(15,23,42,…) (thiết kế gốc cho nền
+   đen tuyền); chồng lên thẻ kính --edu-card-bg giờ đã sáng, nó chỉ còn là
+   một lớp phủ xám mờ — chữ (--text-300/500, --module-color) đọc gần như
+   không ra. Đổi hẳn sang thẻ kính cùng hệ với .cd-block, giữ dải màu module
+   bên trái (.cd-roadmap-module::before) làm dấu hiệu phân biệt module. */
+.cd-roadmap-module {
+  background: var(--edu-card-bg);
+  border-color: var(--edu-card-border);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .04);
+}
+
+/* Vòng tròn bài học mặc định/khoá cũng hard-code nền tối tương tự. */
+.cd-roadmap-node-circle {
+  background: var(--edu-track-bg);
+  border-color: var(--edu-input-border);
+  color: var(--text-500);
+}
+.cd-roadmap-node.locked .cd-roadmap-node-circle {
+  background: var(--edu-input-bg);
+  border-color: var(--edu-input-border);
+  color: var(--text-500);
+}
+.cd-roadmap-node-title,
+.cd-roadmap-node.locked .cd-roadmap-node-title {
+  color: var(--text-500);
+}
+/* Bài đã học/đang học tô tên bài thẳng bằng --module-color (hổ phách/tím/
+   lục) — hợp nền tối gốc nhưng bão hoà cao nên khó đọc trên nền sáng mới.
+   Giữ --module-color cho vòng tròn/đường nối/nhãn MODULE (trang trí, đã ổn ở
+   cả hai nền), chỉ đổi màu CHỮ tên bài về đậm trung tính khi đang ở nền sáng. */
+body.light .cd-roadmap-node.completed .cd-roadmap-node-title,
+body.light .cd-roadmap-node.current .cd-roadmap-node-title {
+  color: var(--text-200);
+}
+
+/* ── Thành tựu chưa mở khoá — body.light khớp với nền phẳng #F1F5F9 gốc,
+   giờ nằm trên thẻ kính tím nhạt nên #94A3B8 gần như biến mất. */
+body.light .cd-skill-item.is-locked {
+  background: var(--edu-input-bg);
+}
+body.light .cd-skill-item.is-locked .cd-skill-title,
+body.light .cd-skill-item.is-locked .cd-skill-desc {
+  color: var(--text-500);
+}
+
+/* Thành tựu chưa mở khoá vẫn phải ĐỌC ĐƯỢC — người dùng cần biết mình sắp
+   nhận huy hiệu gì. Bộ gốc dùng #475569 (xanh đen, hợp nền đen tuyền) cho cả
+   tiêu đề lẫn mô tả rồi hạ opacity xuống .45; trên nền mới đo được tỉ lệ
+   tương phản 2.3 (chuẩn tối thiểu là 4.5). Chuyển sang thang chữ theo chủ đề
+   và nâng nhẹ opacity — vẫn mờ hơn hẳn thẻ đã mở khoá nên vẫn phân biệt được. */
+.cd-skill-item.is-locked { opacity: .72; }
+.cd-skill-item.is-locked .cd-skill-title { color: var(--text-300); }
+.cd-skill-item.is-locked .cd-skill-desc { color: var(--text-400); }
+
+/* Easter-egg "Vũ trụ GameHub" cố tình mờ, nhưng .62 là quá mờ để đọc ra chữ
+   (2.5). Nâng lên mức vẫn kín đáo mà đọc được; hover vẫn sáng hẳn như cũ. */
+.cd-saga-refs { opacity: .82; }
+.cd-saga-link { color: var(--text-400); }
+.cd-saga-eyebrow { color: var(--text-400); }
+/* tên 2 khóa kia trong easter-egg đang là #22D3EE (xanh cyan của bộ màu cũ) —
+   trên nền sáng chỉ đạt 1.8, và lạc hẳn tông tím */
+.cd-saga-link strong { color: var(--edu-accent-text); }
+
+/* Nhãn "7 bài" ở đầu mỗi module: #94A3B8 viết cứng, hợp nền đen tuyền cũ */
+.cd-roadmap-module-hd-meta { color: var(--text-400); }
+
+/* ── Nút "Hủy đăng ký" — #FCA5A5 (hồng nhạt, để đọc trên nền tối) gần như
+   trong suốt trên nền sáng. Tối màu ở sáng, giữ nguyên tông cũ ở tối. */
+.cd-enroll-btn.unenroll { color: #B91C1C; }
+body.dark .cd-enroll-btn.unenroll { color: #FCA5A5; }
+
+/* ── Hộp minh hoạ khối "Miễn phí" — hard-code #0B1121/#1A2744 (nền cyan cũ),
+   lệch tông với thẻ kính tím quanh nó. Đổi sang cặp màu tím-navy cùng hệ với
+   ảnh bìa khóa học ở trang chi tiết khóa học chung (courses/[courseId]). */
+.cd-card-image {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(185, 63, 240, .28), transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(123, 143, 245, .16), transparent 50%),
+    linear-gradient(135deg, #221c36, #181426);
+}

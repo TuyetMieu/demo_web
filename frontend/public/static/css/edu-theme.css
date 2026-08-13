@@ -1,0 +1,636 @@
+/* ══════════════════════════════════════════════════════════════
+   EDU-THEME — "Brilliant-inspired" re-skin (Claude Design import:
+   Programming EDU.dc.html / Programming EDU - Toi.dc.html)
+
+   This file is an OVERRIDE layer loaded AFTER style.css/dashboard.css/
+   pages.css/skeleton.css/ChangePassword.css/roadmap.css/course_detail.css.
+   It intentionally only touches paint properties (color/background/
+   border/box-shadow/border-radius/font) plus the topbar→sidebar layout
+   conversion — it never renames or removes an id/class main.js,
+   dashboard.js or roadmap.js depend on, so all real data-wiring keeps
+   working unchanged.
+   ══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --edu-font: 'Poppins', system-ui, sans-serif;
+
+  /* accent — identical in light & dark */
+  --edu-accent: #b93ff0;
+  --edu-accent-2: #c04af5;
+  --edu-accent-3: #e08cf9;
+  --edu-accent-grad: linear-gradient(90deg, var(--edu-accent-2), var(--edu-accent-3));
+  --edu-accent-text: #a34fd0;
+
+  /* light theme (default) */
+  --edu-bg-image:
+    radial-gradient(70% 55% at 78% 12%, rgba(250,247,190,.75) 0%, rgba(250,247,190,0) 60%),
+    radial-gradient(55% 45% at 96% 78%, rgba(226,178,250,.85) 0%, rgba(226,178,250,0) 62%),
+    radial-gradient(50% 40% at 52% 88%, rgba(186,210,250,.7) 0%, rgba(186,210,250,0) 65%),
+    radial-gradient(60% 60% at 6% 20%, rgba(214,240,240,.9) 0%, rgba(214,240,240,0) 70%),
+    linear-gradient(120deg,#e7f4f4 0%,#eef1fa 42%,#f4ecfa 72%,#f6e9f8 100%);
+  --edu-bg-solid: #eef3f6;
+  --edu-t1: #221d33;
+  --edu-t2: #4b4661;
+  --edu-t3: #6b6880;
+  --edu-t4: #7c7894;
+  --edu-t5: #8b87a0;
+  --edu-t6: #5d5875;
+  --edu-card-bg: rgba(255,255,255,.55);
+  --edu-card-border: rgba(255,255,255,.85);
+  --edu-card-shadow: 0 10px 30px rgba(120,110,170,.10);
+  --edu-pill-bg: rgba(255,255,255,.55);
+  --edu-pill-border: rgba(255,255,255,.85);
+  --edu-panel-bg: rgba(255,255,255,.96);
+  --edu-panel-border: rgba(255,255,255,.9);
+  --edu-panel-shadow: 0 20px 50px rgba(90,80,140,.24);
+  --edu-track-bg: rgba(140,130,180,.2);
+  --edu-sidebar-bg: rgba(255,255,255,.5);
+  --edu-sidebar-border: rgba(160,150,190,.28);
+  --edu-nav-bg: rgba(255,255,255,.72);
+  --edu-accent-soft: rgba(185,63,240,.10);
+  --edu-accent-soft-strong: rgba(185,63,240,.14);
+  --edu-input-bg: rgba(255,255,255,.6);
+  --edu-input-border: rgba(255,255,255,.9);
+
+  /* ── Bridge to theme.css ──────────────────────────────────────
+     theme.css declares its surface/text tokens dark-first on :root
+     (it predates the light default), so anything still painting with
+     var(--bg)/var(--card)/var(--t1) — #main and most of dashboard.css —
+     stayed dark once the app switched to light-by-default.
+     Re-point those tokens at the --edu-* set. The indirection resolves
+     at the point of use, so a body.dark subtree picks up the dark
+     values below automatically and the theme toggle keeps working. */
+  --bg: var(--edu-bg-solid);
+  --card: var(--edu-card-bg);
+  --lift: var(--edu-pill-bg);
+  --border: var(--edu-card-border);
+  --card-border: var(--edu-card-border);
+  --t1: var(--edu-t1);
+  --t2: var(--edu-t3);
+  --t3: var(--edu-t5);
+  --text-1: var(--edu-t1);
+  --text-2: var(--edu-t3);
+  --text-3: var(--edu-t5);
+  --accent: var(--edu-accent);
+  --accent-light: var(--edu-accent-3);
+  --accent-soft: var(--edu-accent-soft);
+  /* the design has a single accent; theme.css's blue/purple pair is what
+     questionaire.css, admin.inline.css and dashboard.css build their
+     gradients and focus rings from, so point both at it */
+  --blue: var(--edu-accent-2);
+  --blue-light: var(--edu-accent-3);
+  --purple: var(--edu-accent);
+
+  /* dashboard.css reads these three only through a fallback
+     (var(--bd, rgba(255,255,255,.06)) …) — values picked for a dark
+     ground, so they vanish on light. Defining them stops the fallback. */
+  --bg2: var(--edu-pill-bg);
+  --bd: var(--edu-card-border);
+  --text-400: var(--edu-t4);
+}
+
+/* #main is the scroll container next to the sidebar. style.css and
+   dark-mode.css both paint it a flat --bg; keeping it transparent lets the
+   body's gradient run the full width, which is what the design shows. */
+#main, body.dark #main, .page, body.dark .page { background: transparent; }
+
+/* style.css hard-codes .topbar at rgba(7,9,15,.96). The dashboard's rail is
+   .topbar.edu-sidebar-shell and keeps its own rule below; this is for the
+   pages that still render the plain horizontal bar (course detail). */
+.topbar:not(.edu-sidebar-shell) {
+  background: var(--edu-nav-bg);
+  border-bottom: 1px solid var(--edu-sidebar-border);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LIGHT-MODE LEFTOVERS — rules that hard-code dark values without a
+   body.dark guard, so they used to be invisible and now are not.
+   ══════════════════════════════════════════════════════════════ */
+
+/* dashboard.css §B6 repaints the roadmap canvas navy for every theme,
+   overriding its own light rule further up the file */
+.mini-rm-canvas {
+  background-color: rgba(255,255,255,.42);
+  background-image: radial-gradient(circle, rgba(150,140,190,.42) 1.2px, transparent 1.2px);
+  background-size: 20px 20px;
+  border: 1.5px solid var(--edu-card-border);
+  border-radius: 14px;
+}
+body.dark .mini-rm-canvas {
+  background-color: rgba(255,255,255,.03);
+  background-image: radial-gradient(circle, rgba(255,255,255,.16) 1.2px, transparent 1.2px);
+}
+.mini-rm-empty, .mini-rm-loading { color: var(--edu-t4); }
+
+/* auth.css is loaded group-wide by (base)/layout.tsx for the landing page,
+   but .section-card / .section-grid are also dashboard class names — its
+   near-white text bled onto the light cards. Scope to #main to outrank it. */
+#main .section-card strong { color: var(--edu-t1); }
+#main .section-card p,
+#main .section-card .section-sub { color: var(--edu-t3); }
+
+body.dark {
+  --edu-bg-image:
+    radial-gradient(70% 55% at 78% 10%, rgba(120,70,190,.28) 0%, rgba(120,70,190,0) 62%),
+    radial-gradient(55% 45% at 96% 80%, rgba(185,63,240,.20) 0%, rgba(185,63,240,0) 64%),
+    radial-gradient(50% 40% at 46% 92%, rgba(60,90,190,.20) 0%, rgba(60,90,190,0) 66%),
+    radial-gradient(60% 60% at 4% 18%, rgba(40,90,110,.28) 0%, rgba(40,90,110,0) 70%),
+    linear-gradient(120deg,#141220 0%,#171525 44%,#1b1526 74%,#1d1424 100%);
+  --edu-bg-solid: #131019;
+  --edu-t1: #ece9f5;
+  --edu-t2: #c7c3d6;
+  --edu-t3: #9a96ac;
+  --edu-t4: #918ca5;
+  --edu-t5: #8a85a0;
+  --edu-t6: #a8a4bb;
+  --edu-card-bg: rgba(255,255,255,.045);
+  --edu-card-border: rgba(255,255,255,.09);
+  --edu-card-shadow: 0 10px 30px rgba(0,0,0,.42);
+  --edu-pill-bg: rgba(255,255,255,.045);
+  --edu-pill-border: rgba(255,255,255,.09);
+  --edu-panel-bg: rgba(32,28,46,.97);
+  --edu-panel-border: rgba(255,255,255,.10);
+  --edu-panel-shadow: 0 20px 50px rgba(0,0,0,.55);
+  --edu-track-bg: rgba(255,255,255,.13);
+  --edu-sidebar-bg: rgba(255,255,255,.03);
+  --edu-sidebar-border: rgba(255,255,255,.09);
+  --edu-nav-bg: rgba(19,16,25,.82);
+  --edu-accent-soft: rgba(185,63,240,.14);
+  --edu-accent-soft-strong: rgba(185,63,240,.18);
+  --edu-input-bg: rgba(255,255,255,.05);
+  --edu-input-border: rgba(255,255,255,.09);
+
+  /* The theme.css bridge must be restated here, not only on :root. A custom
+     property's var() is substituted on the element that DECLARES it and only
+     the resolved value inherits — so `--bg: var(--edu-bg-solid)` up on :root
+     freezes the light value and body.dark could never move it. */
+  --bg: var(--edu-bg-solid);
+  --card: var(--edu-card-bg);
+  --lift: var(--edu-pill-bg);
+  --border: var(--edu-card-border);
+  --card-border: var(--edu-card-border);
+  --t1: var(--edu-t1);
+  --t2: var(--edu-t3);
+  --t3: var(--edu-t5);
+  --text-1: var(--edu-t1);
+  --text-2: var(--edu-t3);
+  --text-3: var(--edu-t5);
+  --accent: var(--edu-accent);
+  --accent-light: var(--edu-accent-3);
+  --accent-soft: var(--edu-accent-soft);
+  /* the design has a single accent; theme.css's blue/purple pair is what
+     questionaire.css, admin.inline.css and dashboard.css build their
+     gradients and focus rings from, so point both at it */
+  --blue: var(--edu-accent-2);
+  --blue-light: var(--edu-accent-3);
+  --purple: var(--edu-accent);
+  --bg2: var(--edu-pill-bg);
+  --bd: var(--edu-card-border);
+  --text-400: var(--edu-t4);
+}
+
+/* ── Base ─────────────────────────────────────────────────────── */
+body {
+  font-family: var(--edu-font);
+  background: var(--edu-bg-solid);
+  background-image: var(--edu-bg-image);
+  background-attachment: fixed;
+  color: var(--edu-t1);
+}
+body.dark { background: var(--edu-bg-solid); background-image: var(--edu-bg-image); }
+a { color: var(--edu-accent); }
+a:hover { color: #8e2bc0; }
+
+/* ══════════════════════════════════════════════════════════════
+   SIDEBAR — .topbar is repurposed from a fixed 50px top strip into
+   a fixed 272px-wide left rail, but ONLY when it carries the
+   .edu-sidebar-shell marker Sidebar.tsx adds. Scoping this way
+   means the same .topbar/.nav-btn/.search-wrap/.chip-avatar class
+   names used by pages that DON'T mount <Sidebar/> (e.g. the
+   course-detail page, which has its own bespoke topbar and doesn't
+   even load main.js) are completely unaffected if edu-theme.css
+   ever gets loaded there.
+
+   #topbar-nav / .nav-btn[data-page] / #nav-underline are kept
+   verbatim (main.js's navigate() and _updateNavUnderline() query
+   them by these exact hooks) — only layout/paint changes.
+   #nav-underline is hidden: the new design marks the active item
+   with a pill background instead of an underline, but the element
+   must still exist for main.js's getBoundingClientRect() math to
+   run without a null check failing.
+   ══════════════════════════════════════════════════════════════ */
+.topbar.edu-sidebar-shell {
+  position: fixed; top: 0; left: 0; right: auto; bottom: 0;
+  width: 272px; height: 100vh;
+  flex-direction: column; align-items: stretch; justify-content: flex-start;
+  gap: 0;
+  padding: 34px 0 30px;
+  background: var(--edu-sidebar-bg);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: none;
+  border-right: 1px solid var(--edu-sidebar-border);
+  z-index: 100;
+  overflow-y: auto;
+}
+.edu-sidebar-shell + #main { padding-top: 0; padding-left: 272px; }
+
+.edu-sidebar-shell .topbar-left { padding: 0 34px; flex-shrink: 0; }
+.edu-sidebar-shell .brand-always { gap: 12px !important; cursor: pointer; }
+.edu-sidebar-shell .brand .brand-title, .edu-sidebar-shell .brand-always .brand-title { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
+/* "Programming EDU" on one line overflows the 272px rail; the design
+   stacks the two words, so put the wordmark spans on their own rows */
+.edu-sidebar-shell .brand-full { display: flex; flex-direction: column; line-height: 1.1; }
+.edu-sidebar-shell .brand-c1 { background: var(--edu-accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.edu-sidebar-shell .brand-c2 { color: var(--edu-t1); }
+.edu-sidebar-shell .brand-always::before {
+  content: 'P';
+  width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0;
+  background: linear-gradient(140deg,#c04af5,#e396fb);
+  color: #fff; font-weight: 800; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 20px rgba(185,63,240,.32);
+}
+
+.edu-sidebar-shell .topbar-nav {
+  flex-direction: column !important;
+  align-items: stretch;
+  gap: 4px;
+  flex: none;
+  margin-top: 44px;
+  padding: 0 20px;
+  justify-content: flex-start;
+}
+.edu-sidebar-shell .topbar-nav .nav-btn {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 16px;
+  height: 52px;
+  padding: 0 14px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--edu-t6);
+}
+.edu-sidebar-shell .topbar-nav .nav-btn:hover { background: var(--edu-accent-soft); color: var(--edu-accent-text); }
+.edu-sidebar-shell .topbar-nav .nav-btn.active {
+  background: var(--edu-accent-soft);
+  color: var(--edu-accent);
+  font-weight: 600;
+}
+.edu-sidebar-shell .topbar-nav .nav-btn .nav-icon { width: 21px; height: 21px; font-size: 18px; background: transparent; }
+.edu-sidebar-shell .topbar-nav .nav-btn.active .nav-icon { background: transparent; }
+.edu-sidebar-shell #nav-underline { display: none; }
+.edu-sidebar-shell .nav-chevron { display: none !important; }
+.edu-sidebar-shell #topbar-title, .edu-sidebar-shell .sub { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+.sidebar-bottom-links {
+  margin-top: auto;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 0 20px;
+}
+.sidebar-bottom-links .nav-btn,
+.sidebar-bottom-links .edu-bottom-link {
+  width: 100%; display: flex; align-items: center; justify-content: flex-start; gap: 16px;
+  height: 52px; padding: 0 14px; border-radius: 14px;
+  color: var(--edu-t6); font-size: 16px; font-weight: 600;
+  background: transparent; border: none; cursor: pointer; text-decoration: none;
+}
+.sidebar-bottom-links .nav-btn.active { background: var(--edu-accent-soft); color: var(--edu-accent); }
+.sidebar-bottom-links .edu-bottom-link:hover,
+.sidebar-bottom-links .nav-btn:hover { background: var(--edu-accent-soft); color: var(--edu-accent-text); }
+.sidebar-bottom-links svg { flex-shrink: 0; }
+
+/* ── Nút đổi sáng/tối ─────────────────────────────────────────
+   Nút hiện HÀNH ĐỘNG sắp xảy ra, đúng như hai bản design:
+   đang sáng → 🌙 "Chế độ tối" · đang tối → ☀️ "Chế độ sáng".
+   Hình dáng kế thừa .edu-bottom-link (52px, bo 14px, hover tím) nên
+   ở đây chỉ lo phần ẩn/hiện cặp icon+chữ theo body.dark. */
+.edu-tt-ico, .edu-tt-txt { transition: opacity .18s ease; }
+
+/* mặc định = chế độ sáng: mời sang tối */
+.edu-tt-ico--sun, .edu-tt-txt--toLight { display: none; }
+.edu-tt-ico--moon, .edu-tt-txt--toDark { display: inline-flex; }
+
+/* đang tối: mời quay lại sáng */
+body.dark .edu-tt-ico--moon, body.dark .edu-tt-txt--toDark { display: none; }
+body.dark .edu-tt-ico--sun, body.dark .edu-tt-txt--toLight { display: inline-flex; }
+/* mặt trời giữ sắc ấm để phân biệt ngay với mặt trăng */
+body.dark .edu-tt-ico--sun { color: #f59e0b; }
+
+/* ══════════════════════════════════════════════════════════════
+   HEADER — search / bell / user-chip cluster, now rendered inside
+   #main (HeaderBar.tsx) instead of the old horizontal .topbar.
+   Scoped under .edu-header-bar (HeaderBar.tsx's own wrapper) for
+   the same reason as above — course-detail has its own unrelated
+   .search-wrap/.bell-wrap/.user-chip-wrap markup outside this
+   wrapper. Same ids as before (#search-wrap, #bell-wrap,
+   #user-chip-wrap…) so main.js / dashboard.js keep driving them.
+   ══════════════════════════════════════════════════════════════ */
+/* KHÔNG sticky: trong design chỉ thanh bên trái mới dính, còn hàng tiêu đề
+   cuộn cùng nội dung. Bản sticky trước đây không có nền nên khi cuộn, nội
+   dung trôi xuyên qua và chồng chữ lên nhau. Bố cục (title trái / cụm điều
+   khiển phải) do edu-dashboard.css quy định. */
+.edu-header-bar {
+  position: static;
+  display: flex;
+  gap: 22px;
+}
+/* Hình dáng ô tìm kiếm nằm ở wrapper (.search-wrap trong edu-dashboard.css);
+   ở đây chỉ còn phần chữ bên trong để hai file không tranh nhau. */
+.edu-header-bar .search-wrap input {
+  color: var(--edu-t1);
+  font-size: 16px;
+  font-family: var(--edu-font);
+}
+.edu-header-bar .search-wrap input::placeholder { color: var(--edu-t5); }
+.edu-header-bar .search-wrap input:focus { border-color: var(--edu-accent); box-shadow: 0 0 0 3px var(--edu-accent-soft); }
+.edu-header-bar .search-wrap .search-icon { left: 20px; color: var(--edu-accent); }
+.edu-header-bar .search-suggestions,
+/* dark-mode.css:49 có `body.dark .search-suggestions { background: var(--card) }`
+   — "body" nâng độ đặc trưng lên (0,2,1), CAO HƠN khối 2 dòng trên (0,2,0),
+   nên ở chế độ tối nó thắng và vẽ lại nền bằng var(--card) = --edu-card-bg
+   (kính mờ 4.5%, dùng cho card nằm TRÊN nền trang) — sai chỗ cho một popup
+   nổi trên nội dung bất kỳ, ra đúng ô trong suốt lộ chữ "Bảng xếp hạng" phía
+   sau. Panel nổi phải dùng --edu-panel-bg (đục 96-97%, cùng loại với
+   bell-panel/user-dropdown/course-search-hints ở trên). */
+body.dark .edu-header-bar .search-suggestions {
+  background: var(--edu-panel-bg);
+  border: 1px solid var(--edu-panel-border);
+  box-shadow: var(--edu-panel-shadow);
+  border-radius: 18px;
+}
+.edu-header-bar .suggestion-pill,
+body.dark .edu-header-bar .suggestion-pill { background: var(--edu-pill-bg); border-color: var(--edu-pill-border); color: var(--edu-t2); }
+.edu-header-bar .suggestion-pill:hover,
+body.dark .edu-header-bar .suggestion-pill:hover { background: var(--edu-accent-soft); color: var(--edu-accent-text); }
+.edu-header-bar .suggestion-pill.active,
+body.dark .edu-header-bar .suggestion-pill.active { background: var(--edu-accent-grad); color: #fff; }
+
+.edu-header-bar .bell-btn {
+  width: 46px; height: 46px; border-radius: 999px;
+  background: var(--edu-card-bg); border: 1px solid var(--edu-card-border);
+  color: var(--edu-accent-2);
+}
+.edu-header-bar .bell-btn:hover { background: var(--edu-accent-soft); border-color: transparent; }
+.edu-header-bar .bell-dot { background: #f2c94c; border-color: var(--edu-bg-solid); }
+
+.edu-header-bar .bell-panel, .edu-header-bar .user-dropdown {
+  background: var(--edu-panel-bg);
+  border: 1px solid var(--edu-panel-border);
+  box-shadow: var(--edu-panel-shadow);
+  border-radius: 18px;
+}
+.edu-header-bar .bell-panel-header, .edu-header-bar .user-dropdown-divider { border-color: rgba(160,150,190,.2); }
+body.dark .edu-header-bar .bell-panel-header, body.dark .edu-header-bar .user-dropdown-divider { border-color: rgba(255,255,255,.09); }
+.edu-header-bar .bell-panel-title, .edu-header-bar .udh-name { color: var(--edu-t1); }
+.edu-header-bar .bell-mark-all { color: var(--edu-accent-text); }
+.edu-header-bar .bell-item { border-color: rgba(160,150,190,.14); }
+body.dark .edu-header-bar .bell-item { border-color: rgba(255,255,255,.07); }
+/* dark-mode.css có `body.dark .bell-item.unread:hover { background: rgba(59,130,246,.2) }`
+   và `body.dark .bell-item-icon { background: var(--card-border) }` /
+   `body.dark .bell-item.unread .bell-item-icon { background: rgba(59,130,246,.18) }`
+   — cùng lỗi độ đặc trưng như .user-chip/.search-suggestions ở trên: "body"
+   nâng specificity vượt qua các rule 2-class phía trên, nên icon chuông hiện
+   màu xanh cũ thay vì tím accent. Thêm bản body.dark cho cả ba. */
+.edu-header-bar .bell-item.unread,
+body.dark .edu-header-bar .bell-item.unread { background: rgba(185,63,240,.055); }
+.edu-header-bar .bell-item.unread:hover,
+body.dark .edu-header-bar .bell-item.unread:hover { background: rgba(185,63,240,.09); }
+.edu-header-bar .bell-item-icon,
+body.dark .edu-header-bar .bell-item-icon,
+body.dark .edu-header-bar .bell-item.unread .bell-item-icon { background: var(--edu-accent-soft); }
+.edu-header-bar .bell-item-text { color: var(--edu-t1); }
+.edu-header-bar .bell-item-time { color: var(--edu-t5); }
+.edu-header-bar .bell-unread-dot, .edu-header-bar .bell-empty-icon { color: var(--edu-accent); }
+.edu-header-bar .bell-empty { color: var(--edu-t4); }
+
+.edu-header-bar .user-chip { background: transparent; border: none; padding: 0; height: auto; gap: 10px; }
+.edu-header-bar .user-chip:hover, .edu-header-bar .user-chip.open { background: transparent; border-color: transparent; }
+/* dark-mode.css:11 có `body.dark .user-chip { background: var(--bg) }` — bộ
+   chọn "body" (kiểu phần tử) nâng độ đặc trưng lên (0,2,1), CAO HƠN
+   `.edu-header-bar .user-chip` ở trên (0,2,0), nên ở chế độ tối nó luôn thắng
+   bất kể thứ tự nạp file, vẽ lại ô 34px tối bọc quanh avatar 52px (tràn ra
+   ngoài khung). Thêm tiền tố body.dark để độ đặc trưng ngang bằng rồi thắng
+   nhờ nạp sau — cùng cách dòng chip-avatar bên dưới đã né lỗi tương tự. */
+body.dark .edu-header-bar .user-chip,
+body.dark .edu-header-bar .user-chip:hover,
+body.dark .edu-header-bar .user-chip.open { background: transparent; border-color: transparent; }
+.edu-header-bar .chip-avatar {
+  width: 52px; height: 52px; font-size: 16px;
+  background: linear-gradient(140deg,#c9a7f5,#a8d5f2);
+  border: 2px solid rgba(255,255,255,.9);
+}
+body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
+.edu-header-bar .user-chip .chip-name { display: none; }
+.edu-header-bar .user-chip #chip-arrow { color: var(--edu-t1); }
+.edu-header-bar .udh-avatar { width: 40px; height: 40px; font-size: 15px; background: linear-gradient(140deg,#c9a7f5,#a8d5f2); }
+.edu-header-bar .user-dropdown-item { color: var(--edu-t3); }
+.edu-header-bar .user-dropdown-item:hover { background: var(--edu-accent-soft); color: var(--edu-accent-text); }
+.edu-header-bar .user-dropdown-item.danger:hover { background: rgba(240,82,107,.12); color: #f0526b; }
+
+/* ══════════════════════════════════════════════════════════════
+   PAGE TYPOGRAPHY & GENERIC CARD LANGUAGE
+   ══════════════════════════════════════════════════════════════ */
+.page { padding: 0 40px 56px; font-family: var(--edu-font); }
+.page h2 { font-size: 40px; font-weight: 800; letter-spacing: -.03em; color: var(--edu-t1); margin: 0; }
+.page-subtitle, .courses-subtitle { font-size: 16px; color: var(--edu-t3); margin-top: 8px; }
+.section-title span:last-child { color: var(--edu-t1); font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+.title-icon-blue, .title-icon-red { font-size: 20px; }
+
+.section-card,
+.dash-hero, .study-cal-card, .mini-rm-card, .lb-card, .dash-progress-card,
+.edu-lb-teaser, .edu-leader-side, .settings-section, .sec-lang-card,
+.prof-section, .prof-xp-card, .cd-block, .cd-card {
+  background: var(--edu-card-bg) !important;
+  border: 1px solid var(--edu-card-border) !important;
+  box-shadow: var(--edu-card-shadow) !important;
+  border-radius: 22px !important;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+
+/* ── Dashboard hero + leaderboard teaser ─────────────────────── */
+.dash-hero { color: #fff !important; }
+.dash-hero-overlay { background: linear-gradient(120deg, rgba(185,63,240,.85), rgba(91,141,239,.75)) !important; }
+.dash-hero-btn { background: #fff !important; color: var(--edu-accent-text) !important; border-radius: 999px !important; box-shadow: 0 10px 24px rgba(0,0,0,.18) !important; }
+
+.edu-lb-teaser { display: flex; flex-direction: column; gap: 10px; padding: 26px 28px; text-decoration: none; cursor: pointer; transition: transform .15s ease; }
+.edu-lb-teaser:hover { transform: translateY(-2px); }
+.edu-lb-teaser-sub { margin: 0; font-size: 14px; color: var(--edu-t3); line-height: 1.5; }
+.edu-lb-teaser-cta { margin-top: auto; font-size: 14px; font-weight: 700; color: var(--edu-accent-text); }
+
+.edu-leader-grid { display: grid; grid-template-columns: minmax(0,1fr) 340px; gap: 26px; align-items: start; margin-top: 26px; }
+.edu-leader-side { padding: 26px 28px; display: flex; flex-direction: column; gap: 14px; }
+.edu-leader-side-text { margin: 0; font-size: 14px; color: var(--edu-t3); line-height: 1.6; }
+@media (max-width: 1100px) { .edu-leader-grid { grid-template-columns: 1fr; } }
+
+.lb-tabs { gap: 6px; }
+.lb-tab { border-radius: 999px !important; background: var(--edu-pill-bg); border: 1px solid var(--edu-pill-border); color: var(--edu-t3); }
+.lb-tab.active { background: var(--edu-accent-grad) !important; color: #fff !important; border-color: transparent !important; }
+.lb-row, .lb-me { border-radius: 16px !important; }
+.lb-row-me, .lb-me { background: var(--edu-accent-soft) !important; border: 1px solid rgba(185,63,240,.32) !important; }
+.lb-name { color: var(--edu-t1); }
+.lb-rank-num, .lb-value { color: var(--edu-accent-text); }
+.lb-meta { color: var(--edu-t4); }
+
+/* ── Study calendar / mini roadmap ───────────────────────────── */
+.cal-day { border-radius: 14px !important; }
+.cal-day.done, .cal-day.today { background: var(--edu-accent-soft) !important; }
+.cal-day-icon { color: var(--edu-accent) !important; }
+.cal-streak-num { color: var(--edu-accent) !important; }
+.mini-rm-node { border-radius: 14px !important; background: var(--edu-pill-bg) !important; border: 1px solid var(--edu-pill-border) !important; }
+.mini-rm-node--current { border-color: var(--edu-accent) !important; background: var(--edu-accent-soft) !important; }
+.mini-rm-node--done .mini-rm-node-icon { color: #22c55e !important; }
+
+/* ── Big / mini stat cards, generic stat-card ────────────────── */
+.stat-card, .prof-stat-card, .cd-cs {
+  background: var(--edu-card-bg) !important; border: 1px solid var(--edu-card-border) !important;
+  box-shadow: var(--edu-card-shadow) !important; border-radius: 18px !important;
+}
+.stat-val, .prof-stat-val { color: var(--edu-t1) !important; }
+.stat-lbl, .prof-stat-lbl { color: var(--edu-t3) !important; }
+.icon-blue, .icon-red, .icon-orange, .icon-green,
+.prof-stat-icon, .dash-progress-icon, .dash-prog-icon, .prog-icon, .enrolled-icon {
+  background: var(--edu-accent-soft) !important;
+}
+
+.dash-progress-btn, .dash-prog-cta, .continue-btn, .mini-rm-empty-cta,
+.dash-hero-btn, .save-btn, .change-pw-btn, .cp-btn-submit, .cd-enroll-btn.primary,
+.cd-enroll-btn.continue, .quiz-btn.primary {
+  background: var(--edu-accent-grad) !important; color: #fff !important;
+  border: none !important; border-radius: 999px !important;
+  box-shadow: 0 10px 24px rgba(185,63,240,.28) !important;
+}
+.change-pw-btn, .cd-enroll-btn.continue { box-shadow: none !important; }
+.dash-prog-bar-fill, .prog-bar-fill, .cd-prog-fill, .prof-ci-fill, .prof-xp-bar-fill,
+.rm-my-header-bar-fill, .rm-drawer-course-fill {
+  background: var(--edu-accent-grad) !important;
+}
+.dash-prog-bar-bg, .prog-bar-bg, .cd-prog-bar, .prof-ci-bar, .prof-xp-bar-wrap {
+  background: var(--edu-track-bg) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   COURSES — filters, sort, search, card grid
+   ══════════════════════════════════════════════════════════════ */
+.filter-btn, .pill-btn {
+  border-radius: 999px !important; background: var(--edu-pill-bg) !important;
+  border: 1px solid var(--edu-pill-border) !important; color: var(--edu-t3) !important;
+}
+.filter-btn.active, .pill-btn.active {
+  background: var(--edu-accent-grad) !important; color: #fff !important; border-color: transparent !important;
+  box-shadow: 0 8px 22px rgba(185,63,240,.28) !important;
+}
+.sort-dropdown-wrap .sort-select, .lang-select {
+  background: var(--edu-pill-bg) !important; border: 1px solid var(--edu-pill-border) !important;
+  color: var(--edu-t2) !important; border-radius: 12px !important;
+}
+.courses-search-bar-wrap, .skills-search-input, #skills-search-wrap, #forum-search-wrap {
+  background: var(--edu-input-bg) !important; border: 1px solid var(--edu-input-border) !important;
+  border-radius: 16px !important;
+}
+.courses-search-bar-input { color: var(--edu-t1) !important; }
+.course-search-hints { background: var(--edu-panel-bg) !important; border: 1px solid var(--edu-panel-border) !important; box-shadow: var(--edu-panel-shadow) !important; }
+.csh-pill { background: var(--edu-pill-bg) !important; border: 1px solid var(--edu-pill-border) !important; color: var(--edu-t2) !important; }
+.filter-chip { background: var(--edu-accent-soft) !important; color: var(--edu-accent-text) !important; }
+
+.course-card {
+  border-radius: 22px !important; background: var(--edu-card-bg) !important;
+  border: 1px solid var(--edu-card-border) !important; box-shadow: var(--edu-card-shadow) !important;
+}
+.badge-level { background: var(--edu-accent-grad) !important; }
+.badge-enrolled { background: rgba(34,197,94,.85) !important; }
+.card-tag { color: var(--edu-accent) !important; }
+.card-level-pill { background: var(--edu-accent-soft) !important; color: var(--edu-accent-text) !important; }
+.card-btn-enroll, .card-btn-enrolled { background: var(--edu-accent-grad) !important; color: #fff !important; border: none !important; border-radius: 999px !important; }
+.card-btn-ghost { border: 1.5px solid var(--edu-accent-3) !important; color: var(--edu-accent-text) !important; background: transparent !important; border-radius: 999px !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   ROADMAP chrome (roadmap.js is pure DOM-string + CSS, no inline
+   colors except done/active/locked node state — left untouched
+   since it already follows the same green/purple/gray convention)
+   ══════════════════════════════════════════════════════════════ */
+.rm-root, .rm-browse, .rm-drawer, #rm-visual-canvas {
+  background: var(--edu-card-bg) !important; border-color: var(--edu-card-border) !important;
+}
+.rm-tab { border-radius: 999px !important; color: var(--edu-t3) !important; }
+.rm-tab.active { background: var(--edu-accent-soft) !important; color: var(--edu-accent) !important; }
+.rm-course-btn, .rm-save-btn, .rm-ai-btn { background: var(--edu-accent-grad) !important; color: #fff !important; border: none !important; border-radius: 999px !important; }
+.rm-node-chip { background: var(--edu-accent-soft) !important; color: var(--edu-accent-text) !important; }
+.rm-browse-card { background: var(--edu-pill-bg) !important; border: 1px solid var(--edu-pill-border) !important; border-radius: 16px !important; }
+.rm-page-intro-icon { color: var(--edu-accent); }
+.rm-page-intro-link { color: var(--edu-accent-text) !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   SKILLS
+   ══════════════════════════════════════════════════════════════ */
+.sk-tab { border-radius: 14px !important; background: var(--edu-pill-bg) !important; }
+.sk-tab.active { background: var(--edu-accent-soft) !important; color: var(--edu-accent-text) !important; }
+.sk-set { background: var(--edu-card-bg) !important; border: 1px solid var(--edu-card-border) !important; box-shadow: var(--edu-card-shadow) !important; border-radius: 20px !important; }
+.sk-skill-fill { background: var(--edu-accent-grad) !important; }
+.sk-badge.achieved { background: rgba(34,197,94,.16) !important; color: #1f9d59 !important; }
+.sk-badge.new { background: var(--edu-accent-soft) !important; color: var(--edu-accent-text) !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   FORUM
+   ══════════════════════════════════════════════════════════════ */
+.forum-create-box, .fpc-cmt-input-row .fpc-cmt-compose, .fpc-reply-input-row .fpc-cmt-compose {
+  background: var(--edu-card-bg) !important; border: 1px solid var(--edu-card-border) !important;
+  border-radius: 20px !important; box-shadow: var(--edu-card-shadow) !important;
+}
+.fcb-textarea, .fpc-cmt-input { background: var(--edu-input-bg) !important; border: 1px solid var(--edu-input-border) !important; color: var(--edu-t1) !important; border-radius: 14px !important; }
+.fcb-type-btn { background: var(--edu-pill-bg) !important; color: var(--edu-t3) !important; border-radius: 999px !important; }
+.fcb-type-btn.active { background: var(--edu-accent-soft) !important; color: var(--edu-accent-text) !important; }
+.fcb-submit-btn, .fpc-cmt-send { background: var(--edu-accent-grad) !important; color: #fff !important; border: none !important; border-radius: 999px !important; }
+.forum-post-card, .fpc-comments {
+  background: var(--edu-card-bg) !important; border: 1px solid var(--edu-card-border) !important;
+  border-radius: 20px !important; box-shadow: var(--edu-card-shadow) !important;
+}
+.fpc-react-btn.liked, .fpc-react-btn:hover { color: var(--edu-accent-text) !important; }
+.fpc-comment-btn:hover, .fpc-share-btn:hover { color: var(--edu-accent-text) !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   PROFILE ("Trang của tôi")
+   ══════════════════════════════════════════════════════════════ */
+.prof-hero-bg { background: linear-gradient(120deg, rgba(185,63,240,.85), rgba(91,141,239,.75)) !important; }
+.prof-avatar { background: linear-gradient(140deg,#c9a7f5,#a8d5f2) !important; }
+.prof-edit-btn { border: 1.5px solid var(--edu-accent-3) !important; color: var(--edu-accent-text) !important; border-radius: 999px !important; background: transparent !important; }
+.prof-course-item, .prof-post-card { background: var(--edu-pill-bg) !important; border: 1px solid var(--edu-pill-border) !important; border-radius: 16px !important; }
+.prof-xp-row-icon { color: var(--edu-accent); }
+
+/* ══════════════════════════════════════════════════════════════
+   SETTINGS + modals (change-password / unenroll / streak popup)
+   ══════════════════════════════════════════════════════════════ */
+.field-input, .cpForm input, .cp-input {
+  background: var(--edu-input-bg) !important; border: 1px solid var(--edu-input-border) !important;
+  color: var(--edu-t1) !important; border-radius: 12px !important;
+}
+.toggle.on { background: var(--edu-accent-grad) !important; }
+.un-overlay, .cp-overlay, .streak-overlay { background: rgba(20,16,32,.55) !important; backdrop-filter: blur(6px); }
+.un-card, .cp-modal, .streak-card {
+  background: var(--edu-panel-bg) !important; border: 1px solid var(--edu-panel-border) !important;
+  box-shadow: var(--edu-panel-shadow) !important; border-radius: 22px !important;
+}
+.un-btn-confirm { background: linear-gradient(90deg,#f0526b,#f0788e) !important; border: none !important; border-radius: 999px !important; }
+.un-btn-cancel, .cp-btn-cancel { background: var(--edu-pill-bg) !important; border: 1px solid var(--edu-pill-border) !important; border-radius: 999px !important; color: var(--edu-t2) !important; }
+.streak-btn-go { background: var(--edu-accent-grad) !important; border: none !important; border-radius: 999px !important; color: #fff !important; }
+.streak-btn-skip { color: var(--edu-t4) !important; }
+.cp-icon-wrap { background: var(--edu-accent-soft) !important; color: var(--edu-accent) !important; }
+
+/* small screens: collapse sidebar to icon rail rather than hide nav entirely */
+@media (max-width: 900px) {
+  .edu-sidebar-shell { width: 84px; padding: 20px 0; }
+  .edu-sidebar-shell .topbar-left { padding: 0; display: flex; justify-content: center; }
+  .edu-sidebar-shell .brand-always .brand-title, .edu-sidebar-shell .topbar-nav .nav-btn span:not(.nav-icon),
+  /* .edu-tt-txt liệt kê riêng: nút đổi theme có HAI nhãn nên `span:last-child`
+     chỉ ẩn được một cái, cái còn lại vẫn lòi ra ở rail thu gọn. */
+  .sidebar-bottom-links .nav-btn span:not(.nav-icon),
+  .sidebar-bottom-links .edu-bottom-link span:last-child,
+  .sidebar-bottom-links .edu-tt-txt { display: none !important; }
+  .edu-sidebar-shell .topbar-nav, .sidebar-bottom-links { padding: 0 16px; }
+  .edu-sidebar-shell .topbar-nav .nav-btn, .sidebar-bottom-links .nav-btn, .sidebar-bottom-links .edu-bottom-link { justify-content: center; padding: 0; }
+  .edu-sidebar-shell + #main { padding-left: 84px; }
+  .edu-header-bar { padding: 20px 20px 0; flex-wrap: wrap; }
+  .edu-header-bar .search-wrap input { width: 220px; }
+}

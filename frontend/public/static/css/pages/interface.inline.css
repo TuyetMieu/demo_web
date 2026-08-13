@@ -1,0 +1,72 @@
+        body { background-color: #ffffff; color: #4B4B4B; }
+        
+        /* Nút bấm nổi khối 3D phong cách Teen */
+        .btn-3d {
+            position: relative;
+            border-bottom: 4px solid rgba(0,0,0,0.2);
+            transition: all 0.1s;
+        }
+        .btn-3d:active {
+            transform: translateY(2px);
+            border-bottom-width: 2px;
+        }
+
+        /* Khối logic phong cách thẻ bài */
+        .logic-card {
+            cursor: grab;
+            padding: 12px 20px;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 15px;
+            border: 2px solid #E5E5E5;
+            background: white;
+            box-shadow: 0 4px 0 #E5E5E5;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .logic-card:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #E5E5E5; }
+        .logic-card:active { cursor: grabbing; }
+
+        .block-blue { background-color: #E1F5FE; color: #039BE5; border-color: #B3E5FC; box-shadow: 0 4px 0 #B3E5FC; }
+        .block-orange { background-color: #FFF3E0; color: #F57C00; border-color: #FFE0B2; box-shadow: 0 4px 0 #FFE0B2; }
+
+        /* Dropzone */
+        .drop-target {
+            min-width: 160px;
+            height: 52px;
+            background: #F7F7F7;
+            border: 2px dashed #D1D1D1;
+            border-radius: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 4px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .drop-target.hovering {
+            border-color: #1CB0F6;
+            background: #E1F5FE;
+            transform: scale(1.05);
+        }
+        .drop-target.filled {
+            border-style: solid;
+            background: white;
+            border-color: #E5E5E5;
+        }
+
+        /* Compiler Panel */
+        .code-window {
+            background-color: #1A1A1A;
+            border-radius: 24px;
+            border: 8px solid #333333;
+        }
+
+        /* Animations */
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .placeholder-pulse { animation: pulse-soft 2s infinite; }

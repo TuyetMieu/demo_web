@@ -1,0 +1,476 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CourseLevel {
+  beginner
+  intermediate
+  advanced
+
+  @@map("course_level")
+}
+
+enum QuizStatus {
+  generated
+  submitted
+
+  @@map("quiz_status")
+}
+
+model User {
+  id                     Int       @id @default(autoincrement())
+  name                   String?
+  email                  String    @unique
+  phone                  String?
+  birthday               DateTime? @db.Date
+  role                   String
+  password               String    @db.VarChar(512)
+  xp                     Int       @default(0)
+  streak                 Int       @default(0)
+  gems                   Int       @default(0)
+  certificates           Int       @default(0)
+  questionnaireCompleted Boolean   @default(false) @map("questionnaire_completed")
+  lastStudyDate          DateTime? @map("last_study_date") @db.Date
+  oauthProvider          String?   @map("oauth_provider")
+  oauthProviderId        String?   @map("oauth_provider_id")
+  avatar                 String?
+  isVerified             Boolean   @default(false) @map("is_verified")
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  authSessions        AuthSession[]
+  emailVerifications  EmailVerification[]
+  oauthAccounts       UserOauthAccount[]
+  courses             Course[]
+  enrollments         Enrollment[]
+  lessonProgress      LessonProgress[]
+  courseRatings       CourseRating[]
+  missions            Mission[]
+  quizzes             Quiz[]
+  reviewQuizResults   ReviewQuizResult[]
+  surveys             Survey[]
+  roadmaps            RoadMap[]
+  roadmapProgress     RoadMapProgress[]
+  dailyXpLogs         UserDailyXpLog[]
+  userBadges          UserBadge[]
+  notificationSetting NotificationSetting?
+  notifications       Notification[]
+  comments            Comment[]
+  posts               Post[]
+  postReactions       PostReaction[]
+  commentReactions    CommentReaction[]
+  userAchievements    UserAchievement[]
+  following           UserFollow[] @relation("UserFollowers")
+  followers           UserFollow[] @relation("UserFollowing")
+
+  @@map("users")
+}
+
+model AuthSession {
+  id         Int       @id @default(autoincrement())
+  userId     Int       @map("user_id")
+  token      String
+  deviceInfo String?   @map("device_info")
+  expiresAt  DateTime? @map("expires_at") @db.Timestamptz(6)
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("auth_sessions")
+}
+
+model EmailVerification {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  token     String
+  type      String?
+  expiresAt DateTime @default(now()) @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("email_verifications")
+}
+
+model UserOauthAccount {
+  id             Int     @id @default(autoincrement())
+  userId         Int     @map("user_id")
+  provider       String?
+  providerUserId String  @map("provider_user_id")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("user_oauth_accounts")
+}
+
+model Course {
+  id           String       @id @default(cuid())
+  title        String?
+  level        CourseLevel?
+  rating       Float        @db.Real
+  lessonCount  Int          @map("lessons")
+  instructorId Int          @map("instructor_id")
+  xp_reward    Int
+  isPublished  Boolean      @default(false) @map("is_published")
+  contentMeta  Json?        @map("content_meta") @db.JsonB
+  // Task 88: filter theo language + map accentColor ra response camelCase.
+  language     String?
+  accentColor  String?      @map("accent_color")
+
+  user           User             @relation(fields: [instructorId], references: [id])
+  lessons        Lesson[]
+  enrollments    Enrollment[]
+  lessonProgress LessonProgress[]
+  courseRatings  CourseRating[]
+  missions       Mission[]
+  quizzes        Quiz[]
+
+  @@map("courses")
+}
+
+model Lesson {
+  id               Int      @id @default(autoincrement())
+  courseId         String   @map("course_id")
+  lessonCode       String?  @map("lesson_code")
+  module           String?
+  title            String?
+  subtitle         String?
+  sortOrder        Int      @map("sort_order")
+  contentJson      Json?    @map("content_json") @db.JsonB
+  estimatedMinutes Int?     @map("estimated_minutes")
+  xpReward         Int      @map("xp_reward")
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  course         Course           @relation(fields: [courseId], references: [id])
+  lessonProgress LessonProgress[]
+
+  @@unique([courseId, lessonCode])
+  @@index([contentJson], type: Gin)
+  @@map("lessons")
+}
+
+model Enrollment {
+  userId           Int      @map("user_id")
+  courseId         String   @map("course_id")
+  progress         Int
+  completedLessons Int      @map("completed_lessons")
+  status           String?
+  // Lưu dạng chuỗi '12.5h' theo bản Django -> StatsService.parseTimeSpent() parse ra số.
+  timeSpent        String?  @map("time_spent")
+  enrolledAt       DateTime @default(now()) @map("enrolled_at") @db.Timestamptz(6)
+
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+
+  @@id([userId, courseId])
+  @@map("enrollments")
+}
+
+model LessonProgress {
+  userId      Int      @map("user_id")
+  lessonId    Int      @map("lesson_id")
+  courseId    String   @map("course_id")
+  status      String?
+  quizScore   Int      @map("quiz_score")
+  xpEarned    Int      @map("xp_earned")
+  completedAt DateTime @default(now()) @map("completed_at") @db.Timestamptz(6)
+
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+
+  @@id([userId, lessonId])
+  @@map("lesson_progress")
+}
+
+model CourseRating {
+  userId    Int      @map("user_id")
+  courseId  String   @map("course_id")
+  rating    Int
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+
+  @@id([userId, courseId])
+  @@map("course_ratings")
+}
+
+model Mission {
+  userId           Int     @map("user_id")
+  courseId         String  @map("course_id")
+  title            String?
+  xpReward         Int     @map("xp_reward")
+  correctCondition String? @map("correct_condition")
+  isActive         Boolean @default(false) @map("is_active")
+
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+
+  @@id([userId, courseId])
+  @@map("missions")
+}
+
+model Quiz {
+  id            Int         @id @default(autoincrement())
+  userId        Int         @map("user_id")
+  courseId      String      @map("course_id")
+  status        QuizStatus? @default(generated)
+  questionsJson Json        @map("questions_json") @db.JsonB
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course            Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  reviewQuizResults ReviewQuizResult[]
+
+  @@index([userId, courseId])
+  @@index([status])
+  @@map("quizzes")
+}
+
+model ReviewQuizResult {
+  id          Int      @id @default(autoincrement())
+  quizId      Int      @map("quiz_id")
+  userId      Int      @map("user_id")
+  score       Int
+  total       Int
+  answersJson Json     @map("answers_json") @db.JsonB
+  submittedAt DateTime @default(now()) @map("submitted_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([quizId])
+  @@map("review_quiz_results")
+}
+
+model Survey {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  dataJson  Json     @map("data_json") @db.JsonB
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user     User      @relation(fields: [userId], references: [id])
+  roadmaps RoadMap[]
+
+  @@map("surveys")
+}
+
+model RoadMap {
+  id                    String   @id @default(cuid())
+  userId                Int      @map("user_id")
+  generatedFromSurveyId Int      @map("generated_from_survey_id")
+  source                String?
+  title                 String?  @map("title")
+  nodesJson             Json     @map("nodes_json") @db.JsonB
+  edgesJson             Json     @map("edges_json") @db.JsonB
+  mermaidDef            String?  @map("mermaid_def")
+  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user            User              @relation(fields: [userId], references: [id])
+  survey          Survey            @relation(fields: [generatedFromSurveyId], references: [id])
+  roadmapProgress RoadMapProgress[]
+
+  @@map("roadmaps")
+}
+
+model RoadMapProgress {
+  userId      Int      @map("user_id")
+  roadmapId   String   @map("roadmap_id")
+  itemId      String   @map("item_id")
+  done        Boolean  @default(false)
+  completedAt DateTime @default(now()) @map("completed_at") @db.Timestamptz(6)
+
+  user    User    @relation(fields: [userId], references: [id])
+  roadmap RoadMap @relation(fields: [roadmapId], references: [id])
+
+  @@id([userId, roadmapId, itemId])
+  @@map("roadmap_progress")
+}
+
+model Questionnaire {
+  id            Int     @id @default(autoincrement())
+  version       Int
+  title         String?
+  questionsJson Json    @map("questions_json") @db.JsonB
+  isActive      Boolean @default(false) @map("is_active")
+
+  @@map("questionnaires")
+}
+
+model UserDailyXpLog {
+  id       Int      @id @default(autoincrement())
+  userId   Int      @map("user_id")
+  logDate  DateTime @map("log_date") @db.Date
+  xpEarned Int      @map("xp_earned")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("user_daily_xp_logs")
+}
+
+model Badge {
+  id             Int     @id @default(autoincrement())
+  code           String? @unique
+  name           String?
+  conditionType  String? @map("condition_type")
+  conditionValue Int     @map("condition_value")
+
+  userBadges UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  userId    Int      @map("user_id")
+  badgeId   Int      @map("badge_id")
+  awardedAt DateTime @default(now()) @map("awarded_at") @db.Timestamptz(6)
+
+  user  User  @relation(fields: [userId], references: [id])
+  badge Badge @relation(fields: [badgeId], references: [id])
+
+  @@id([userId, badgeId])
+  @@map("user_badges")
+}
+
+model NotificationSetting {
+  userId        Int     @map("user_id")
+  emailNotif    Boolean @map("email_notif")
+  pushNotif     Boolean @map("push_notif")
+  studyRemind   Boolean @map("study_remind")
+  contentUpdate Boolean @map("content_update")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@id([userId])
+  @@map("notification_settings")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  type      String?
+  title     String?
+  body      String?
+  refType   String?  @map("ref_type")
+  refId     Int      @map("ref_id")
+  isRead    Boolean  @default(false) @map("is_read")
+  // Task 199-201: gộp thông báo cùng (type, ref_type, ref_id) chưa đọc trong 10 phút.
+  coalesceCount Int  @default(1) @map("coalesce_count")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  category  String?
+  title     String?
+  content   String?
+  likeCount Int      @map("like_count")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User           @relation(fields: [userId], references: [id])
+  comments  Comment[]
+  reactions PostReaction[]
+
+  @@map("posts")
+}
+
+model Comment {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @map("user_id")
+  postId          Int      @map("post_id")
+  parentCommentId Int?     @map("parent_comment_id")
+  content         String?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user      User              @relation(fields: [userId], references: [id])
+  post      Post              @relation(fields: [postId], references: [id])
+  parent    Comment?          @relation("CommentReplies", fields: [parentCommentId], references: [id])
+  replies   Comment[]         @relation("CommentReplies")
+  reactions CommentReaction[]
+
+  @@map("comments")
+}
+
+// Task 163 — tên model theo task sheet (PostReaction), tên bảng theo Sheet 3 (post_likes).
+// Cột `type` giữ 1 trong 6 loại reaction; mặc định 'like' cho dữ liệu cũ.
+model PostReaction {
+  userId    Int      @map("user_id")
+  postId    Int      @map("post_id")
+  type      String   @default("like")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  @@id([userId, postId])
+  @@map("post_likes")
+}
+
+// Task 164 — bảng comment_likes (Sheet 3), chưa từng tồn tại trong DB.
+model CommentReaction {
+  userId    Int      @map("user_id")
+  commentId Int      @map("comment_id")
+  type      String   @default("like")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user    User    @relation(fields: [userId], references: [id])
+  comment Comment @relation(fields: [commentId], references: [id])
+
+  @@id([commentId, userId])
+  @@map("comment_likes")
+}
+
+// Task 148-149 — achievements/user_achievements (Sheet 3 liệt kê composite key
+// user_achievements(user_id, achievement_id)). Tách riêng khỏi badges/user_badges.
+model Achievement {
+  id             Int     @id @default(autoincrement())
+  code           String? @unique
+  name           String?
+  description    String?
+  icon           String?
+  conditionType  String? @map("condition_type")
+  conditionValue Int     @default(0) @map("condition_value")
+
+  userAchievements UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  userId        Int      @map("user_id")
+  achievementId Int      @map("achievement_id")
+  awardedAt     DateTime @default(now()) @map("awarded_at") @db.Timestamptz(6)
+
+  user        User        @relation(fields: [userId], references: [id])
+  achievement Achievement @relation(fields: [achievementId], references: [id])
+
+  @@id([userId, achievementId])
+  @@map("user_achievements")
+}
+
+model UserFollow {
+  followerId Int      @map("follower_id")
+  followeeId Int      @map("followee_id")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  follower User @relation("UserFollowers", fields: [followerId], references: [id])
+  followee User @relation("UserFollowing", fields: [followeeId], references: [id])
+
+  @@id([followerId, followeeId])
+  @@map("user_follows")
+}

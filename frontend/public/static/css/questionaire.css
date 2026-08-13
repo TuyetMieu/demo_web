@@ -1,0 +1,542 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ══════════════════════════════════════════════════
+   ONBOARDING SURVEY — wizard style (Duolingo/Scrimba)
+   Tokens theo /static/css/theme.css (load trước file này)
+   JS hooks giữ nguyên: .step(.active) .next-btn(.locked)
+   .prev-btn .submit-btn .question-block(.shake) .btn-group
+   .step-error .option #progressBar #surveyForm
+   #sub_language_section .thanks-overlay(.show)
+   ══════════════════════════════════════════════════ */
+
+* {
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background:
+        radial-gradient(640px 420px at 12% -5%, rgba(59, 130, 246, 0.10), transparent 62%),
+        radial-gradient(720px 480px at 92% 108%, rgba(139, 92, 246, 0.10), transparent 62%),
+        var(--bg, #07090F);
+    color: var(--t1, #E2E8F0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 28px 16px;
+    overflow-x: hidden;
+}
+
+/* --- 1. KHUNG WIZARD --- */
+.survey-container {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    background: var(--card, #0C1220);
+    border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+    border-radius: var(--radius-lg, 16px);
+    padding: 40px 36px 34px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+/* đường sáng mảnh trên mép card */
+.survey-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 28px;
+    right: 28px;
+    height: 1px;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(96, 165, 250, 0.55),
+        rgba(139, 92, 246, 0.55),
+        transparent);
+    pointer-events: none;
+}
+
+/* --- 2. LOGO --- */
+.tech-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 22px;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.logo-text {
+    background: linear-gradient(90deg, var(--blue-light, #60A5FA), var(--purple, #8B5CF6));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+/* --- 3. THANH TIẾN TRÌNH --- */
+.progress-container {
+    width: 100%;
+    height: 6px;
+    background: var(--lift, #101928);
+    border-radius: 999px;
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--blue, #3B82F6), var(--purple, #8B5CF6));
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.55);
+    transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- 4. HIỂN THỊ TỪNG BƯỚC --- */
+.step {
+    display: none;
+}
+
+.step.active {
+    display: block;
+    animation: stepIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes stepIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- 5. CÂU HỎI --- */
+.question-block {
+    margin-bottom: 8px;
+}
+
+.step-count {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--t3, #64748B);
+    margin-bottom: 8px;
+}
+
+.question {
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--t1, #E2E8F0);
+    margin-bottom: 18px;
+}
+
+.note {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--blue-light, #60A5FA);
+    background: var(--accent-soft, rgba(59, 130, 246, 0.15));
+    border: 1px solid rgba(96, 165, 250, 0.25);
+    padding: 3px 8px;
+    border-radius: 999px;
+    margin-left: 8px;
+}
+
+/* --- 6. OPTION TILE --- */
+.option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    min-height: 52px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    background: var(--lift, #101928);
+    border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+    border-radius: var(--radius, 10px);
+    color: var(--t2, #94A3B8);
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background-color 0.18s ease,
+                box-shadow 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.option:hover {
+    background: #121B2E;
+    border-color: rgba(96, 165, 250, 0.4);
+    color: var(--t1, #E2E8F0);
+    transform: translateY(-1px);
+}
+
+/* ẩn input gốc nhưng vẫn focus được (accessibility) */
+.option > input[type="radio"],
+.option > input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    pointer-events: none;
+}
+
+/* indicator tròn/vuông bên trái */
+.option::before {
+    content: '';
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    border: 2px solid rgba(148, 163, 184, 0.35);
+    border-radius: 6px;
+    background: transparent center / 13px 13px no-repeat;
+    transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.option:has(> input[type="radio"])::before {
+    border-radius: 50%;
+}
+
+/* trạng thái đã chọn: viền xanh + glow + dấu check */
+.option:has(> input:checked) {
+    border-color: var(--blue, #3B82F6);
+    background: rgba(59, 130, 246, 0.08);
+    color: var(--t1, #E2E8F0);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16), 0 8px 22px rgba(59, 130, 246, 0.12);
+}
+
+.option:has(> input:checked)::before {
+    border-color: var(--blue, #3B82F6);
+    background-color: var(--blue, #3B82F6);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+/* focus bàn phím */
+.option:has(> input:focus-visible) {
+    outline: 2px solid var(--blue-light, #60A5FA);
+    outline-offset: 2px;
+}
+
+/* fallback cho trình duyệt không hỗ trợ :has() */
+@supports not (selector(:has(*))) {
+    .option > input[type="radio"],
+    .option > input[type="checkbox"] {
+        position: static;
+        opacity: 1;
+        width: 18px;
+        height: 18px;
+        pointer-events: auto;
+        accent-color: var(--blue, #3B82F6);
+    }
+    .option::before {
+        display: none;
+    }
+}
+
+/* ô nhập "Khác" */
+.custom-text-input {
+    flex: 1 1 140px;
+    min-width: 0;
+    padding: 9px 12px;
+    font-size: 0.9rem;
+    color: var(--t1, #E2E8F0);
+    background: var(--bg, #07090F);
+    border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+    border-radius: 8px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.custom-text-input::placeholder {
+    color: var(--t3, #64748B);
+}
+
+.custom-text-input:focus {
+    outline: none;
+    border-color: var(--blue, #3B82F6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+
+.custom-text-input:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+/* câu hỏi phụ (Q3 – ngôn ngữ đã học) — JS toggle inline display */
+.sub-question {
+    margin-top: 20px;
+    padding: 16px 16px 8px;
+    border: 1px dashed rgba(96, 165, 250, 0.28);
+    border-radius: var(--radius, 10px);
+    background: rgba(59, 130, 246, 0.04);
+}
+
+.sub-question .question {
+    font-size: 1rem;
+    margin-bottom: 14px;
+}
+
+/* --- 7. NÚT ĐIỀU HƯỚNG --- */
+.btn-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 26px;
+}
+
+.next-btn,
+.prev-btn,
+.submit-btn {
+    font-size: 0.95rem;
+    font-weight: 700;
+    min-height: 48px;
+    border-radius: var(--radius, 10px);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease,
+                filter 0.2s ease, background-color 0.2s ease,
+                border-color 0.2s ease, color 0.2s ease;
+}
+
+.next-btn {
+    margin-left: auto;
+    padding: 0 30px;
+    border: none;
+    color: #fff;
+    background: linear-gradient(135deg, var(--blue, #3B82F6), var(--purple, #8B5CF6));
+    box-shadow: 0 8px 22px rgba(59, 130, 246, 0.30);
+}
+
+.next-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+    box-shadow: 0 10px 28px rgba(59, 130, 246, 0.40);
+}
+
+.next-btn.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.next-btn.locked:hover {
+    transform: none;
+    filter: none;
+    box-shadow: none;
+}
+
+.prev-btn {
+    padding: 0 18px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--t3, #64748B);
+}
+
+.prev-btn:hover {
+    color: var(--t1, #E2E8F0);
+    border-color: var(--card-border, rgba(255, 255, 255, 0.07));
+    background: var(--lift, #101928);
+}
+
+.submit-btn {
+    flex: 1;
+    padding: 0 24px;
+    min-height: 50px;
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    background: linear-gradient(135deg, var(--blue, #3B82F6), var(--purple, #8B5CF6));
+    box-shadow: 0 10px 26px rgba(139, 92, 246, 0.35);
+}
+
+.submit-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+    box-shadow: 0 12px 32px rgba(139, 92, 246, 0.45);
+}
+
+/* --- 8. LỖI VALIDATION (JS chèn .step-error trước .btn-group) --- */
+.step-error {
+    display: none;
+    color: var(--danger, #F87171);
+    background: rgba(248, 113, 113, 0.10);
+    border: 1px solid rgba(248, 113, 113, 0.30);
+    border-radius: var(--radius, 10px);
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    margin: 14px 0 0;
+    animation: stepIn 0.2s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%       { transform: translateX(-7px); }
+    40%       { transform: translateX(7px); }
+    60%       { transform: translateX(-4px); }
+    80%       { transform: translateX(4px); }
+}
+
+.question-block.shake {
+    animation: shake 0.4s ease;
+    outline: 1px solid rgba(248, 113, 113, 0.45);
+    outline-offset: 6px;
+    border-radius: var(--radius, 10px);
+    will-change: transform;
+}
+
+/* --- 9. OVERLAY CẢM ƠN --- */
+.thanks-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(7, 9, 15, 0.72);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+    z-index: 50;
+}
+
+.thanks-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.thanks-modal {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    background: var(--card, #0C1220);
+    border: 1px solid rgba(52, 211, 153, 0.25);
+    border-radius: var(--radius-lg, 16px);
+    padding: 32px 26px 26px;
+    text-align: center;
+    box-shadow: 0 0 60px rgba(52, 211, 153, 0.10), 0 24px 60px rgba(0, 0, 0, 0.65);
+    transform: translateY(12px) scale(0.96);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.thanks-overlay.show .thanks-modal {
+    transform: translateY(0) scale(1);
+}
+
+.thanks-badge {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 26px;
+    color: #05221A;
+    background: linear-gradient(135deg, var(--success, #34D399), #6EE7B7);
+    border-radius: 50%;
+    box-shadow: 0 0 0 8px rgba(52, 211, 153, 0.12), 0 10px 26px rgba(52, 211, 153, 0.35);
+}
+
+.thanks-overlay.show .thanks-badge {
+    animation: badgePop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes badgePop {
+    from { transform: scale(0.4); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+.thanks-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--t1, #E2E8F0);
+}
+
+.thanks-sub {
+    font-size: 0.95rem;
+    color: var(--t2, #94A3B8);
+    line-height: 1.55;
+    margin-bottom: 20px;
+}
+
+.thanks-btn {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 16px;
+    border: none;
+    border-radius: var(--radius, 10px);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #fff;
+    background: linear-gradient(135deg, var(--blue, #3B82F6), var(--purple, #8B5CF6));
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.thanks-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+    box-shadow: 0 10px 24px rgba(59, 130, 246, 0.35);
+}
+
+/* --- 10. RESPONSIVE --- */
+@media (max-width: 480px) {
+    body {
+        padding: 16px 12px;
+        align-items: flex-start;
+    }
+
+    .survey-container {
+        padding: 26px 18px 24px;
+    }
+
+    .question {
+        font-size: 1.12rem;
+    }
+
+    .next-btn {
+        padding: 0 22px;
+    }
+
+    .prev-btn {
+        padding: 0 14px;
+    }
+
+    .custom-text-input {
+        flex-basis: 100%;
+        margin-left: 34px; /* thẳng hàng với text sau indicator */
+    }
+}
+
+/* --- 11. GIẢM CHUYỂN ĐỘNG --- */
+@media (prefers-reduced-motion: reduce) {
+    .step.active,
+    .thanks-overlay.show .thanks-badge,
+    .question-block.shake,
+    .step-error {
+        animation: none;
+    }
+
+    .option,
+    .option:hover,
+    .next-btn:hover,
+    .submit-btn:hover,
+    .thanks-btn:hover {
+        transform: none;
+        transition: none;
+    }
+
+    .progress-bar,
+    .thanks-overlay,
+    .thanks-modal {
+        transition: none;
+    }
+}

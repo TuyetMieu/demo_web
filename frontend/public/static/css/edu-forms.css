@@ -1,0 +1,91 @@
+/* ══════════════════════════════════════════════════════════════
+   EDU-FORMS — /questionaire and /admin.
+
+   Both sheets already read their surfaces through var(--card) /
+   var(--lift) / var(--blue) …, so edu-theme.css's token bridge converts
+   most of the page on its own. What is left here is the handful of
+   places that hard-code the old blue as a literal rgba()/hex — focus
+   rings, glows and hover fills — which no token can reach.
+
+   Paint-only: questionaire.js and the admin page's fetch code query
+   #surveyForm, #progressBar, .option, .step-error, .row … by these exact
+   names and none of them change.
+   ══════════════════════════════════════════════════════════════ */
+
+body { font-family: var(--edu-font); }
+
+/* ── /questionaire ───────────────────────────────────────────── */
+.survey-container {
+  box-shadow: var(--edu-card-shadow);
+  border-radius: 24px;
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+}
+.progress-bar { box-shadow: 0 0 12px rgba(185, 63, 240, .45); }
+
+.option:hover {
+  background: var(--edu-accent-soft);
+  border-color: rgba(185, 63, 240, .34);
+}
+.option:has(> input:checked) {
+  background: var(--edu-accent-soft);
+  box-shadow: 0 0 0 3px rgba(185, 63, 240, .16), 0 8px 22px rgba(185, 63, 240, .12);
+}
+.option:has(> input:checked)::before { box-shadow: 0 0 10px rgba(185, 63, 240, .5); }
+.option::before { border-color: rgba(150, 140, 190, .45); }
+
+.note { border-color: rgba(185, 63, 240, .28); }
+.sub-question {
+  border-color: rgba(185, 63, 240, .28);
+  background: rgba(185, 63, 240, .04);
+}
+.custom-text-input:focus { box-shadow: 0 0 0 3px rgba(185, 63, 240, .18); }
+
+.next-btn, .submit-btn { border-radius: 999px; }
+.next-btn { box-shadow: 0 8px 22px rgba(185, 63, 240, .3); }
+.next-btn:hover { box-shadow: 0 10px 28px rgba(185, 63, 240, .4); }
+.submit-btn { box-shadow: 0 10px 26px rgba(185, 63, 240, .35); }
+.submit-btn:hover { box-shadow: 0 12px 32px rgba(185, 63, 240, .45); }
+.prev-btn { border-radius: 999px; }
+
+/* ── /admin ──────────────────────────────────────────────────── */
+.wrap .card, .form-box {
+  background: var(--edu-card-bg);
+  border: 1px solid var(--edu-card-border);
+  border-radius: 20px;
+  box-shadow: var(--edu-card-shadow);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+.admin-topbar {
+  background: var(--edu-nav-bg);
+  border-bottom: 1px solid var(--edu-sidebar-border);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+.admin-topbar-icon {
+  background: linear-gradient(140deg, #c04af5, #e396fb);
+  box-shadow: 0 8px 20px rgba(185, 63, 240, .32);
+}
+.admin-back, .btn-ghost {
+  border-radius: 999px;
+  background: var(--edu-pill-bg);
+  border: 1px solid var(--edu-pill-border);
+  color: var(--edu-t2);
+}
+.btn-primary {
+  border-radius: 999px;
+  background: var(--edu-accent-grad);
+  border: none; color: #fff;
+  box-shadow: 0 8px 22px rgba(185, 63, 240, .28);
+}
+.btn-danger { border-radius: 999px; background: linear-gradient(90deg, #f0526b, #f0788e); border: none; color: #fff; }
+.field input, .field textarea, .field select {
+  background: var(--edu-input-bg);
+  border: 1px solid var(--edu-input-border);
+  color: var(--edu-t1);
+  border-radius: 12px;
+}
+.field input:focus, .field textarea:focus {
+  border-color: var(--edu-accent);
+  box-shadow: 0 0 0 3px rgba(185, 63, 240, .16);
+  outline: none;
+}
+.card-sub, .hint { color: var(--edu-t3); }

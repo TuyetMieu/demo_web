@@ -1,0 +1,82 @@
+    /* TRẢ-NỢ 2026-07-05 — concept card Option-2 (recommendation §5 Hybrid).
+     * Trang tự chứa, cùng design system dark của lesson player. */
+    :root { --cc-accent: #FB923C; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh; background: #0B1121; color: #E2E8F0;
+      font-family: 'Inter', sans-serif; line-height: 1.65;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 40px 20px 64px;
+    }
+    .cc-top { width: 100%; max-width: 760px; margin-bottom: 14px; }
+    .cc-back {
+      color: #7f93ad; text-decoration: none; font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .cc-back:hover { color: #e8edf5; }
+    .cc-card {
+      width: 100%; max-width: 760px;
+      background: #0e1726; border: 1px solid rgba(148, 163, 184, .18);
+      border-top: 3px solid var(--cc-accent);
+      border-radius: 14px; padding: 34px 38px;
+    }
+    .cc-eyebrow {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+      letter-spacing: .16em; color: var(--cc-accent); margin-bottom: 10px;
+    }
+    .cc-title { font-size: 27px; font-weight: 800; color: #F1F5F9; text-wrap: balance; margin-bottom: 10px; }
+    .cc-intro { color: #aebfd6; font-size: 15px; margin-bottom: 6px; }
+    .cc-section { margin-top: 22px; }
+    .cc-section h2 {
+      font-size: 15px; font-weight: 700; color: #e8edf5; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 9px;
+    }
+    .cc-section h2 i { color: var(--cc-accent); font-size: 14px; width: 18px; text-align: center; }
+    .cc-section p { color: #aebfd6; font-size: 14.5px; }
+    .cc-card code {
+      font-family: 'JetBrains Mono', monospace; font-size: .92em;
+      color: #fbbf24; background: rgba(251, 191, 36, .08);
+      padding: 1px 5px; border-radius: 4px;
+    }
+    .cc-source {
+      margin-top: 26px; padding: 10px 14px; border-radius: 8px;
+      background: rgba(148, 163, 184, .06); border-left: 3px solid rgba(148, 163, 184, .35);
+      font-size: 12.5px; color: #7f93ad; font-family: 'JetBrains Mono', monospace;
+    }
+    .cc-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 26px; padding: 12px 22px; border-radius: 10px;
+      background: var(--cc-accent); color: #0B1121; font-weight: 800; font-size: 15px;
+      text-decoration: none; transition: transform .15s ease, filter .15s ease;
+    }
+    .cc-cta:hover { transform: translateY(-1px); filter: brightness(1.08); }
+    .cc-cta:focus-visible { outline: 2px solid #06B6D4; outline-offset: 3px; }
+    .cc-missing {
+      max-width: 560px; margin-top: 15vh; text-align: center; color: #aebfd6;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* NC 2026-07-05 — micro quiz (PART_6: mỗi card = 1 visual + ≤4 dòng + 1 quiz + feedback).
+     * Client-side thuần, chọn 1 phát là khóa; không chấm vào progress (stateless như cả trang). */
+    .cc-quiz { margin-top: 26px; padding-top: 20px; border-top: 1px dashed rgba(148, 163, 184, .25); }
+    .cc-quiz-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+      letter-spacing: .16em; color: var(--cc-accent); margin-bottom: 8px;
+    }
+    .cc-quiz-q { font-size: 15px; font-weight: 700; color: #e8edf5; margin-bottom: 12px; }
+    .cc-quiz-opt {
+      display: block; width: 100%; text-align: left; cursor: pointer;
+      margin-bottom: 8px; padding: 11px 14px; border-radius: 9px;
+      background: rgba(148, 163, 184, .06); border: 1px solid rgba(148, 163, 184, .22);
+      color: #cbd5e1; font-family: 'Inter', sans-serif; font-size: 14px;
+      transition: border-color .15s ease, background .15s ease;
+    }
+    .cc-quiz-opt:hover:not(:disabled) { border-color: var(--cc-accent); background: rgba(148, 163, 184, .1); }
+    .cc-quiz-opt:focus-visible { outline: 2px solid #06B6D4; outline-offset: 2px; }
+    .cc-quiz-opt:disabled { cursor: default; opacity: .55; }
+    .cc-quiz-opt.correct { border-color: #34D399; background: rgba(52, 211, 153, .12); color: #d1fae5; opacity: 1; }
+    .cc-quiz-opt.wrong { border-color: #F87171; background: rgba(248, 113, 113, .12); color: #fee2e2; opacity: 1; }
+    .cc-quiz-feedback { margin-top: 10px; font-size: 14px; padding: 11px 14px; border-radius: 9px; display: none; }
+    .cc-quiz-feedback.ok { display: block; background: rgba(52, 211, 153, .1); border-left: 3px solid #34D399; color: #d1fae5; }
+    .cc-quiz-feedback.ko { display: block; background: rgba(248, 113, 113, .1); border-left: 3px solid #F87171; color: #fee2e2; }
+    @media (max-width: 640px) { .cc-card { padding: 26px 20px; } .cc-title { font-size: 22px; } }
+    @media (prefers-reduced-motion: reduce) { .cc-cta, .cc-quiz-opt { transition: none; } }

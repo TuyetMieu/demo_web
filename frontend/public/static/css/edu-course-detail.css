@@ -1,0 +1,183 @@
+/* ══════════════════════════════════════════════════════════════
+   EDU-COURSE-DETAIL — màn "isCourse" của Programming EDU.dc.html
+   (khối hero + "Nội dung khóa học" + sidebar "Tiến độ của bạn" /
+   "Bạn sẽ học được"). Nạp SAU edu-theme.css + edu-dashboard.css để
+   dùng chung bộ token --edu-* và khung .edu-header-bar/.page.
+
+   Trang giữ nguyên các khối không có trong design (Tổng quan, Yêu cầu,
+   Đánh giá, Quiz ôn tập) — những khối đó dùng lại .cd-block của
+   course_detail.css (đã restyle khớp thẻ kính mờ ở đây), chỉ riêng
+   hero/danh sách bài/sidebar là markup mới hoàn toàn.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Nút quay lại danh sách khóa học ──
+   Có trong design (màn isCourse: "‹ Tất cả khóa học" phía trên lưới). Không có
+   nó thì từ trang chi tiết chỉ còn cách bấm mục "Khóa học" ở thanh bên. */
+.edu-cd-back {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-bottom: 20px; padding: 0;
+  background: none; border: 0; cursor: pointer;
+  font-family: var(--edu-font); font-size: 14px; font-weight: 500;
+  color: var(--edu-t3);
+  transition: color .15s ease, gap .15s ease;
+}
+.edu-cd-back:hover { color: var(--edu-accent-text); gap: 11px; }
+.edu-cd-back:focus-visible { outline: 2px solid var(--edu-accent); outline-offset: 3px; border-radius: 6px; }
+.edu-cd-back svg { flex: none; }
+
+.edu-cd-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 360px;
+  gap: 26px;
+  align-items: start;
+}
+/* Khóa Thiết kế CSDL: markup có sẵn trong JSX là bản mặc định của khóa Cơ bản;
+   course_db_design.js mới thay bằng nội dung đúng khóa. Ẩn cho tới lúc đó để
+   không nhấp nháy nội dung sai — vẫn phải ở trong DOM cho script ghi vào. */
+.edu-cd-grid.edu-cd-prep { display: none; }
+.edu-cd-main { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.edu-cd-side { display: flex; flex-direction: column; gap: 20px; }
+
+/* ── Hero ── */
+.edu-cd-hero {
+  border-radius: 24px;
+  background: var(--edu-card-bg);
+  border: 1px solid var(--edu-card-border);
+  box-shadow: var(--edu-card-shadow);
+  padding: 30px 34px;
+  display: flex; gap: 28px; align-items: center;
+}
+.edu-cd-hero-info { flex: 1; min-width: 0; }
+.edu-cd-tag {
+  font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--edu-accent);
+}
+.edu-cd-title {
+  margin: 10px 0 0; font-size: 30px; font-weight: 800; letter-spacing: -.03em;
+  color: var(--edu-t1); line-height: 1.25;
+}
+.edu-cd-subtitle {
+  margin: 10px 0 0; font-size: 15px; color: var(--edu-t3); max-width: 480px;
+  line-height: 1.6; text-wrap: pretty;
+}
+.edu-cd-hero-cta { margin-top: 22px; display: flex; gap: 12px; }
+.edu-cd-btn {
+  height: 50px; padding: 0 34px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 999px; border: none;
+  font-family: var(--edu-font); font-size: 15px; font-weight: 600; cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.edu-cd-btn.primary {
+  background: var(--edu-accent-grad); color: #fff;
+  box-shadow: 0 10px 24px rgba(185,63,240,.3);
+}
+.edu-cd-btn.primary:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.06); box-shadow: 0 14px 30px rgba(185,63,240,.4); }
+.edu-cd-btn.primary:disabled { opacity: .65; cursor: default; transform: none; }
+.edu-cd-hero-art {
+  width: 220px; height: 158px; flex: none; border-radius: 16px; overflow: hidden;
+  background-color: #221c36;
+  background-image:
+    repeating-linear-gradient(115deg, rgba(255,255,255,.07) 0 2px, transparent 2px 9px),
+    linear-gradient(160deg,#2e2554,#181426);
+  display: flex; align-items: center; justify-content: center;
+}
+.edu-cd-hero-art img { max-width: 78%; max-height: 78%; object-fit: contain; }
+/* 3 khóa Thiết kế CSDL không có ảnh bìa, chỉ có một emoji */
+.edu-cd-hero-art--emoji { font-size: 62px; line-height: 1; }
+
+/* ── "Nội dung khóa học" (module/bài) — nằm trong .cd-block dùng chung ── */
+.edu-cd-module { border-bottom: 1px solid var(--edu-card-border); }
+.edu-cd-module:last-child { border-bottom: none; }
+.edu-cd-module-hd {
+  display: flex; align-items: center; gap: 12px; padding: 13px 4px;
+  cursor: pointer; user-select: none;
+}
+.edu-cd-module-arrow {
+  width: 20px; height: 20px; border-radius: 6px; background: var(--edu-input-bg);
+  display: flex; align-items: center; justify-content: center; flex: none;
+  font-size: 10px; color: var(--edu-t4); transition: transform .2s ease;
+}
+.edu-cd-module-hd.open .edu-cd-module-arrow { transform: rotate(90deg); }
+.edu-cd-module-name { flex: 1; font-size: 14px; font-weight: 700; color: var(--edu-t1); }
+.edu-cd-module-meta { font-size: 12px; color: var(--edu-t4); white-space: nowrap; }
+.edu-cd-module-prog { font-size: 11px; color: #22c55e; font-weight: 700; white-space: nowrap; }
+.edu-cd-module-body { display: none; padding: 4px 0 14px; }
+.edu-cd-module-body.open { display: block; }
+
+.edu-cd-lesson-list { display: flex; flex-direction: column; gap: 8px; }
+.edu-cd-lesson {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 18px; border-radius: 14px;
+  background: var(--edu-input-bg); border: 1px solid var(--edu-input-border);
+  transition: background .15s ease, border-color .15s ease;
+}
+.edu-cd-lesson[data-clickable="1"] { cursor: pointer; }
+.edu-cd-lesson[data-clickable="1"]:hover { border-color: rgba(185,63,240,.3); }
+.edu-cd-lesson-icon {
+  width: 34px; height: 34px; border-radius: 999px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+}
+.edu-cd-lesson.done .edu-cd-lesson-icon { background: #22c55e; color: #fff; }
+.edu-cd-lesson.current .edu-cd-lesson-icon { background: var(--edu-accent-grad); color: #fff; }
+.edu-cd-lesson.locked .edu-cd-lesson-icon { background: var(--edu-track-bg); color: var(--edu-t5); }
+.edu-cd-lesson-body { flex: 1; min-width: 0; }
+.edu-cd-lesson-title { font-size: 16px; font-weight: 600; color: var(--edu-t1); }
+.edu-cd-lesson.done .edu-cd-lesson-title { color: var(--edu-t4); }
+.edu-cd-lesson.locked .edu-cd-lesson-title { color: var(--edu-t5); }
+.edu-cd-lesson-meta { margin-top: 3px; font-size: 13px; color: var(--edu-t4); }
+.edu-cd-lesson-mins { font-size: 13px; color: var(--edu-t4); flex: none; }
+.edu-cd-lesson-badge {
+  font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 999px; flex: none;
+  background: var(--edu-accent-soft); color: var(--edu-accent-text); white-space: nowrap;
+}
+
+/* ── Sidebar: Tiến độ của bạn / đăng ký ── */
+.edu-cd-card {
+  border-radius: 22px;
+  background: var(--edu-card-bg);
+  border: 1px solid var(--edu-card-border);
+  box-shadow: var(--edu-card-shadow);
+  padding: 24px 26px 26px;
+}
+.edu-cd-card-title { font-size: 16px; font-weight: 700; color: var(--edu-t1); }
+.edu-cd-price { font-size: 20px; font-weight: 800; color: var(--edu-t1); }
+.edu-cd-price-free { margin-top: 2px; font-size: 12px; font-weight: 600; color: #22c55e; }
+
+.edu-cd-progress-row { margin-top: 18px; }
+.edu-cd-progress-top { display: flex; align-items: baseline; gap: 10px; }
+.edu-cd-progress-pct { font-size: 36px; font-weight: 800; letter-spacing: -.03em; color: var(--edu-t1); }
+.edu-cd-progress-frac { font-size: 14px; color: var(--edu-t4); }
+.edu-cd-progress-bar { height: 9px; border-radius: 99px; background: var(--edu-track-bg); margin-top: 12px; overflow: hidden; }
+.edu-cd-progress-fill { height: 100%; border-radius: 99px; background: var(--edu-accent-grad); transition: width .4s ease; }
+
+.edu-cd-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.edu-cd-stat { padding: 12px 14px; border-radius: 14px; background: var(--edu-input-bg); }
+.edu-cd-stat .v { font-size: 18px; font-weight: 800; color: var(--edu-t1); }
+.edu-cd-stat .l { font-size: 11px; color: var(--edu-t4); margin-top: 2px; }
+
+.edu-cd-unenroll {
+  display: block; width: 100%; margin-top: 10px; padding: 8px; text-align: center;
+  background: none; border: none; cursor: pointer;
+  font-family: var(--edu-font); font-size: 12px; font-weight: 600; color: var(--edu-t5);
+}
+.edu-cd-unenroll:hover { color: #ef4444; }
+
+.edu-cd-includes { margin-top: 20px; border-top: 1px solid var(--edu-card-border); padding-top: 16px; }
+.edu-cd-includes-title { font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--edu-t4); margin-bottom: 10px; }
+.edu-cd-inc-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--edu-t3); padding: 4px 0; }
+.edu-cd-inc-item i { width: 16px; color: var(--edu-accent); }
+
+/* ── Sidebar: Bạn sẽ học được ── */
+.edu-cd-outcomes { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+.edu-cd-outcome { display: flex; gap: 10px; align-items: flex-start; }
+.edu-cd-outcome-dot { width: 7px; height: 7px; border-radius: 99px; background: var(--edu-accent); margin-top: 7px; flex: none; }
+.edu-cd-outcome span { font-size: 14px; color: var(--edu-t2); line-height: 1.55; text-wrap: pretty; }
+
+@media (max-width: 900px) {
+  .edu-cd-grid { grid-template-columns: 1fr; }
+  .edu-cd-hero { flex-direction: column; align-items: stretch; }
+  .edu-cd-hero-art { width: 100%; height: 160px; }
+  .edu-cd-hero-cta { flex-wrap: wrap; }
+}

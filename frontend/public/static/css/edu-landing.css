@@ -1,0 +1,274 @@
+/* ══════════════════════════════════════════════════════════════
+   EDU-LANDING — brings landing.html onto the "Brilliant-inspired"
+   design language (Claude Design import: Programming EDU.dc.html).
+
+   Override layer loaded AFTER theme.css / auth.css / edu-theme.css.
+   Paint-only: it never renames or removes a class/id that
+   landing.inline.js or icons.js query, so the course-preview fetch
+   and the reveal-on-scroll observer keep working unchanged.
+
+   auth.css paints the landing dark-navy with cyan/pink neon glows;
+   every neon-* rule there is !important, so the counter-rules here
+   are scoped under .landing-body to win on specificity rather than
+   by source order alone.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Page ground ─────────────────────────────────────────────── */
+body.landing-body {
+  font-family: var(--edu-font);
+  color: var(--edu-t1);
+  background: var(--edu-bg-solid);
+  background-image: var(--edu-bg-image);
+  background-attachment: fixed;
+}
+/* auth.css paints a 120px grid mesh over the whole page via ::after */
+body.landing-body::after { display: none; }
+
+/* The dark canvas + scanline grid + rising particles are neon-era
+   decor with no counterpart in the new design. The blobs stay —
+   recoloured to the design's pastel radials — because they are the
+   only thing giving the hero motion. */
+.landing-body .bg-canvas { background: transparent; }
+.landing-body .grid-overlay,
+.landing-body .particles { display: none; }
+.landing-body .bg-blob { opacity: .22; filter: blur(120px); }
+.landing-body .bg-blob.b1 { background: radial-gradient(circle, rgba(226,178,250,.9), rgba(226,178,250,0)); }
+.landing-body .bg-blob.b2 { background: radial-gradient(circle, rgba(186,210,250,.85), rgba(186,210,250,0)); }
+.landing-body .bg-blob.b3 { background: radial-gradient(circle, rgba(250,247,190,.8), rgba(250,247,190,0)); }
+.landing-body .bg-blob.b4 { background: radial-gradient(circle, rgba(214,240,240,.9), rgba(214,240,240,0)); }
+
+/* ── Top nav ─────────────────────────────────────────────────── */
+.landing-body .landing-nav {
+  position: sticky; top: 0; z-index: 30;
+  padding: 18px 40px;
+  background: var(--edu-nav-bg);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--edu-sidebar-border);
+}
+.landing-body .landing-logo {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-size: 20px; font-weight: 800; letter-spacing: -.02em;
+  background: var(--edu-accent-grad);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+/* the "P" tile the design puts left of the wordmark */
+.landing-body .landing-logo::before {
+  content: 'P';
+  width: 40px; height: 40px; border-radius: 13px; flex: none;
+  background: linear-gradient(140deg, #c04af5, #e396fb);
+  color: #fff; font-size: 19px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 20px rgba(185, 63, 240, .32);
+  -webkit-text-fill-color: #fff;
+}
+/* design keeps "Programming" in the gradient and "EDU" solid */
+.landing-body .landing-logo .red { -webkit-text-fill-color: var(--edu-t1); }
+
+.landing-body .btn-outline {
+  padding: 11px 24px; border-radius: 999px;
+  background: var(--edu-pill-bg); border: 1px solid var(--edu-pill-border);
+  color: var(--edu-t2); font-size: 15px; font-weight: 600;
+}
+.landing-body .btn-outline:hover {
+  background: var(--edu-accent-soft); border-color: rgba(185, 63, 240, .34);
+  color: var(--edu-accent-text);
+}
+.landing-body .btn-primary {
+  padding: 11px 26px; border-radius: 999px;
+  background: var(--edu-accent-grad); color: #fff;
+  font-size: 15px; font-weight: 600;
+  box-shadow: 0 8px 22px rgba(185, 63, 240, .28);
+}
+.landing-body .btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(185, 63, 240, .38);
+}
+
+/* ── Hero ────────────────────────────────────────────────────── */
+.landing-body .hero-section { padding-top: 72px; }
+.landing-body .hero-badge,
+.landing-body .neon-badge {
+  background: var(--edu-accent-soft) !important;
+  border: 1px solid rgba(185, 63, 240, .28) !important;
+  box-shadow: none !important;
+  color: var(--edu-accent-text) !important;
+  font-size: 13px; font-weight: 600;
+  letter-spacing: .08em;
+}
+.landing-body .hero-title,
+.landing-body .neon-text {
+  color: var(--edu-t1) !important;
+  text-shadow: none !important;
+  font-weight: 800; letter-spacing: -.03em;
+}
+.landing-body .neon-cyan,
+.landing-body .neon-pink {
+  background: var(--edu-accent-grad);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent !important; -webkit-text-fill-color: transparent;
+  text-shadow: none !important;
+}
+/* second accent span gets the cooler half of the palette so the two
+   highlighted phrases stay distinguishable, as they were in neon */
+.landing-body .neon-pink {
+  background: linear-gradient(90deg, #7b8ff5, #b93ff0);
+  -webkit-background-clip: text; background-clip: text;
+}
+.landing-body .hero-sub { color: var(--edu-t3); font-size: 17px; max-width: 560px; }
+
+.landing-body .hero-stat-val,
+.landing-body .neon-glow-text {
+  color: var(--edu-t1) !important;
+  text-shadow: none !important;
+  font-size: 32px; font-weight: 800; letter-spacing: -.03em;
+}
+.landing-body .hero-stat-lbl { color: var(--edu-t3); font-size: 13.5px; }
+
+/* ── Buttons (hero + CTA) ────────────────────────────────────── */
+.landing-body .btn-main,
+.landing-body .btn-hero-primary,
+.landing-body .neon-btn {
+  background: var(--edu-accent-grad) !important;
+  border: none !important;
+  color: #fff !important;
+  border-radius: 999px !important;
+  padding: 15px 38px;
+  font-family: var(--edu-font);
+  font-size: 16px; font-weight: 600;
+  text-transform: none; letter-spacing: 0;
+  box-shadow: 0 12px 28px rgba(185, 63, 240, .34) !important;
+}
+.landing-body .neon-btn::before { display: none; }
+.landing-body .btn-main:hover,
+.landing-body .btn-hero-primary:hover,
+.landing-body .neon-btn:hover {
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(185, 63, 240, .44) !important;
+}
+.landing-body .btn-hero-outline,
+.landing-body .glass-btn {
+  padding: 15px 32px; border-radius: 999px;
+  background: transparent !important;
+  border: 1.5px solid var(--edu-accent-3) !important;
+  color: var(--edu-accent-text) !important;
+  font-size: 16px; font-weight: 600;
+  backdrop-filter: none;
+}
+.landing-body .btn-hero-outline:hover,
+.landing-body .glass-btn:hover {
+  background: var(--edu-accent-soft) !important;
+  border-color: var(--edu-accent) !important;
+}
+
+/* ── Section headings ────────────────────────────────────────── */
+.landing-body .section-heading,
+.landing-body .neon-text-sm {
+  color: var(--edu-t1) !important;
+  text-shadow: none !important;
+  font-weight: 800; letter-spacing: -.03em;
+}
+.landing-body .section-sub { color: var(--edu-t3); }
+
+/* ── Feature / value cards ───────────────────────────────────── */
+.landing-body .section-card,
+.landing-body .neon-card,
+.landing-body .testimonial-card,
+.landing-body .glass-card,
+.landing-body .project-card {
+  background: var(--edu-card-bg) !important;
+  border: 1px solid var(--edu-card-border) !important;
+  box-shadow: var(--edu-card-shadow) !important;
+  border-radius: 22px !important;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  transform-style: flat;
+}
+/* the neon deck tilted cards in 3D on hover; the new design lifts them */
+.landing-body .section-card:hover,
+.landing-body .neon-card:hover,
+.landing-body .testimonial-card:hover,
+.landing-body .glass-card:hover,
+.landing-body .project-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(185, 63, 240, .32) !important;
+  box-shadow: 0 18px 40px rgba(120, 110, 170, .18) !important;
+}
+.landing-body .section-card strong { color: var(--edu-t1); font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+.landing-body .section-card p { color: var(--edu-t3); font-size: 14.5px; }
+
+.landing-body .card-icon,
+.landing-body .neon-icon {
+  width: 56px; height: 56px; border-radius: 16px;
+  background: var(--edu-accent-soft) !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--edu-accent) !important;
+}
+.landing-body .neon-card:hover .neon-icon {
+  background: var(--edu-accent-grad) !important;
+  color: #fff !important;
+  transform: none;
+  box-shadow: 0 10px 22px rgba(185, 63, 240, .3) !important;
+}
+.landing-body .value-pill,
+.landing-body .neon-pill {
+  background: var(--edu-accent-soft) !important;
+  border: 1px solid rgba(185, 63, 240, .28) !important;
+  color: var(--edu-accent-text) !important;
+  box-shadow: none !important;
+  font-weight: 600;
+}
+.landing-body .neon-card:hover .neon-pill {
+  border-color: rgba(185, 63, 240, .5) !important;
+  box-shadow: none !important;
+}
+
+/* ── Project cards ───────────────────────────────────────────── */
+.landing-body .project-card { overflow: hidden; }
+.landing-body .project-card > strong { color: var(--edu-t1); font-weight: 700; padding: 4px 20px 0; }
+.landing-body .project-card > p { color: var(--edu-t3); padding: 0 20px; }
+.landing-body .project-tag {
+  margin: 10px 20px 20px; border-radius: 999px; padding: 5px 12px;
+  background: var(--edu-accent-soft); color: var(--edu-accent-text);
+  font-size: 11.5px; font-weight: 700; letter-spacing: .06em;
+}
+/* page.tsx sets a saturated gradient inline per card; the design uses one
+   dark striped "code art" plate for every thumbnail, so override inline */
+.landing-body .project-thumb {
+  height: 128px;
+  background-color: #221c36 !important;
+  background-image:
+    repeating-linear-gradient(115deg, rgba(255,255,255,.07) 0 2px, transparent 2px 9px),
+    linear-gradient(160deg, #2e2554, #181426) !important;
+}
+
+/* ── Trust / testimonial ─────────────────────────────────────── */
+.landing-body .trust-stat-val { color: var(--edu-t1); }
+.landing-body .trust-stat-lbl { color: var(--edu-t4); }
+.landing-body .trust-quote { color: var(--edu-t2); font-style: normal; }
+.landing-body .trust-note { color: var(--edu-t5); border-top-color: var(--edu-card-border); }
+.landing-body .testimonial-card p { color: var(--edu-t3); }
+
+/* ── Closing CTA + footer ────────────────────────────────────── */
+.landing-body .cta-panel,
+.landing-body .neon-cta {
+  background: var(--edu-card-bg) !important;
+  border: 1px solid var(--edu-card-border) !important;
+  box-shadow: var(--edu-card-shadow) !important;
+  border-radius: 28px !important;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+.landing-body .cta-panel h2 { color: var(--edu-t1); font-weight: 800; letter-spacing: -.03em; }
+.landing-body .cta-panel p { color: var(--edu-t3); }
+.landing-body .landing-footer {
+  color: var(--edu-t4);
+  border-top: 1px solid var(--edu-sidebar-border);
+}
+
+/* ── Course preview cards (filled by landing.inline.js) ──────── */
+.landing-body .course-preview-card:hover { box-shadow: 0 18px 40px rgba(185, 63, 240, .2) !important; }
+.landing-body .course-preview-card .course-preview-meta {
+  border-radius: 999px; padding: 5px 12px;
+  background: var(--edu-accent-soft); color: var(--edu-accent-text);
+}

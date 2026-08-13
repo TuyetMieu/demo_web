@@ -1,0 +1,244 @@
+/* ══════════════════════════════════════════════════
+   DARK MODE — Programming EDU Dashboard
+   Áp dụng khi body có class .dark
+   ══════════════════════════════════════════════════ */
+
+/* ── Transition mượt cho mọi thứ ── */
+body, #sidebar, #main, .topbar,
+.stat-card, .section-card, .course-card, .enrolled-card,
+.roadmap-phase, .settings-section, .sec-lang-card,
+.field-input, .lang-select, .nav-btn, .search-wrap input,
+.user-chip, .bell-btn, .lesson-box, .roadmap-item {
+  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* ── Base layout ── */
+body.dark              { background: var(--bg); color: #E2E8F0; }
+body.dark #main        { background: var(--bg); }
+body.dark .page        { background: var(--bg); }
+
+/* ── Sidebar ── */
+body.dark #sidebar {
+  background: var(--card);
+  border-right-color: var(--card-border);
+  box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+}
+body.dark .sidebar-top    { border-bottom-color: var(--card-border); }
+body.dark .sidebar-footer { border-top-color: var(--card-border); }
+body.dark .user-info .name { color: #F1F5F9; }
+body.dark .user-info .role { color: #64748B; }
+
+body.dark .nav-btn        { color: #94A3B8; }
+body.dark .nav-btn:hover  { background: rgba(59,130,246,0.1); color: var(--accent-light); }
+body.dark .nav-btn.active {
+  background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(232,69,69,0.1));
+  color: var(--accent-light);
+  box-shadow: 0 2px 8px rgba(59,130,246,0.2);
+}
+body.dark .nav-icon        { background: rgba(255,255,255,0.06); }
+body.dark .nav-btn.active .nav-icon { background: rgba(59,130,246,0.15); }
+
+body.dark .logout-btn      { color: #64748B; }
+body.dark .logout-btn:hover { background: rgba(232,69,69,0.12); color: #F87171; }
+
+/* ── Topbar/search/bell: định nghĩa duy nhất trong style.css (Navbar.tsx), không override theo .dark nữa ── */
+
+body.dark .search-wrap input { background: var(--card); border-color: var(--card-border); color: var(--text-1); }
+body.dark .search-wrap input:focus { border-color: var(--accent); background: var(--card); box-shadow: 0 0 0 3px var(--accent-soft); }
+body.dark .search-icon { color: var(--text-3); }
+body.dark .search-suggestions {
+  background: var(--card);
+  border-color: var(--card-border);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+}
+body.dark .search-suggestions .suggestions-header { color: var(--text-2); }
+body.dark .suggestion-pill { background: var(--bg); border-color: var(--card-border); color: var(--text-1); }
+body.dark .suggestion-pill:hover { background: var(--accent-soft); }
+body.dark .suggestion-pill.active { background: var(--accent); color: #fff; border-color: transparent; }
+body.dark .bell-item.unread:hover { background: rgba(59,130,246,0.2); }
+body.dark .bell-item-icon     { background: var(--card-border); }
+body.dark .bell-item.unread .bell-item-icon { background: rgba(59,130,246,0.18); }
+body.dark .bell-item-text     { color: #E2E8F0; }
+body.dark .bell-item-time     { color: #64748B; }
+body.dark .bell-empty         { color: #475569; }
+
+body.dark .user-chip {
+  background: var(--bg);
+  border-color: var(--card-border);
+}
+body.dark .user-chip:hover { background: var(--card); border-color: var(--accent); }
+body.dark .user-chip .chip-name { color: #CBD5E1; }
+
+/* ── Theme toggle button: định nghĩa duy nhất trong style.css ── */
+
+/* ── Stat cards ── */
+body.dark .stat-card {
+  background: var(--card);
+  border-color: var(--card-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+body.dark .stat-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+body.dark .stat-val  { color: #F1F5F9; }
+body.dark .stat-lbl  { color: #64748B; }
+
+/* ── Section card ── */
+body.dark .section-card {
+  background: var(--card);
+  border-color: var(--card-border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+body.dark .section-title span { color: #E2E8F0; }
+
+/* ── Progress ── */
+body.dark .prog-bar-bg  { background: var(--card-border); }
+body.dark .prog-name    { color: #CBD5E1; }
+body.dark .prog-icon    { /* keep colored bg */ }
+
+/* ── Welcome banner ── (giữ gradient, chỉ tweak text) */
+body.dark .banner-inner .greeting { color: rgba(255,255,255,0.75); }
+
+/* ── Courses header & filters ── */
+body.dark .courses-header h2 { color: #F1F5F9; }
+body.dark .filter-btn {
+  background: var(--card);
+  color: #64748B;
+  border: 1px solid var(--card-border);
+}
+body.dark .filter-btn:hover { background: #293548; color: #94A3B8; }
+body.dark .filter-btn.active {
+  background: linear-gradient(135deg, var(--accent), #E84545);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* ── Course cards ── */
+body.dark .course-card {
+  background: var(--card);
+  border-color: var(--card-border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+body.dark .course-card:hover {
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 8px 20px rgba(0,0,0,0.3);
+  border-color: var(--accent)40;
+}
+body.dark .card-desc     { color: #94A3B8; }
+body.dark .card-stat     { color: #475569; }
+body.dark .card-lessons  { color: #475569; }
+body.dark .card-footer   { border-top-color: var(--card-border); }
+body.dark .cta-btn {
+  background: var(--bg);
+  color: #64748B;
+  border: 1px solid var(--card-border);
+}
+
+/* ── Enrolled cards ── */
+body.dark .enrolled-card {
+  background: var(--card);
+  border-color: var(--card-border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+body.dark .enrolled-info h3       { color: #F1F5F9; }
+body.dark .enrolled-info .subtitle { color: #64748B; }
+body.dark .enrolled-meta span      { color: #94A3B8; }
+body.dark .prog-label span:first-child { color: #64748B; }
+
+body.dark .lesson-box { background: var(--bg) !important; border-color: var(--card-border) !important; }
+body.dark .lesson-box .lbl { color: #475569; }
+body.dark .lesson-box .val { color: #CBD5E1; }
+
+/* ── Roadmap ── */
+body.dark .roadmap-phase {
+  background: var(--card);
+  border-color: var(--card-border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+body.dark .roadmap-phase-title { color: #F1F5F9; }
+body.dark .roadmap-phase-sub   { color: #475569; }
+body.dark .roadmap-item        { color: #CBD5E1; }
+body.dark .roadmap-item:hover  { background: #293548; }
+body.dark .roadmap-item.done   { color: #475569; }
+body.dark .roadmap-check       { border-color: #475569; }
+
+/* ── Settings ── */
+body.dark .settings-section {
+  background: var(--card);
+  border-color: var(--card-border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+body.dark .settings-section-title span { color: #F1F5F9; }
+body.dark .profile-name   { color: #F1F5F9; }
+body.dark .profile-email  { color: #64748B; }
+body.dark .field-label    { color: #94A3B8; }
+body.dark .field-input {
+  background: var(--bg);
+  border-color: var(--card-border);
+  color: #E2E8F0;
+}
+body.dark .field-input:focus { border-color: var(--accent); background: var(--bg); }
+
+body.dark .notif-lbl   { color: #CBD5E1; }
+body.dark .notif-desc  { color: #475569; }
+body.dark .notif-row   { border-bottom-color: var(--card); }
+
+body.dark .sec-lang-card {
+  background: var(--card);
+  border-color: var(--card-border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+body.dark .sec-lang-title span { color: #F1F5F9; }
+body.dark .change-pw-btn {
+  background: var(--bg);
+  color: #94A3B8;
+  border: 1px solid var(--card-border);
+}
+body.dark .change-pw-btn:hover { opacity: 0.8; }
+body.dark .lang-select {
+  background: var(--bg);
+  border-color: var(--card-border);
+  color: #E2E8F0;
+}
+
+/* ── Empty state ── */
+body.dark .empty p    { color: #475569; }
+body.dark .empty-icon { color: var(--card-border); }
+
+/* ── Unenroll modal ── */
+body.dark .un-card {
+  background: var(--card);
+  box-shadow: 0 30px 70px rgba(0,0,0,0.5);
+}
+body.dark .un-title  { color: #F1F5F9; }
+body.dark .un-sub    { color: #94A3B8; }
+body.dark .un-warning {
+  background: rgba(220,38,38,0.1);
+  border-color: rgba(220,38,38,0.25);
+}
+body.dark .un-btn-cancel {
+  background: var(--bg);
+  border-color: var(--card-border);
+  color: #CBD5E1;
+}
+body.dark .un-btn-cancel:hover { background: #293548; border-color: #475569; }
+
+/* ── Skills ── */
+body.dark .courses-header h2 { color: #F1F5F9; }
+body.dark .sk-stat            { background:var(--card); border-color:var(--card-border); }
+body.dark .sk-stat .v         { color:#F1F5F9; }
+body.dark .sk-stat .l         { color:#64748B; }
+body.dark .sk-set             { background:var(--card); border-color:var(--card-border); }
+body.dark .sk-set-hd:hover    { background:#293548; }
+body.dark .sk-set-title       { color:#F1F5F9; }
+body.dark .sk-set-bar         { background:var(--card-border); }
+body.dark .sk-set-meta        { color:#64748B; }
+body.dark .sk-donut-inner     { background:var(--card); }
+body.dark .sk-donut-pct       { color:#F1F5F9; }
+body.dark .sk-skill-row:hover { background:#293548; }
+body.dark .sk-skill-name      { color:#CBD5E1; }
+body.dark .sk-skill-bar       { background:var(--card-border); }
+body.dark .sk-skill-pct       { color:#94A3B8; }
+body.dark .sk-sub:hover       { background:#293548; }
+body.dark .sk-sub-title.todo  { color:#CBD5E1; }
+body.dark .sk-badge.new       { background:var(--card); color:#64748B; border:1px solid var(--card-border); }
+
+/* ── Shared: page-subtitle ── */
+body.dark .page-subtitle { color: #475569; }

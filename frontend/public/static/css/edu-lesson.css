@@ -1,0 +1,116 @@
+/* ══════════════════════════════════════════════════════════════
+   EDU-LESSON — /lesson/python | java | htmlcss and /interface.
+
+   These pages are Tailwind-CDN markup (bg-gray-50, text-gray-800 …)
+   with lesson.css layered on top to force a dark "tech" look. The
+   design import is light, so this file mirrors lesson.css selector for
+   selector and hands the surfaces back to the --edu-* palette.
+
+   lesson.css declares almost everything !important, so the counter-rules
+   here must too; they win on source order at equal specificity.
+   Paint-only — .drop-target / .logic-card / #hint-box / #success-modal
+   keep their names for main.js's initDragDrop().
+   ══════════════════════════════════════════════════════════════ */
+
+body.lesson-page {
+  background: var(--edu-bg-solid) !important;
+  background-image: var(--edu-bg-image) !important;
+  background-attachment: fixed;
+  color: var(--edu-t1);
+  font-family: var(--edu-font);
+}
+/* the blueprint grid and the cool corner glow belong to the dark look */
+body.lesson-page::before { background-image: none; }
+body.lesson-page::after {
+  background: radial-gradient(ellipse at center, rgba(185, 63, 240, .10) 0%, transparent 65%);
+}
+
+/* ── Navbar ──────────────────────────────────────────────────── */
+body.lesson-page nav {
+  background: var(--edu-nav-bg) !important;
+  border-bottom-color: var(--edu-sidebar-border) !important;
+  box-shadow: none;
+}
+body.lesson-page nav span.text-gray-800 { color: var(--edu-t1) !important; }
+body.lesson-page nav .bg-gray-50 {
+  background: var(--edu-pill-bg) !important;
+  border-color: var(--edu-pill-border) !important;
+}
+body.lesson-page nav .text-sm.font-bold { color: var(--edu-t2) !important; }
+body.lesson-page nav a.bg-gray-100 {
+  background: var(--edu-pill-bg) !important;
+  color: var(--edu-t2) !important;
+  border: 1px solid var(--edu-pill-border);
+  border-radius: 999px;
+}
+body.lesson-page nav a.bg-gray-100:hover {
+  background: var(--edu-accent-soft) !important;
+  color: var(--edu-accent-text) !important;
+}
+
+/* ── Left panel ──────────────────────────────────────────────── */
+body.lesson-page main h2 {
+  color: var(--edu-t1) !important;
+  text-shadow: none;
+  font-weight: 800; letter-spacing: -.03em;
+}
+body.lesson-page main .text-gray-500 { color: var(--edu-t3) !important; }
+body.lesson-page .text-gray-400 { color: var(--edu-t4) !important; }
+body.lesson-page .border-gray-200 { border-color: var(--edu-card-border) !important; }
+
+/* drag-and-drop canvas */
+body.lesson-page .bg-gray-50.rounded-\[32px\] {
+  background: var(--edu-card-bg) !important;
+  border-color: var(--edu-card-border) !important;
+  box-shadow: var(--edu-card-shadow) !important;
+}
+body.lesson-page .lesson-else-default {
+  background: var(--edu-pill-bg) !important;
+  border-color: var(--edu-pill-border) !important;
+  color: var(--edu-t4) !important;
+}
+
+/* ── Drop targets ────────────────────────────────────────────── */
+body.lesson-page .drop-target {
+  background: rgba(255, 255, 255, .45) !important;
+  border-color: rgba(185, 63, 240, .3) !important;
+}
+body.lesson-page .drop-target .text-gray-300 { color: var(--edu-t5) !important; }
+body.lesson-page .drop-target.hovering {
+  background: var(--edu-accent-soft) !important;
+  border-color: var(--edu-accent) !important;
+  box-shadow: 0 0 20px rgba(185, 63, 240, .18) !important;
+}
+body.lesson-page .drop-target.filled {
+  background: rgba(255, 255, 255, .6) !important;
+  border-color: var(--edu-card-border) !important;
+}
+
+/* ── Inventory ───────────────────────────────────────────────── */
+body.lesson-page .rounded-3xl.border-dashed {
+  background: var(--edu-card-bg) !important;
+  border-color: rgba(185, 63, 240, .28) !important;
+  box-shadow: var(--edu-card-shadow);
+}
+body.lesson-page .uppercase.tracking-\[0\.2em\] { color: var(--edu-t4) !important; }
+
+body.lesson-page .logic-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 0 rgba(120, 110, 170, .18), 0 0 0 1px rgba(150, 140, 190, .18) !important;
+}
+body.lesson-page .logic-card:hover {
+  box-shadow: 0 8px 20px rgba(120, 110, 170, .22), 0 0 0 1px rgba(185, 63, 240, .35) !important;
+}
+
+/* ── Right panel ─────────────────────────────────────────────── */
+body.lesson-page main > section:last-child { background: transparent !important; }
+/* the editor itself stays dark — the design shows a dark code plate
+   inside the light lesson layout */
+body.lesson-page .code-window {
+  border-radius: 18px;
+  box-shadow: var(--edu-card-shadow) !important;
+}
+body.lesson-page #hint-box { color: var(--edu-t4) !important; }
+body.lesson-page #success-modal {
+  background: rgba(20, 16, 32, .55) !important;
+}

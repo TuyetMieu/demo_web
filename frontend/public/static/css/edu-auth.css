@@ -1,0 +1,158 @@
+/* ══════════════════════════════════════════════════════════════
+   EDU-AUTH — brings login.html / register.html onto the
+   "Brilliant-inspired" design language (Claude Design import:
+   Programming EDU.dc.html).
+
+   Override layer loaded AFTER login.css / register.css (+ edu-theme.css
+   for the token set). Paint-only: every class/id login.inline.js and
+   register.inline.js query (#loginBtn, .field.has-error, .success-overlay,
+   .error-toast, .toggle-eye …) keeps its name and its show/hide states.
+
+   Both source sheets declare the same class set, so one override file
+   serves both routes.
+   ══════════════════════════════════════════════════════════════ */
+
+html, body {
+  font-family: var(--edu-font);
+  color: var(--edu-t1);
+  background: var(--edu-bg-solid);
+  background-image: var(--edu-bg-image);
+  background-attachment: fixed;
+}
+
+/* edu-theme.css styles .page as a dashboard content column; on these
+   routes .page is the full-height centering wrapper login.css defines */
+.page { padding: 1rem; }
+
+/* neon-era decor with no counterpart in the new design */
+.bg-canvas { background: transparent; }
+.grid-overlay, .particles { display: none; }
+.bg-blob { opacity: .22; filter: blur(120px); }
+.bg-blob.b1 { background: radial-gradient(circle, rgba(226,178,250,.9), rgba(226,178,250,0)); }
+.bg-blob.b2 { background: radial-gradient(circle, rgba(186,210,250,.85), rgba(186,210,250,0)); }
+.bg-blob.b3 { background: radial-gradient(circle, rgba(250,247,190,.8), rgba(250,247,190,0)); }
+.bg-blob.b4 { background: radial-gradient(circle, rgba(214,240,240,.9), rgba(214,240,240,0)); }
+
+/* ── Form card ───────────────────────────────────────────────── */
+.card {
+  background: var(--edu-card-bg);
+  border: 1px solid var(--edu-card-border);
+  border-radius: 24px;
+  box-shadow: var(--edu-card-shadow);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+}
+
+.logo-icon {
+  border-radius: 14px;
+  background: linear-gradient(140deg, #c04af5, #e396fb);
+  box-shadow: 0 8px 20px rgba(185, 63, 240, .32);
+  animation: none;
+}
+.logo-text {
+  background: var(--edu-accent-grad);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -.02em;
+}
+
+.form-title { color: var(--edu-t1); font-size: 1.5rem; font-weight: 800; letter-spacing: -.03em; }
+.form-subtitle { color: var(--edu-t3); font-size: .86rem; }
+
+/* ── Fields ──────────────────────────────────────────────────── */
+.field-label { color: var(--edu-t4); }
+.field input {
+  background: var(--edu-input-bg);
+  border: 1px solid var(--edu-input-border);
+  border-radius: 12px;
+  color: var(--edu-t1);
+  font-family: var(--edu-font);
+}
+.field input::placeholder { color: var(--edu-t5); }
+.field input:focus {
+  border-color: var(--edu-accent);
+  background: var(--edu-accent-soft);
+  box-shadow: 0 0 0 3px rgba(185, 63, 240, .16);
+}
+.field.has-error input { border-color: #f0526b; background: rgba(240, 82, 107, .08); }
+.field-icon { color: var(--edu-t5); }
+.field-wrap:focus-within .field-icon { color: var(--edu-accent); }
+.toggle-eye { color: var(--edu-t5); }
+.toggle-eye:hover { color: var(--edu-accent-text); }
+.field-error { color: #d24a62; }
+
+.forgot a { color: var(--edu-accent-text); font-weight: 600; }
+.forgot a:hover { color: var(--edu-accent); }
+
+/* ── Primary button ──────────────────────────────────────────── */
+.btn-main {
+  border-radius: 999px;
+  font-family: var(--edu-font);
+  font-weight: 600;
+  letter-spacing: 0;
+  box-shadow: 0 10px 24px rgba(185, 63, 240, .3);
+}
+/* the two stacked <span> layers login.inline.js leaves untouched */
+.btn-bg { background: var(--edu-accent-grad); }
+.btn-bg-hover { background: linear-gradient(135deg, #a92fe0, #d97cf2); }
+.btn-main:hover { box-shadow: 0 14px 30px rgba(185, 63, 240, .42); }
+
+/* ── Divider + social ────────────────────────────────────────── */
+.divider::before, .divider::after { background: var(--edu-card-border); }
+.divider span, .or-divider span { color: var(--edu-t5); }
+.btn-social {
+  background: var(--edu-pill-bg);
+  border: 1px solid var(--edu-pill-border);
+  border-radius: 999px;
+  color: var(--edu-t2);
+  font-family: var(--edu-font);
+}
+.btn-social:hover {
+  background: var(--edu-accent-soft);
+  border-color: rgba(185, 63, 240, .34);
+  color: var(--edu-accent-text);
+}
+
+.switch-text { color: var(--edu-t3); }
+.switch-text a { color: var(--edu-accent-text); }
+.terms, .terms a { color: var(--edu-t4); }
+.terms a { color: var(--edu-accent-text); }
+
+/* ── Success overlay / error toast ───────────────────────────── */
+.success-overlay { background: var(--edu-panel-bg); }
+.success-title { color: var(--edu-t1); }
+.success-sub { color: var(--edu-t3); }
+.check-circle { background: linear-gradient(140deg, #22c55e, #4ade80); }
+
+/* ── Right-hand brand canvas ─────────────────────────────────── */
+.brand-canvas {
+  background: var(--edu-card-bg);
+  border: 1px solid var(--edu-card-border);
+  border-radius: 28px;
+  box-shadow: var(--edu-card-shadow);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+}
+.brand-glow { opacity: .22; }
+.brand-glow--amber { background: #e08cf9; }
+.brand-glow--indigo { background: #7b8ff5; }
+.brand-glow--emerald { background: #9fe0c4; opacity: .16; }
+
+.brand-canvas-eyebrow {
+  color: var(--edu-accent-text);
+  background: var(--edu-accent-soft);
+  border: 1px solid rgba(185, 63, 240, .28);
+}
+.brand-canvas-dot { background: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, .7); }
+.brand-canvas-title { color: var(--edu-t1); font-weight: 800; letter-spacing: -.03em; }
+.brand-canvas-grad {
+  background: var(--edu-accent-grad);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.brand-canvas-sub { color: var(--edu-t3); }
+.brand-stat-num { color: var(--edu-t1); letter-spacing: -.02em; }
+.brand-stat-lbl { color: var(--edu-t4); }
+.brand-pill {
+  color: var(--edu-t2);
+  background: var(--edu-pill-bg);
+  border: 1px solid var(--edu-pill-border);
+}

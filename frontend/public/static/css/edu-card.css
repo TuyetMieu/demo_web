@@ -1,0 +1,70 @@
+/* ══════════════════════════════════════════════════════════════
+   EDU-CARD — /card/:cardId (the standalone "concept card" page).
+
+   concept_card.inline.css is fully self-contained and hard-codes the old
+   dark lesson-player palette, so this layer restates the same selectors
+   on the design's light ground. The amber --cc-accent becomes the
+   design accent. Paint-only: the client-side quiz in the page keeps its
+   .cc-quiz-opt / .is-correct / .is-wrong hooks.
+   ══════════════════════════════════════════════════════════════ */
+
+:root { --cc-accent: #b93ff0; }
+
+body {
+  background: var(--edu-bg-solid);
+  background-image: var(--edu-bg-image);
+  background-attachment: fixed;
+  color: var(--edu-t1);
+  font-family: var(--edu-font);
+}
+
+.cc-back { color: var(--edu-t4); }
+.cc-back:hover { color: var(--edu-accent-text); }
+
+.cc-card {
+  background: var(--edu-card-bg);
+  border: 1px solid var(--edu-card-border);
+  border-top: 3px solid var(--cc-accent);
+  border-radius: 22px;
+  box-shadow: var(--edu-card-shadow);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+
+.cc-title { color: var(--edu-t1); letter-spacing: -.03em; }
+.cc-intro, .cc-section p { color: var(--edu-t3); }
+.cc-section h2, .cc-quiz-q { color: var(--edu-t1); }
+.cc-eyebrow, .cc-quiz-label { color: var(--edu-accent-text); }
+
+.cc-card code {
+  color: var(--edu-accent-text);
+  background: var(--edu-accent-soft);
+}
+
+.cc-source {
+  background: rgba(255, 255, 255, .5);
+  border-left-color: rgba(185, 63, 240, .35);
+  color: var(--edu-t4);
+}
+
+.cc-cta {
+  background: var(--edu-accent-grad);
+  color: #fff;
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(185, 63, 240, .3);
+}
+.cc-cta:focus-visible { outline-color: var(--edu-accent); }
+
+.cc-missing { color: var(--edu-t3); }
+
+.cc-quiz { border-top-color: var(--edu-card-border); }
+.cc-quiz-opt {
+  background: rgba(255, 255, 255, .55);
+  border: 1px solid var(--edu-card-border);
+  color: var(--edu-t2);
+  font-family: var(--edu-font);
+  border-radius: 12px;
+}
+.cc-quiz-opt:hover {
+  background: var(--edu-accent-soft);
+  border-color: rgba(185, 63, 240, .34);
+}

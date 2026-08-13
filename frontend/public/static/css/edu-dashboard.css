@@ -1,0 +1,842 @@
+/* ══════════════════════════════════════════════════════════════
+   EDU-DASHBOARD — bố cục màn "dash" dựng 1:1 theo
+   "Programming EDU.dc.html" (Claude Design import).
+
+   Mọi số đo (272 sidebar, grid 1fr/1.05fr gap 34, thẻ 290px, vòng
+   tiến độ 56px, ô ngày 104px, avatar 58/52…) lấy đúng từ file design.
+   Nạp SAU edu-theme.css để dùng chung bộ token --edu-*.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Header: tiêu đề trái + cụm điều khiển phải ───────────────── */
+.edu-header-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  padding: 34px 40px 0;
+  margin-bottom: 38px;
+}
+.edu-head-titles { flex: 1; min-width: 0; }
+/* Trang chi tiết khóa học không hiện tên khóa ở header (hero bên dưới đã có).
+   Khối tiêu đề rỗng vẫn giữ flex:1 để cụm điều khiển bám mép phải; bớt khoảng
+   trên/dưới cho khỏi thừa một mảng trống to. */
+.edu-header-bar--notitle { padding-top: 24px; margin-bottom: 18px; }
+.edu-page-title {
+  margin: 0;
+  font-size: 44px;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  line-height: 1.05;
+  color: var(--edu-t1);
+}
+.edu-page-sub {
+  margin: 8px 0 0;
+  font-size: 16px;
+  color: var(--edu-t3);
+}
+
+/* ── Vệt chờ (skeleton) dùng chung ────────────────────────────────
+   Trang chi tiết khóa học phải gọi 4 API mới dựng được nội dung. Trước đây
+   nhánh chờ đó `return` sớm nên KHÔNG dựng PageStyles/Sidebar/HeaderBar —
+   toàn bộ CSS bị gỡ (0 thẻ <link>), sidebar và header biến mất, ra một
+   khoảng trắng toàn màn hình rồi mọi thứ mới nhảy trở lại. Giờ khung
+   luôn đứng yên, chỉ phần nội dung đổi thành các vệt này. */
+.edu-skel {
+  border-radius: 12px;
+  background: var(--edu-card-bg);
+  animation: edu-skel-pulse 1.4s ease-in-out infinite;
+}
+@keyframes edu-skel-pulse { 0%, 100% { opacity: .5 } 50% { opacity: 1 } }
+@media (prefers-reduced-motion: reduce) { .edu-skel { animation: none } }
+/* bám đúng số đo của .edu-page-title / .edu-page-sub để không xê dịch */
+.edu-skel--title { height: 46px; width: min(460px, 70%); border-radius: 14px; }
+.edu-skel--sub { height: 18px; width: min(320px, 50%); margin-top: 10px; }
+
+/* Cụm điều khiển: một hàng flex căn giữa, lệch xuống 8px so với đỉnh tiêu đề
+   (đúng như `padding-top:8px` của design). Căn giữa ở ĐÂY chứ không ở
+   .edu-header-bar, vì tiêu đề bên trái phải bám mép trên. */
+.edu-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding-top: 8px;
+  flex: none;
+}
+
+/* các control giữ nguyên id/hành vi, chỉ đổi hình dáng cho khớp design */
+.edu-header-bar .search-wrap {
+  width: 400px; height: 58px;
+  padding: 0 24px;
+  border-radius: 16px;
+  background: var(--edu-card-bg);
+  border: 1px solid var(--edu-card-border);
+  /* dùng token: bản dark là bóng đen, không phải quầng tím nhạt của bản sáng */
+  box-shadow: var(--edu-card-shadow);
+  display: flex; align-items: center; gap: 14px;
+  flex: none;
+}
+/* style.css để icon position:absolute (chừa chỗ bằng padding-left của input).
+   Ở đây wrap là flex nên trả icon về luồng thường, khoảng cách do `gap` lo —
+   nếu không nó nằm đè lên chữ placeholder. */
+.edu-header-bar .search-wrap .search-icon {
+  position: static;
+  display: flex; flex: none;
+  color: var(--edu-accent);
+}
+/* Ô input phải TRONG SUỐT hoàn toàn — cái pill 16px bên ngoài đã là hộp rồi.
+   style.css cho input hộp riêng (h34, bo 7px, có viền) và dark-mode.css còn
+   thêm `body.dark .search-wrap input { background: var(--card) }`, specificity
+   (0,2,2) — cao hơn rule 2 class của ta nên ở chế độ tối nó vẽ đè một hộp
+   thứ hai sáng hơn bên trong, trông như vệt mờ. Đặc tả lại kèm body.dark. */
+.edu-header-bar .search-wrap input,
+body.dark .edu-header-bar .search-wrap input {
+  flex: 1; min-width: 0;
+  height: auto; padding: 0;
+  background: transparent; border: none; border-radius: 0;
+  box-shadow: none; outline: none;
+  font-family: var(--edu-font); font-size: 16px; color: var(--edu-t1);
+}
+.edu-header-bar .search-wrap input::placeholder { color: var(--edu-t5); }
+/* style.css:171 vẽ khung 3px quanh input khi focus (border-color + box-shadow)
+   — viền pill 16px bên ngoài đã là khung rồi, nên input phải trong suốt cả
+   khi gõ, không chỉ lúc đứng yên. */
+.edu-header-bar .search-wrap input:focus {
+  border: none; box-shadow: none; background: transparent;
+}
+
+.edu-header-bar .bell-wrap,
+.edu-header-bar .user-chip-wrap { display: flex; align-items: center; }
+.edu-header-bar .bell-btn { color: var(--edu-accent-2); background: none; border: none; cursor: pointer; }
+
+.edu-streak {
+  display: flex; align-items: center; gap: 7px;
+  color: #f97316;
+  cursor: default;
+}
+.edu-streak-num { font-size: 17px; font-weight: 700; color: #e0742a; }
+
+.edu-header-bar .chip-avatar {
+  width: 52px; height: 52px; border-radius: 999px;
+  background: linear-gradient(140deg,#c9a7f5,#a8d5f2);
+  border: 2px solid rgba(255,255,255,.9);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: #fff;
+}
+body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
+/* design chỉ có avatar + mũi tên, không có tên cạnh avatar */
+.edu-header-bar .chip-name { display: none; }
+
+/* Tiêu đề trang giờ nằm ở HeaderBar (design chỉ có MỘT tiêu đề). Mỗi .page
+   vẫn giữ khối .courses-header cũ vì phần điều khiển lọc/sắp xếp nằm trong
+   đó — chỉ ẩn phần chữ bị lặp. */
+#main .page > .courses-header > div > h2,
+#main .page > .courses-header > div > .page-subtitle,
+#main .page > .courses-header > div > .courses-subtitle { display: none; }
+/* chỉ ẩn khối header CHỈ chứa chữ — không đụng vào khối chứa bộ lọc/sắp xếp
+   (Diễn đàn dùng .filter-group + .sort-dropdown-wrap, không có .courses-controls) */
+#main .page > .courses-header:not(:has(.courses-controls)):not(:has(.filter-group)):not(:has(.sort-dropdown-wrap)) {
+  display: none;
+}
+
+/* style.css@1440 đặt .page { max-width:1200px; margin-inline:auto } — margin auto
+   trên flex item của #main (flex column) làm nó co về fit-content rồi căn giữa,
+   nên nội dung dồn vào một cột hẹp. Design dùng nguyên chiều ngang. */
+#main > .page { max-width: none; margin-inline: 0; }
+
+/* ── Khung 2 cột ──────────────────────────────────────────────── */
+.edu-d-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1.05fr);
+  gap: 34px;
+  align-items: start;
+}
+.edu-d-col { display: flex; flex-direction: column; gap: 26px; }
+.edu-d-spacer { flex: 1; }
+
+.edu-d-sec-head {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 20px;
+}
+.edu-d-sec-title {
+  font-size: 26px; font-weight: 700; letter-spacing: -.02em;
+  color: var(--edu-t1);
+}
+.edu-d-arrows { display: flex; gap: 10px; color: var(--edu-t2); }
+.edu-d-arrow {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; padding: 0;
+  /* reset đầy đủ: nếu thiếu, trình duyệt vẽ viền mặc định của <button> */
+  appearance: none; -webkit-appearance: none;
+  border: 0; outline: 0; box-shadow: none;
+  border-radius: 999px;
+  background: none; color: inherit; cursor: pointer;
+  transition: background .15s ease, color .15s ease, opacity .15s ease;
+}
+.edu-d-arrow::-moz-focus-inner { border: 0; padding: 0; }
+.edu-d-arrow:hover:not(:disabled) { background: var(--edu-accent-soft); color: var(--edu-accent-text); }
+.edu-d-arrow:focus-visible { outline: 2px solid var(--edu-accent); outline-offset: 2px; }
+.edu-d-arrow:disabled { opacity: .3; cursor: default; }
+
+.edu-d-card {
+  border-radius: 22px;
+  background: var(--edu-card-bg);
+  border: 1px solid var(--edu-card-border);
+  box-shadow: var(--edu-card-shadow);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+
+/* ── Bài học gần đây ─────────────────────────────────────────── */
+/* Khung nhìn cố định 2 thẻ; toàn bộ khóa đã đăng ký nằm trên một "ray"
+   trượt bằng transform để chuyển thẻ mượt thay vì vẽ lại đột ngột. */
+.edu-d-recent { overflow: hidden; }
+.edu-d-track {
+  display: flex;
+  gap: 20px;
+  will-change: transform;
+  transition: transform .42s cubic-bezier(.22,.61,.36,1);
+}
+.edu-d-track > .edu-d-lesson { flex: 0 0 calc((100% - 20px) / 2); }
+@media (prefers-reduced-motion: reduce) { .edu-d-track { transition: none; } }
+
+.edu-d-lesson {
+  position: relative; height: 290px;
+  border-radius: 20px; overflow: hidden; cursor: pointer;
+  box-shadow: 0 12px 34px rgba(90,80,140,.18);
+  background-color: #211c33;
+  background-image:
+    repeating-linear-gradient(115deg, rgba(255,255,255,.07) 0 2px, transparent 2px 9px),
+    linear-gradient(160deg,#2b2350,#171426);
+}
+body.dark .edu-d-lesson { box-shadow: 0 12px 34px rgba(0,0,0,.5); }
+.edu-d-lesson-art {
+  position: absolute; top: 14px; left: 16px;
+  font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+  color: rgba(255,255,255,.45);
+}
+.edu-d-lesson-foot {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 18px 18px 20px;
+  background: linear-gradient(180deg, rgba(20,16,32,0), rgba(20,16,32,.86) 46%);
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 14px;
+}
+.edu-d-lesson-name { font-size: 19px; font-weight: 700; color: #fff; }
+.edu-d-lesson-btn {
+  margin-top: 10px;
+  display: inline-flex; align-items: center; height: 32px; padding: 0 16px;
+  border-radius: 9px; background: #15121f; color: #fff;
+  font-size: 13px; font-weight: 600;
+}
+.edu-d-ring { position: relative; width: 56px; height: 56px; border-radius: 999px; flex: none; }
+.edu-d-ring-in {
+  position: absolute; inset: 6px; border-radius: 999px; background: #15121f;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #fff;
+}
+/* khóa gợi ý chưa có tiến độ: vòng viền mảnh + số bài thay cho phần trăm */
+.edu-d-ring--plain { background: rgba(255,255,255,.22); }
+.edu-d-ring--plain .edu-d-ring-in { font-size: 15px; }
+.edu-d-ring--plain .edu-d-ring-in span {
+  font-size: 9px; font-weight: 600; letter-spacing: .06em;
+  color: rgba(255,255,255,.6); margin-top: 1px;
+}
+.edu-d-recent-empty {
+  border-radius: 20px; padding: 40px 24px; text-align: center;
+  background: var(--edu-card-bg); border: 1px solid var(--edu-card-border);
+  color: var(--edu-t3); font-size: 15px;
+}
+
+/* ── Thẻ cuộc thi ────────────────────────────────────────────── */
+.edu-d-contest { padding: 30px 34px 34px; text-align: center; }
+.edu-d-contest-title { font-size: 22px; font-weight: 600; letter-spacing: -.01em; color: var(--edu-t1); }
+.edu-d-date-tile {
+  width: 104px; height: 104px; margin: 24px auto 0;
+  border-radius: 18px;
+  background: linear-gradient(160deg,#f4f2f7,#dcd8e6);
+  border: 1px solid rgba(255,255,255,.9);
+  box-shadow: 0 10px 24px rgba(110,100,150,.18);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  animation: eduFloaty 4s ease-in-out infinite;
+}
+body.dark .edu-d-date-tile {
+  background: linear-gradient(160deg,#332c4a,#242033);
+  border-color: rgba(255,255,255,.10);
+  box-shadow: 0 10px 24px rgba(0,0,0,.45);
+}
+@keyframes eduFloaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.edu-d-date-mon { font-size: 12px; font-weight: 700; color: var(--edu-t5); letter-spacing: .1em; }
+/* chưa đủ streak: con số làm dịu lại để không trông như một việc phải làm ngay */
+.edu-d-review--locked .edu-d-date-day { color: var(--edu-t4); }
+.edu-d-review--locked .edu-d-cta {
+  background: transparent; color: var(--edu-accent-text);
+  border: 1.5px solid var(--edu-accent-3);
+  box-shadow: none;
+}
+.edu-d-date-day { font-size: 38px; font-weight: 800; color: #3d5bd6; line-height: 1; }
+body.dark .edu-d-date-day { color: #93a9ff; }
+.edu-d-contest-date { margin-top: 20px; font-size: 20px; font-weight: 600; color: var(--edu-t2); }
+.edu-d-contest-cta-wrap { margin-top: 22px; display: flex; justify-content: center; }
+.edu-d-cta {
+  height: 58px; padding: 0 66px;
+  display: flex; align-items: center;
+  border: none; border-radius: 999px;
+  background: var(--edu-accent-grad); color: #fff;
+  font-family: var(--edu-font); font-size: 17px; font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(185,63,240,.34);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+/* Nút này (và các CTA mới thêm bên dưới) không kế thừa :hover từ CSS gốc —
+   khác với .btn-main/.neon-btn ở landing/login vốn đã có sẵn hover từ
+   auth.css. Thêm hover nâng nhẹ + sáng lên, active ấn xuống nhẹ. */
+.edu-d-cta:hover { transform: translateY(-2px); filter: brightness(1.06); box-shadow: 0 16px 34px rgba(185,63,240,.44); }
+.edu-d-cta:active { transform: translateY(0); filter: brightness(.97); box-shadow: 0 8px 20px rgba(185,63,240,.3); }
+.edu-d-review--locked .edu-d-cta:hover {
+  background: var(--edu-accent-soft); border-color: var(--edu-accent);
+  filter: none; box-shadow: none;
+}
+
+/* ── Bảng xếp hạng top 3 ─────────────────────────────────────── */
+.edu-d-lb { padding: 14px 26px; }
+.edu-d-lb-row { display: flex; align-items: center; gap: 20px; padding: 20px 0; }
+.edu-d-lb-av {
+  width: 58px; height: 58px; border-radius: 999px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: #fff;
+}
+.edu-d-lb-main { flex: 1; min-width: 0; }
+.edu-d-lb-name { font-size: 19px; font-weight: 700; letter-spacing: -.01em; color: var(--edu-t1); }
+.edu-d-lb-league { margin-top: 3px; font-size: 14px; color: var(--edu-t4); }
+.edu-d-lb-pos {
+  width: 56px; height: 56px; border-radius: 999px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 800;
+  border: 2px solid currentColor;
+}
+.edu-d-lb-empty { padding: 26px 0; color: var(--edu-t3); font-size: 15px; text-align: center; }
+
+/* ── Ô thống kê ──────────────────────────────────────────────── */
+.edu-d-stats { display: grid; grid-template-columns: 1fr 268px; gap: 20px; align-items: start; }
+.edu-d-bigstats { display: flex; flex-direction: column; gap: 20px; }
+.edu-d-bigstat {
+  display: flex; align-items: center; gap: 18px;
+  padding: 26px 22px; border-radius: 22px;
+  background: var(--edu-card-bg);
+  border: 1px solid var(--edu-card-border);
+  box-shadow: var(--edu-card-shadow);
+}
+.edu-d-bigstat-icon {
+  width: 62px; height: 62px; border-radius: 16px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.edu-d-bigstat-val { font-size: 34px; font-weight: 800; letter-spacing: -.03em; line-height: 1; color: var(--edu-t1); }
+.edu-d-bigstat-lbl { margin-top: 6px; font-size: 16px; color: var(--edu-t3); }
+
+.edu-d-ministats { padding: 24px 24px 26px; display: flex; flex-direction: column; gap: 24px; }
+.edu-d-ministat { display: flex; align-items: center; gap: 16px; }
+.edu-d-ministat-icon {
+  width: 46px; height: 46px; border-radius: 13px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.edu-d-ministat-val { font-size: 24px; font-weight: 800; line-height: 1; color: var(--edu-t1); }
+.edu-d-ministat-lbl { margin-top: 3px; font-size: 13px; color: var(--edu-t4); }
+
+/* ══════════════════════════════════════════════════════════════
+   MÀN "KHÓA HỌC" — dựng theo màn isCourses của Programming EDU.dc.html
+   ══════════════════════════════════════════════════════════════ */
+
+/* hàng lọc + sắp xếp */
+#page-courses .courses-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 28px; flex-wrap: wrap;
+}
+#page-courses .courses-controls { display: flex; align-items: center; gap: 10px; flex: 1; }
+#page-courses .filter-group { display: flex; gap: 10px; }
+#page-courses .filter-btn {
+  height: 44px; padding: 0 24px;
+  display: flex; align-items: center;
+  border-radius: 999px;
+  background: var(--edu-pill-bg);
+  border: 1px solid var(--edu-pill-border);
+  color: var(--edu-t6);
+  font-family: var(--edu-font); font-size: 15px; font-weight: 600;
+  cursor: pointer;
+}
+#page-courses .filter-btn.active {
+  background: var(--edu-accent-grad);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(185,63,240,.28);
+}
+#page-courses .sort-dropdown-wrap {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 10px;
+}
+#page-courses .sort-label { font-size: 14px; color: var(--edu-t3); }
+#page-courses .sort-select {
+  height: 44px; padding: 0 16px;
+  border-radius: 12px;
+  background: var(--edu-pill-bg);
+  border: 1px solid var(--edu-pill-border);
+  color: var(--edu-t2);
+  font-family: var(--edu-font); font-size: 14px; font-weight: 600;
+  cursor: pointer;
+}
+
+/* ô tìm kiếm + bộ lọc cấp độ/ngôn ngữ (không có trong design nhưng là tính
+   năng thật của app — giữ lại và làm cùng ngôn ngữ thị giác) */
+#page-courses .courses-search-bar-wrap,
+#page-courses .course-filter-panel {
+  background: var(--edu-card-bg);
+  border: 1px solid var(--edu-card-border);
+  box-shadow: var(--edu-card-shadow);
+  border-radius: 16px;
+}
+#page-courses .courses-search-bar-input {
+  background: transparent; border: none; outline: none;
+  font-family: var(--edu-font); font-size: 15px; color: var(--edu-t1);
+}
+#page-courses .pill-btn {
+  border-radius: 999px;
+  background: var(--edu-pill-bg);
+  border: 1px solid var(--edu-pill-border);
+  color: var(--edu-t6);
+  font-family: var(--edu-font); font-weight: 600;
+}
+#page-courses .pill-btn.active {
+  background: var(--edu-accent-soft);
+  border-color: rgba(185,63,240,.34);
+  color: var(--edu-accent-text);
+}
+
+/* lưới thẻ */
+#page-courses .courses-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.edu-c-card {
+  border-radius: 22px;
+  background: var(--edu-card-bg);
+  border: 1px solid var(--edu-card-border);
+  box-shadow: var(--edu-card-shadow);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.edu-c-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(185,63,240,.32);
+  box-shadow: 0 18px 40px rgba(120,110,170,.18);
+}
+.edu-c-art {
+  position: relative;
+  height: 150px;
+  display: flex; align-items: flex-end;
+  padding: 14px;
+  background-color: #221c36;
+  background-image:
+    repeating-linear-gradient(115deg, rgba(255,255,255,.07) 0 2px, transparent 2px 9px),
+    linear-gradient(160deg,#2e2554,#181426);
+}
+.edu-c-art-label {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,.45);
+}
+/* Nhãn "Đang học" — trước dùng xanh lá đặc (rgba(34,197,94,.9)) lấy từ bộ màu
+   cũ, chọi hẳn với dải tím của design. Đổi sang chính gradient accent, thêm
+   chấm sáng nhỏ cho ra nghĩa "đang diễn ra". */
+.edu-c-enrolled {
+  position: absolute; top: 12px; right: 12px;
+  height: 28px; padding: 0 13px;
+  display: inline-flex; align-items: center; gap: 7px;
+  border-radius: 999px;
+  background: var(--edu-accent-grad); color: #fff;
+  font-size: 11.5px; font-weight: 700; letter-spacing: .01em;
+  box-shadow: 0 6px 16px rgba(185,63,240,.34);
+}
+.edu-c-enrolled::before {
+  content: ''; width: 6px; height: 6px; border-radius: 999px; flex: none;
+  background: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,.28);
+}
+
+/* Thẻ đã đăng ký nổi hơn thẻ chưa đăng ký một bậc: viền tím nhạt thường trực
+   (thẻ chưa đăng ký chỉ đổi viền khi rê chuột) — quét mắt là thấy ngay mình
+   đang học khóa nào. */
+.edu-c-card.is-enrolled { border-color: rgba(185,63,240,.3); }
+.edu-c-card.is-enrolled:hover { border-color: rgba(185,63,240,.5); }
+.edu-c-body { padding: 20px 22px 24px; }
+.edu-c-cat {
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--edu-accent);
+}
+.edu-c-title {
+  margin-top: 8px;
+  font-size: 18px; font-weight: 700; letter-spacing: -.02em;
+  color: var(--edu-t1);
+}
+.edu-c-desc {
+  margin: 8px 0 0;
+  font-size: 14px; color: var(--edu-t3);
+  text-wrap: pretty;
+}
+.edu-c-meta {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 16px;
+  font-size: 13px; color: var(--edu-t5);
+}
+/* Khối tiến độ chỉ có ở thẻ đã đăng ký (xem renderCourses trong main.js) */
+.edu-c-prog { margin-top: 18px; }
+.edu-c-prog-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 12.5px; color: var(--edu-t4);
+}
+.edu-c-prog-pct { font-size: 14px; font-weight: 700; color: var(--edu-accent-text); }
+.edu-c-track {
+  height: 8px; border-radius: 99px;
+  background: var(--edu-track-bg);
+  overflow: hidden;
+}
+.edu-c-fill {
+  height: 100%; border-radius: 99px;
+  background: var(--edu-accent-grad);
+  transition: width .4s ease;
+}
+
+@media (max-width: 1240px) { #page-courses .courses-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 820px)  { #page-courses .courses-grid { grid-template-columns: 1fr; } }
+
+/* ══════════════════════════════════════════════════════════════
+   MÀN "XẾP HẠNG" — thẻ phụ theo màn isLeader của design
+   ══════════════════════════════════════════════════════════════ */
+#page-leader .edu-leader-side { padding: 26px 28px 28px; }
+.edu-l-side-title { font-size: 17px; font-weight: 700; color: var(--edu-t1); }
+.edu-l-side-sub {
+  margin: 8px 0 0;
+  font-size: 14px; color: var(--edu-t3); line-height: 1.6;
+  text-wrap: pretty;
+}
+.edu-l-side-rows { margin-top: 20px; display: flex; flex-direction: column; gap: 14px; }
+.edu-l-side-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--edu-input-bg);
+}
+.edu-l-side-row span { font-size: 14px; color: var(--edu-t6); }
+.edu-l-side-row b { font-size: 16px; font-weight: 700; color: var(--edu-t1); }
+
+/* ══════════════════════════════════════════════════════════════
+   MÀN "DIỄN ĐÀN" — dựng theo màn isForum của Programming EDU.dc.html
+   Giữ nguyên class/id mà dashboard.js sinh ra, chỉ đổi phần nhìn.
+   ══════════════════════════════════════════════════════════════ */
+
+#page-forum #forum-search-wrap {
+  display: flex; align-items: center; gap: 14px;
+  height: 56px; padding: 0 24px;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  background: var(--edu-card-bg);
+  border: 1px solid var(--edu-card-border);
+  box-shadow: var(--edu-card-shadow);
+}
+#page-forum #forum-search-wrap .csb-icon { color: var(--edu-accent); display: flex; }
+#page-forum #forum-search-input {
+  flex: 1; min-width: 0;
+  background: transparent; border: none; outline: none;
+  font-family: var(--edu-font); font-size: 15px; color: var(--edu-t1);
+}
+#page-forum #forum-search-input::placeholder { color: var(--edu-t5); }
+
+#page-forum .courses-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 22px; flex-wrap: wrap;
+}
+#page-forum .filter-group { display: flex; gap: 10px; }
+#page-forum .filter-btn {
+  height: 44px; padding: 0 24px;
+  display: flex; align-items: center;
+  border-radius: 999px;
+  background: var(--edu-pill-bg);
+  border: 1px solid var(--edu-pill-border);
+  color: var(--edu-t6);
+  font-family: var(--edu-font); font-size: 15px; font-weight: 600;
+  cursor: pointer;
+}
+#page-forum .filter-btn.active {
+  background: var(--edu-accent-grad);
+  border-color: transparent; color: #fff;
+  box-shadow: 0 8px 22px rgba(185,63,240,.28);
+}
+#page-forum .sort-dropdown-wrap { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+#page-forum .sort-label { font-size: 14px; color: var(--edu-t3); }
+#page-forum .sort-select {
+  height: 44px; padding: 0 16px;
+  border-radius: 12px;
+  background: var(--edu-pill-bg);
+  border: 1px solid var(--edu-pill-border);
+  color: var(--edu-t2);
+  font-family: var(--edu-font); font-size: 14px; font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── Ô soạn bài ──────────────────────────────────────────────── */
+#page-forum .forum-create-box {
+  border-radius: 20px;
+  background: var(--edu-card-bg) !important;
+  border: 1px solid var(--edu-card-border) !important;
+  box-shadow: var(--edu-card-shadow) !important;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+#page-forum .forum-create-row { display: flex; gap: 16px; align-items: flex-start; }
+#page-forum .fcb-avatar {
+  width: 46px; height: 46px; border-radius: 999px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(140deg,#c9a7f5,#a8d5f2);
+  color: #fff; font-size: 15px; font-weight: 700;
+}
+#page-forum .fcb-textarea {
+  flex: 1; min-width: 0; min-height: 62px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: var(--edu-input-bg) !important;
+  border: 1px solid var(--edu-input-border) !important;
+  color: var(--edu-t1) !important;
+  font-family: var(--edu-font); font-size: 15px;
+  resize: vertical;
+}
+#page-forum .fcb-bottom-row { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+#page-forum .fcb-type-picker { display: flex; gap: 10px; }
+#page-forum .fcb-type-btn {
+  height: 38px; padding: 0 18px;
+  display: flex; align-items: center;
+  border-radius: 999px;
+  background: var(--edu-pill-bg) !important;
+  border: 1px solid var(--edu-pill-border);
+  color: var(--edu-t6) !important;
+  font-family: var(--edu-font); font-size: 14px; font-weight: 600;
+  cursor: pointer;
+}
+#page-forum .fcb-type-btn.active {
+  background: var(--edu-accent-soft) !important;
+  border-color: rgba(185,63,240,.34);
+  color: var(--edu-accent-text) !important;
+}
+#page-forum .fcb-submit-btn {
+  margin-left: auto;
+  height: 42px; padding: 0 30px;
+  border: none; border-radius: 999px;
+  background: var(--edu-accent-grad) !important;
+  color: #fff !important;
+  font-family: var(--edu-font); font-size: 15px; font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(185,63,240,.28);
+  transition: transform .15s ease, filter .15s ease;
+}
+#page-forum .fcb-submit-btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.06); }
+#page-forum .fcb-submit-btn:disabled { opacity: .45; cursor: default; box-shadow: none; }
+
+/* ── Danh sách bài viết ──────────────────────────────────────── */
+#page-forum #forum-list { display: flex; flex-direction: column; gap: 18px; }
+#page-forum .forum-post-card {
+  border-radius: 20px;
+  background: var(--edu-card-bg) !important;
+  border: 1px solid var(--edu-card-border) !important;
+  box-shadow: var(--edu-card-shadow) !important;
+  padding: 24px 28px 26px;
+}
+#page-forum .fpc-top { display: flex; align-items: center; gap: 14px; }
+#page-forum .fpc-avatar {
+  width: 46px; height: 46px; border-radius: 999px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 14px; font-weight: 700;
+}
+#page-forum .fpc-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+#page-forum .fpc-author { font-size: 15px; font-weight: 700; color: var(--edu-t1); }
+#page-forum .fpc-time { margin-top: 2px; font-size: 13px; color: var(--edu-t5); }
+#page-forum .fpc-cat-tag {
+  height: 32px; padding: 0 16px;
+  display: inline-flex; align-items: center;
+  border-radius: 999px;
+  font-size: 13px; font-weight: 600;
+}
+#page-forum .fpc-title {
+  margin-top: 16px;
+  font-size: 18px; font-weight: 700; letter-spacing: -.01em; line-height: 1.4;
+  color: var(--edu-t1);
+}
+#page-forum .fpc-excerpt {
+  margin-top: 8px;
+  font-size: 14.5px; color: var(--edu-t3); line-height: 1.7;
+  text-wrap: pretty;
+}
+#page-forum .fpc-actions {
+  display: flex; align-items: center; gap: 24px;
+  margin-top: 18px; padding-top: 16px;
+  border-top: 1px solid var(--edu-card-border);
+  font-size: 14px; color: var(--edu-t4);
+}
+#page-forum .fpc-react-btn,
+#page-forum .fpc-comment-btn,
+#page-forum .fpc-share-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: none; border: none; padding: 0;
+  font-family: var(--edu-font); font-size: 14px; color: var(--edu-t4);
+  cursor: pointer;
+}
+#page-forum .fpc-react-btn:hover,
+#page-forum .fpc-comment-btn:hover,
+#page-forum .fpc-share-btn:hover { color: var(--edu-accent-text); }
+#page-forum .fpc-react-btn.liked { color: var(--edu-accent-text); font-weight: 600; }
+/* dashboard.css đẩy nút Chia sẻ sang phải bằng margin-left:auto;
+   design gom cả ba hành động về bên trái, cách nhau 24px */
+#page-forum .fpc-share-btn { margin-left: 0; }
+#page-forum .fpc-react-wrap { display: inline-flex; }
+
+/* ── Khu bình luận ───────────────────────────────────────────────
+   File design không vẽ phần này (thẻ bài viết ở design không mở
+   bình luận), nên dựng theo cùng ngôn ngữ: nền kính, bo tròn, accent
+   tím — thay cho viền cyan của theme cũ. Class do dashboard.js sinh. */
+/* edu-theme.css cũng tô .fpc-comments thành thẻ kính bo 20 — trong thẻ bài
+   viết nó thành card lồng card. Ở đây nó chỉ là phần mở rộng, ngăn bằng
+   một đường kẻ như design vẫn dùng cho footer. */
+#page-forum .fpc-comments {
+  margin-top: 18px;
+  padding: 18px 0 0 !important;
+  border: none !important;
+  border-top: 1px solid var(--edu-card-border) !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+}
+
+#page-forum .fpc-cmt-sort-bar {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 14px;
+}
+#page-forum .fpc-cmt-sort-label {
+  font-size: 15px; font-weight: 700; color: var(--edu-t1);
+}
+#page-forum .fpc-cmt-sort-btns { margin-left: auto; display: flex; gap: 8px; }
+#page-forum .fpc-cmt-sort-btn {
+  height: 32px; padding: 0 14px;
+  display: inline-flex; align-items: center;
+  border-radius: 999px;
+  background: var(--edu-pill-bg) !important;
+  border: 1px solid var(--edu-pill-border) !important;
+  color: var(--edu-t4) !important;
+  font-family: var(--edu-font); font-size: 13px; font-weight: 600;
+  cursor: pointer;
+}
+#page-forum .fpc-cmt-sort-btn.active {
+  background: var(--edu-accent-soft) !important;
+  border-color: rgba(185,63,240,.34) !important;
+  color: var(--edu-accent-text) !important;
+}
+
+#page-forum .fpc-cmt-empty {
+  margin: 0; padding: 20px 0;
+  text-align: center;
+  font-size: 14px; color: var(--edu-t4);
+}
+
+/* danh sách bình luận */
+#page-forum .fpc-cmt-list { display: flex; flex-direction: column; gap: 14px; }
+#page-forum .fpc-cmt-item { display: flex; gap: 12px; }
+#page-forum .fpc-cmt-avatar,
+#page-forum .fpc-reply-avatar {
+  width: 36px; height: 36px; border-radius: 999px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(140deg,#c9a7f5,#a8d5f2);
+  font-size: 15px;
+}
+#page-forum .fpc-reply-avatar { width: 30px; height: 30px; font-size: 13px; }
+#page-forum .fpc-cmt-vline { background: var(--edu-card-border) !important; }
+#page-forum .fpc-cmt-body { flex: 1; min-width: 0; }
+#page-forum .fpc-cmt-bubble,
+#page-forum .fpc-reply-body {
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--edu-input-bg) !important;
+  border: 1px solid var(--edu-input-border) !important;
+}
+#page-forum .fpc-cmt-author { font-size: 14px; font-weight: 700; color: var(--edu-t1); }
+#page-forum .fpc-cmt-text { margin-top: 2px; font-size: 14px; color: var(--edu-t2); line-height: 1.6; }
+#page-forum .fpc-reply-to { color: var(--edu-accent-text); font-weight: 600; }
+#page-forum .fpc-cmt-actions {
+  display: flex; align-items: center; gap: 16px;
+  margin-top: 6px; padding-left: 4px;
+  font-size: 12.5px; color: var(--edu-t5);
+}
+#page-forum .fpc-cmt-act-btn {
+  background: none !important; border: none !important; padding: 0;
+  font-family: var(--edu-font); font-size: 12.5px; font-weight: 600;
+  color: var(--edu-t4) !important; cursor: pointer;
+}
+#page-forum .fpc-cmt-act-btn:hover { color: var(--edu-accent-text) !important; }
+#page-forum .fpc-replies-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+
+/* ô nhập bình luận */
+#page-forum .fpc-cmt-input-row,
+#page-forum .fpc-reply-input-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 14px;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+}
+/* dashboard.css để padding-right:6px trên .fpc-cmt-compose. `right` của phần
+   tử absolute tính từ PADDING box, còn input width:100% lại nằm trong CONTENT
+   box — nên nút gửi và mép phải ô nhập trùng khít nhau, mất khe hở. Bỏ padding
+   để nút thụt vào đúng 5px, cân với (44-34)/2 theo chiều dọc. */
+#page-forum .fpc-cmt-compose {
+  position: relative; flex: 1; min-width: 0;
+  display: block; padding: 0 !important;
+}
+#page-forum .fpc-cmt-input {
+  width: 100%; height: 44px;
+  padding: 0 50px 0 18px;
+  border-radius: 999px;
+  background: var(--edu-input-bg) !important;
+  border: 1px solid var(--edu-input-border) !important;
+  color: var(--edu-t1) !important;
+  font-family: var(--edu-font); font-size: 14px;
+  outline: none;
+  box-shadow: none !important;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+#page-forum .fpc-cmt-input::placeholder { color: var(--edu-t5); }
+/* focus nhẹ: viền tím nhạt + quầng mờ, thay cho viền tím đặc trước đây */
+#page-forum .fpc-cmt-input:focus {
+  border-color: rgba(185,63,240,.45) !important;
+  box-shadow: 0 0 0 3px rgba(185,63,240,.10) !important;
+}
+#page-forum .fpc-cmt-send {
+  position: absolute; top: 50%; right: 5px;
+  transform: translateY(-50%);
+  width: 34px; height: 34px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: none; border-radius: 999px;
+  background: var(--edu-accent-grad) !important;
+  color: #fff !important;
+  font-size: 16px; font-weight: 700; line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(185,63,240,.3);
+  transition: filter .15s ease;
+}
+#page-forum .fpc-cmt-send:hover { filter: brightness(1.06); }
+
+/* ── Thu hẹp ─────────────────────────────────────────────────── */
+@media (max-width: 1240px) {
+  .edu-d-grid { grid-template-columns: 1fr; }
+  .edu-d-stats { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .edu-header-bar { flex-wrap: wrap; padding: 20px 20px 0; margin-bottom: 24px; }
+  .edu-page-title { font-size: 32px; }
+  .edu-header-bar .search-wrap { width: 100%; }
+  .edu-d-recent { grid-template-columns: 1fr; }
+}
