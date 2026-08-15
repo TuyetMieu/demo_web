@@ -770,6 +770,20 @@ function sortCourses(courseList) {
 }
 
 /* ── Course rendering ── */
+/* Đường dẫn ảnh dùng cho THẺ khóa học.
+   Khối ảnh trên thẻ rất ngang (365×150) còn ảnh bìa là 3:2, nên có sẵn bản cắt
+   riêng `<id>-card.webp` (xem docs/tinh-nang — sinh bằng sharp, chọn vùng nổi
+   bật) để không cắt mất dòng tiêu đề in trong ảnh. Ảnh hero trang chi tiết
+   khung gần vuông hơn nên vẫn dùng bản gốc.
+   Chỉ đổi tên khi đường dẫn ĐÚNG quy ước của hệ thống; ảnh quản trị tự đặt
+   (tên khác) thì dùng nguyên, vì không có bản -card đi kèm. */
+function _courseCardArt(image) {
+  var url = '/' + String(image).replace(/^\/+/, '');
+  return /^\/static\/images\/[A-Za-z0-9_]+\.webp$/.test(url)
+    ? url.replace(/\.webp$/, '-card.webp')
+    : url;
+}
+
 function renderCourses() {
   var grid = document.getElementById("courses-grid");
   var empty = document.getElementById("empty-state");
@@ -867,7 +881,13 @@ function renderCourses() {
         '<div class="edu-c-card fx-fade-up' + (c.enrolled ? " is-enrolled" : "") + '"',
         ' style="animation-delay:' + Math.min(i * 0.05, 0.4) + 's"',
         ' onclick="peGo(\'' + goUrl + "')\">",
-        '<div class="edu-c-art">',
+        // Ảnh bìa thật (13/08/2026). Trước đây khối này chỉ là vân chéo CSS —
+        // c.image backend vẫn trả nhưng không ai dùng. Đặt qua style nội tuyến
+        // vì mỗi khóa một ảnh; nền vân chéo trong CSS giữ nguyên làm lớp lót
+        // lúc ảnh chưa tải xong hoặc khóa chưa có ảnh.
+        '<div class="edu-c-art' + (c.image ? ' has-img' : '') + '"',
+        c.image ? ' style="background-image:url(\'' + _courseCardArt(c.image) + '\')"' : '',
+        '>',
         '<span class="edu-c-art-label">' + (c.subtitle || c.tag || "") + "</span>",
         c.enrolled ? '<span class="edu-c-enrolled">Đang học</span>' : "",
         "</div>",

@@ -1941,6 +1941,10 @@ body.dark .rmv-del:hover { background: #EF4444; }
 .fpc-share-btn:hover { background: var(--bg); color: var(--t1); border-color: rgba(255,255,255,0.12); }
 .fpc-react-count { opacity: 0.7; font-weight: 400; margin-left: 2px; }
 
+/* Emoji react của CHÍNH MÌNH trên nút bài viết (👍/❤️/😂/😮/😢/😡).
+   line-height 1 để emoji không đội cao nút so với 2 nút SVG bên cạnh. */
+.fpc-react-emoji { font-size: 14px; line-height: 1; }
+
 .fpc-like-btn {
   display: flex;
   align-items: center;

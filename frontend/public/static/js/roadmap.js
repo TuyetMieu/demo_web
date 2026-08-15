@@ -1,50 +1,60 @@
 /* ══════════════════════════════════════════════════
-   ROADMAP — Định hướng học tập theo khóa học trên nền tảng.
-   Danh mục lộ trình tĩnh (ROADMAP_LIST/ROADMAP_DATA/ROADMAP_DETAILS
-   trong roadmapData.js). Trạng thái node:
-   · Chặng gắn khóa học (section.course) → TỰ ĐỘNG suy từ tiến độ
-     thật (/api/enrolled): đang học → active, 100% → done.
-   · Node kỹ năng bổ trợ → user tự đánh dấu; lưu localStorage (tri-state)
-     và đồng bộ "done" lên server qua /api/roadmap (roadmap_progress).
-   Roadmap cá nhân (canvas kéo-thả) giữ nguyên ở main.js.
+   ROADMAP — Lộ trình học TUYẾN TÍNH.
+
+   Mỗi lộ trình là MỘT mạch thẳng từ trên xuống, không rẽ nhánh:
+   các chủ đề con của một chặng nằm trong drawer chi tiết chứ không
+   vẽ thành node trái/phải như bản cũ.
+
+   Tab bar:
+     [✏️ Tùy chỉnh]  ← luôn đứng đầu, canvas kéo-thả của người dùng
+     [🎯 Lộ trình của tôi]  ← sinh từ khảo sát (nếu có)
+     [<các lộ trình đã ghim>]  [+]
+
+   Trạng thái chặng:
+     · Chặng gắn khóa học (stage.course) → TỰ ĐỘNG suy từ tiến độ thật
+       (/api/enrolled): đang học → active, 100% → done.
+     · Chặng còn lại → user tự đánh dấu; lưu localStorage (tri-state)
+       và đồng bộ "done" lên server qua /api/roadmap.
+
+   Định danh: mọi thứ chạy bằng roadmap ID (slug), KHÔNG phải tên hiển
+   thị — đổi tên tiếng Việt không làm mất tiến độ đã lưu.
    ══════════════════════════════════════════════════ */
 (function () {
-  var LS_PINNED = 'roadmap_pinned_v2';
-  var LS_ACTIVE = 'roadmap_active_v2';
-  var LS_PROGRESS = 'roadmap_progress_v3';
-  var LS_SEEN_GENERATED = 'roadmap_generated_seen_v1';
-  var DEFAULT_PINNED = ['Frontend Web', 'Python & AI'];
-  var MY_ROADMAP_TAB = 'Lộ trình của tôi';
+  /* v4: bản cũ lưu theo TÊN lộ trình và danh mục đã thay đổi hoàn toàn,
+     nên dùng key mới thay vì cố migrate dữ liệu không còn ánh xạ được. */
+  var LS_PINNED = 'roadmap_pinned_v4';
+  var LS_ACTIVE = 'roadmap_active_v4';
+  var LS_PROGRESS = 'roadmap_progress_v4';
+  var LS_SEEN_GENERATED = 'roadmap_generated_seen_v2';
 
-  function listMeta(name) {
+  var CUSTOM_TAB = 'personal';        // tab "Tùy chỉnh" (canvas kéo-thả)
+  var MY_TAB = '__my__';              // tab "Lộ trình của tôi" (từ khảo sát)
+  var DEFAULT_PINNED = ['frontend', 'backend', 'ai-engineer'];
+
+  /* ── Truy cập danh mục ── */
+  function listMeta(id) {
     return (typeof ROADMAP_LIST !== 'undefined')
-      ? ROADMAP_LIST.find(function (r) { return r.name === name; })
+      ? ROADMAP_LIST.find(function (r) { return r.id === id; })
       : null;
   }
-  /* Slug ổn định làm roadmap_id khi lưu tiến độ lên server */
-  function roadmapSlug(name) {
-    var meta = listMeta(name);
-    return meta ? meta.id : null;
-  }
-  function isValidTab(name) {
-    return name === 'personal' || name === MY_ROADMAP_TAB || !!listMeta(name);
+  function isValidTab(id) {
+    return id === CUSTOM_TAB || id === MY_TAB || !!listMeta(id);
   }
 
   function getPinned() {
     var v = null;
     try { v = JSON.parse(localStorage.getItem(LS_PINNED)); } catch (e) { /* noop */ }
     if (!Array.isArray(v)) v = DEFAULT_PINNED.slice();
-    // Lọc tên lộ trình cũ không còn tồn tại (đổi danh mục giữa các phiên bản)
     v = v.filter(isValidTab);
     return v.length ? v : DEFAULT_PINNED.slice();
   }
   function setPinned(arr) { localStorage.setItem(LS_PINNED, JSON.stringify(arr)); }
   function getActive() {
-    var name = localStorage.getItem(LS_ACTIVE);
-    if (name && isValidTab(name)) return name;
+    var id = localStorage.getItem(LS_ACTIVE);
+    if (id && isValidTab(id)) return id;
     return getPinned()[0] || DEFAULT_PINNED[0];
   }
-  function setActive(name) { localStorage.setItem(LS_ACTIVE, name); }
+  function setActive(id) { localStorage.setItem(LS_ACTIVE, id); }
   function getOverrides() {
     try { return JSON.parse(localStorage.getItem(LS_PROGRESS)) || {}; }
     catch (e) { return {}; }
@@ -71,11 +81,7 @@
         .then(function (data) {
           _enrolledReady = true;
           // /enrolled trả { ok, enrolled: [...] } — BỌC, không phải mảng trần.
-          // Gán thẳng `data` làm window.enrolledCourses (biến dùng CHUNG với
-          // main.js) thì .length là undefined: lộ trình không tô được khóa nào
-          // là done/active, và mục "Khóa học của tôi" cũng trống theo.
           var list = Array.isArray(data) ? data : ((data && data.enrolled) || []);
-          // Không ghi đè nếu main.js đã nạp dữ liệu mới hơn
           if (!window.enrolledCourses || !window.enrolledCourses.length) {
             window.enrolledCourses = list;
           }
@@ -99,9 +105,9 @@
   }
 
   /* ── Tiến độ thủ công lưu server (bảng roadmap_progress) ──
-     Server chỉ lưu boolean done; trạng thái 'active' chỉ nằm ở localStorage. */
-  var _serverDone = {};        // slug -> mảng item_id đã done
-  var _serverDonePromise = {}; // slug -> promise fetch (chống gửi trùng)
+     Server chỉ lưu boolean done; 'active' chỉ nằm ở localStorage. */
+  var _serverDone = {};
+  var _serverDonePromise = {};
   function fetchServerDone(slug) {
     if (!_serverDonePromise[slug]) {
       _serverDonePromise[slug] = fetch('/api/roadmap?roadmap_id=' + encodeURIComponent(slug),
@@ -134,33 +140,28 @@
     if (!done && idx !== -1) arr.splice(idx, 1);
   }
 
-  /* ── Trạng thái hiệu lực của 1 node ──
-     Ưu tiên: tiến độ khóa học thật > đánh dấu tay (local) > done từ server > mặc định. */
-  function getStatus(name, node) {
-    if (node.course) {
-      var cs = courseStatus(node.course);
+  /* ── Trạng thái hiệu lực của 1 chặng ──
+     Ưu tiên: tiến độ khóa học thật > đánh dấu tay (local) > done từ server. */
+  function getStatus(rmId, stage) {
+    if (stage.course) {
+      var cs = courseStatus(stage.course);
       if (cs) return cs;
     }
-    var ov = getOverrides()[name + ':' + node.id];
+    var ov = getOverrides()[rmId + ':' + stage.id];
     if (ov) return ov;
-    var slug = roadmapSlug(name);
-    if (slug && _serverDone[slug] && _serverDone[slug].indexOf(node.id) !== -1) return 'done';
-    return node.status || 'locked';
+    if (_serverDone[rmId] && _serverDone[rmId].indexOf(stage.id) !== -1) return 'done';
+    return 'locked';
   }
 
-  var SC = {
-    done:   { mainBg: '#0E2A20', childBg: 'rgba(16,185,129,0.16)', stroke: '#10B981', mainText: '#6EE7B7', childText: '#34D399' },
-    active: { mainBg: '#0E2138', childBg: 'rgba(59,130,246,0.18)', stroke: '#3B82F6', mainText: '#93C5FD', childText: '#60A5FA' },
-    locked: { mainBg: '#101725', childBg: 'rgba(255,255,255,0.05)', stroke: 'rgba(255,255,255,0.16)', mainText: '#CBD5E1', childText: '#64748B' }
-  };
+  var STATUS_LABEL = { done: 'Đã học', active: 'Đang học', locked: 'Chưa học' };
   var RES_CFG = {
-    article: { icon: 'file-text', label: 'Bài viết', color: '#60A5FA' },
-    video:   { icon: 'youtube', label: 'Video', color: '#F87171' },
-    course:  { icon: 'graduation-cap', label: 'Khóa học', color: '#A78BFA' },
-    docs:    { icon: 'book-open', label: 'Tài liệu', color: '#34D399' }
+    article: { icon: 'file-text', label: 'Bài viết' },
+    video:   { icon: 'youtube', label: 'Video' },
+    course:  { icon: 'graduation-cap', label: 'Khóa học' },
+    docs:    { icon: 'book-open', label: 'Tài liệu' }
   };
 
-  function escHtmlR(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function escHtmlR(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function esc(s) { return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
 
   /* Sắp xếp node id theo số thứ tự thực (rm_2 < rm_10), không theo alphabet */
@@ -172,111 +173,191 @@
     });
   }
 
-  function normalize(name) {
-    var sections = (typeof ROADMAP_DATA !== 'undefined' && ROADMAP_DATA[name]) || [];
-    function norm(raw) {
-      if (Array.isArray(raw)) return { label: raw[0], status: raw[1] };
-      return { label: raw, status: 'locked' };
-    }
-    return sections.map(function (sec, i) {
-      var main = norm(sec.main);
-      var left = (sec.left || []).map(norm);
-      var right = (sec.right || []).map(norm);
+  /* ── Chuẩn hoá dữ liệu 1 lộ trình → mảng chặng tuyến tính ── */
+  function normalize(rmId) {
+    var raw = (typeof ROADMAP_DATA !== 'undefined' && ROADMAP_DATA[rmId]) || [];
+    return raw.map(function (s, i) {
       return {
-        main: Object.assign({ id: i + '-m', course: sec.course || null }, main),
-        left: left.map(function (n, j) { return Object.assign({ id: i + '-l' + j }, n); }),
-        right: right.map(function (n, j) { return Object.assign({ id: i + '-r' + j }, n); })
+        id: 's' + i,
+        title: s.title,
+        desc: s.desc || '',
+        topics: s.topics || [],
+        course: s.course || null,
+        res: s.res || []
       };
     });
   }
 
-  /* ── Tab bar ── */
+  /* Cache chặng của tab đang mở — drawer tra cứu lại mà không dựng lại mảng */
+  var _stages = [];
+  var _stagesFor = null;
+  function stagesOf(rmId) {
+    if (_stagesFor === rmId) return _stages;
+    return normalize(rmId);
+  }
+
+  /* ══════════════ TAB BAR ══════════════ */
+  function tabBtn(id, label, isActive, extraCls) {
+    return '<button type="button" class="rm-tab' + (isActive ? ' active' : '') + (extraCls ? ' ' + extraCls : '') +
+      '" onclick="window.roadmapSelectTab(\'' + esc(id) + '\')">' + label + '</button>';
+  }
+
   function renderTabs() {
     var bar = document.getElementById('rm-tabbar');
     if (!bar) return;
     var pinned = getPinned();
     var active = getActive();
-    var html = pinned.map(function (name) {
-      var meta = listMeta(name);
-      var isActive = active === name;
-      return '<button type="button" class="rm-tab' + (isActive ? ' active' : '') + '" onclick="window.roadmapSelectTab(\'' + esc(name) + '\')">' +
-        (meta ? meta.emoji + ' ' : '') + escHtmlR(name) + '</button>';
-    }).join('');
-    html += '<button type="button" class="rm-tab' + (active === 'personal' ? ' active' : '') + '" onclick="window.roadmapSelectTab(\'personal\')">✏️ Cá nhân</button>';
+
+    // "Tùy chỉnh" LUÔN đứng đầu — đây là chỗ người dùng tự dựng lộ trình riêng.
+    var html = tabBtn(CUSTOM_TAB, '<span class="rm-tab-ico">✏️</span> Tùy chỉnh',
+      active === CUSTOM_TAB, 'rm-tab--custom');
     html += '<span class="rm-tab-divider"></span>';
-    html += '<button type="button" class="rm-tab-plus" onclick="window.roadmapOpenBrowse()" aria-label="Thêm lộ trình"><span data-icon="plus" data-size="14"></span></button>';
+
+    html += pinned.map(function (id) {
+      if (id === MY_TAB) {
+        return tabBtn(id, '<span class="rm-tab-ico">🎯</span> Lộ trình của tôi', active === id, 'rm-tab--mine');
+      }
+      var meta = listMeta(id);
+      if (!meta) return '';
+      return tabBtn(id, '<span class="rm-tab-ico">' + meta.emoji + '</span> ' + escHtmlR(meta.name), active === id);
+    }).join('');
+
+    html += '<button type="button" class="rm-tab-plus" onclick="window.roadmapOpenBrowse()" aria-label="Thêm lộ trình">' +
+      '<span data-icon="plus" data-size="14"></span></button>';
     bar.innerHTML = html;
     if (window.mountIcons) mountIcons(bar);
   }
 
-  /* ── Node box ── */
-  function nodeBoxHtml(name, node, kind) {
-    var status = getStatus(name, node);
-    var c = SC[status] || SC.locked;
-    var cls = 'rm-node rm-node--' + kind + ' rm-node--' + status;
-    var onclick = "window.roadmapOpenDrawer('" + esc(name) + "','" + node.id + "','" + esc(node.label) + "','" + (node.course || '') + "')";
-    if (kind === 'main') {
-      // Chip 📚: chặng gắn khóa học trên nền tảng — tiến độ tự đồng bộ
-      var chip = node.course
-        ? '<span class="rm-node-chip" title="Có khóa học trên nền tảng — tiến độ tự đồng bộ">📚</span>'
-        : '';
-      return '<button type="button" class="' + cls + (node.course ? ' rm-node--course' : '') + '" style="background:' + c.mainBg + ';border-color:' + c.stroke + ';color:' + c.mainText + '" onclick="' + onclick + '">' + escHtmlR(node.label) + chip + '</button>';
-    }
-    var dotHtml = status === 'done'
-      ? '<span class="rm-node-dot rm-node-dot--done">' + (window.Icon ? Icon('check', 9, '#fff') : '') + '</span>'
-      : '<span class="rm-node-dot rm-node-dot--' + status + '"></span>';
-    return '<button type="button" class="' + cls + '" style="background:' + c.childBg + ';border-color:' + c.stroke + ';color:' + c.childText + '" onclick="' + onclick + '">' + escHtmlR(node.label) + dotHtml + '</button>';
-  }
-
-  /* ── HTML cho danh sách section (spine + main + nhánh trái/phải) — dùng chung
-     bởi renderFlow (roadmap tĩnh) và renderGeneratedRoadmap (roadmap cá nhân) ── */
-  function buildSectionsHtml(name, sections) {
-    return sections.map(function (sec) {
-      var leftHtml = sec.left.length
-        ? '<div class="rm-branch rm-branch--left">' + sec.left.map(function (n) { return nodeBoxHtml(name, n, 'child'); }).join('') + '</div><div class="rm-dash rm-dash--right"></div>'
-        : '';
-      var rightHtml = sec.right.length
-        ? '<div class="rm-dash rm-dash--left"></div><div class="rm-branch rm-branch--right">' + sec.right.map(function (n) { return nodeBoxHtml(name, n, 'child'); }).join('') + '</div>'
-        : '';
-      return '<div class="rm-section">' +
-        '<div class="rm-section-left">' + leftHtml + '</div>' +
-        '<div class="rm-section-main">' + nodeBoxHtml(name, sec.main, 'main') + '</div>' +
-        '<div class="rm-section-right">' + rightHtml + '</div>' +
-        '</div>';
-    }).join('');
-  }
-
-  /* ── Header cá nhân hoá cho tab "Lộ trình của tôi" ── */
-  function renderMyHeader(apiData, sections) {
-    var el = document.getElementById('rm-my-header');
-    if (!el) return;
-    var done = 0;
-    sections.forEach(function (sec) {
-      if (getStatus(MY_ROADMAP_TAB, sec.main) === 'done') done++;
+  /* ══════════════ HEADER LỘ TRÌNH ══════════════ */
+  function progressOf(rmId, stages) {
+    var done = 0, active = 0;
+    stages.forEach(function (s) {
+      var st = getStatus(rmId, s);
+      if (st === 'done') done++; else if (st === 'active') active++;
     });
-    var pct = sections.length ? Math.round((done / sections.length) * 100) : 0;
+    return {
+      done: done, active: active, locked: stages.length - done - active,
+      total: stages.length,
+      pct: stages.length ? Math.round((done / stages.length) * 100) : 0
+    };
+  }
+
+  function renderHeader(opts) {
+    var el = document.getElementById('rm-head');
+    if (!el) return;
+    var p = opts.progress;
+    var courseCount = (opts.stages || []).filter(function (s) { return !!s.course; }).length;
     el.innerHTML =
-      '<div class="rm-my-header-icon">' + (apiData.icon || '🎯') + '</div>' +
-      '<div class="rm-my-header-body">' +
-        '<span class="rm-my-header-badge">✨ Dựa trên khảo sát của bạn</span>' +
-        '<h3 class="rm-my-header-title">' + escHtmlR(apiData.title || 'Lộ trình của tôi') + '</h3>' +
-        '<p class="rm-my-header-sub">' + sections.length + ' chặng học · Gợi ý riêng cho mục tiêu của bạn</p>' +
+      '<div class="rm-head-icon">' + (opts.emoji || '🧭') + '</div>' +
+      '<div class="rm-head-body">' +
+        (opts.badge ? '<span class="rm-head-badge">' + opts.badge + '</span>' : '') +
+        '<h2 class="rm-head-title">' + escHtmlR(opts.title) + '</h2>' +
+        '<p class="rm-head-desc">' + escHtmlR(opts.desc || '') + '</p>' +
+        '<div class="rm-head-meta">' +
+          '<span class="rm-head-chip">' + p.total + ' chặng</span>' +
+          (courseCount ? '<span class="rm-head-chip rm-head-chip--course">📚 ' + courseCount + ' chặng có khóa học</span>' : '') +
+          '<span class="rm-head-chip">Lộ trình thẳng, học từ trên xuống</span>' +
+        '</div>' +
       '</div>' +
-      '<div class="rm-my-header-progress">' +
-        '<span class="rm-my-header-pct">' + pct + '%</span>' +
-        '<div class="rm-my-header-bar"><div class="rm-my-header-bar-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="rm-head-ring" style="--pct:' + p.pct + '">' +
+        '<svg viewBox="0 0 44 44" aria-hidden="true">' +
+          '<circle class="rm-ring-bg" cx="22" cy="22" r="19"></circle>' +
+          '<circle class="rm-ring-fg" cx="22" cy="22" r="19" stroke-dasharray="' + (p.pct * 1.194) + ' 200"></circle>' +
+        '</svg>' +
+        '<span class="rm-head-pct">' + p.pct + '<i>%</i></span>' +
+        '<span class="rm-head-ring-sub">' + p.done + '/' + p.total + ' chặng</span>' +
       '</div>';
     el.style.display = 'flex';
   }
 
-  function hideMyHeader() {
-    var el = document.getElementById('rm-my-header');
+  /* ══════════════ MẠCH LỘ TRÌNH (tuyến tính) ══════════════ */
+  function stageHtml(rmId, stage, index, total) {
+    var status = getStatus(rmId, stage);
+    var isLast = index === total - 1;
+    var topics = (stage.topics || []).slice(0, 4).map(function (t) {
+      return '<span class="rm-topic">' + escHtmlR(t) + '</span>';
+    }).join('');
+    var more = (stage.topics || []).length > 4
+      ? '<span class="rm-topic rm-topic--more">+' + ((stage.topics || []).length - 4) + '</span>'
+      : '';
+    var mark = status === 'done'
+      ? '<span class="rm-step-check">✓</span>'
+      : '<span class="rm-step-num">' + (index + 1) + '</span>';
+
+    return '<div class="rm-step rm-step--' + status + (isLast ? ' rm-step--last' : '') + '" style="animation-delay:' + Math.min(index * 0.035, 0.4) + 's">' +
+      '<div class="rm-step-rail"><span class="rm-step-bullet">' + mark + '</span></div>' +
+      '<button type="button" class="rm-step-card" onclick="window.roadmapOpenDrawer(\'' + esc(rmId) + '\',\'' + esc(stage.id) + '\')">' +
+        '<span class="rm-step-head">' +
+          '<span class="rm-step-title">' + escHtmlR(stage.title) + '</span>' +
+          (stage.course ? '<span class="rm-step-course" title="Có khóa học trên nền tảng — tiến độ tự đồng bộ">📚 Khóa học</span>' : '') +
+          '<span class="rm-step-state">' + STATUS_LABEL[status] + '</span>' +
+        '</span>' +
+        (stage.desc ? '<span class="rm-step-desc">' + escHtmlR(stage.desc) + '</span>' : '') +
+        (topics ? '<span class="rm-step-topics">' + topics + more + '</span>' : '') +
+      '</button>' +
+      '</div>';
+  }
+
+  function buildTrackHtml(rmId, stages) {
+    return '<div class="rm-track">' + stages.map(function (s, i) {
+      return stageHtml(rmId, s, i, stages.length);
+    }).join('') + '</div>';
+  }
+
+  /* ── Render một lộ trình tĩnh ── */
+  function renderFlow(rmId) {
+    var wrap = document.getElementById('rm-flow-wrap');
+    if (!wrap) return;
+    var meta = listMeta(rmId);
+    var stages = normalize(rmId);
+    _stages = stages; _stagesFor = rmId;
+
+    if (!stages.length) {
+      hideHeader();
+      wrap.innerHTML = '<div class="rm-flow-empty">Chưa có dữ liệu cho lộ trình này.</div>';
+      renderStatsPill({ done: 0, active: 0, locked: 0 });
+      return;
+    }
+    var p = progressOf(rmId, stages);
+    renderHeader({
+      emoji: meta ? meta.emoji : '🧭',
+      title: meta ? meta.name : rmId,
+      desc: meta ? meta.desc : '',
+      stages: stages,
+      progress: p
+    });
+    wrap.innerHTML = buildTrackHtml(rmId, stages);
+    renderStatsPill(p);
+    ensureAsyncData(rmId);
+  }
+
+  /* Nạp dữ liệu bất đồng bộ (tiến độ khóa học + done từ server) đúng 1 lần,
+     xong thì render lại tab nếu user vẫn đang xem. */
+  function ensureAsyncData(rmId) {
+    var need = [];
+    if (!_enrolledReady) need.push(fetchEnrolled());
+    if (!_serverDone[rmId]) need.push(fetchServerDone(rmId));
+    if (!need.length) return;
+    Promise.all(need).then(function () {
+      if (getActive() === rmId) renderFlow(rmId);
+    });
+  }
+
+  function hideHeader() {
+    var el = document.getElementById('rm-head');
     if (el) el.style.display = 'none';
   }
 
-  /* Fetch '/api/me/roadmap' đúng 1 lần cho cả vòng đời trang — mọi nơi cần
-     dữ liệu (initRoadmapPage, roadmapSelectTab) đều dùng chung promise này,
-     tránh gửi trùng request khi cả 2 cùng cần dữ liệu lúc mới vào trang. */
+  function renderStatsPill(p) {
+    var pill = document.getElementById('rm-stats-pill');
+    if (!pill) return;
+    pill.innerHTML =
+      '<span class="rm-stat-item"><span class="rm-stat-dot rm-stat-dot--done"></span><b>' + p.done + '</b> Đã học</span>' +
+      '<span class="rm-stat-item"><span class="rm-stat-dot rm-stat-dot--active"></span><b>' + p.active + '</b> Đang học</span>' +
+      '<span class="rm-stat-item"><span class="rm-stat-dot rm-stat-dot--locked"></span><b>' + p.locked + '</b> Chưa học</span>';
+  }
+
+  /* ══════════════ TAB "LỘ TRÌNH CỦA TÔI" (từ khảo sát) ══════════════ */
   var _myRoadmapPromise = null;
   function fetchMyRoadmap() {
     if (!_myRoadmapPromise) {
@@ -287,8 +368,7 @@
           return window._myRoadmapCache;
         })
         .catch(function () {
-          // Lỗi mạng (backend chưa dậy / offline) KHÔNG cache — lần gọi sau
-          // (mở lại tab, initRoadmapPage) thử lại thay vì kẹt null vĩnh viễn.
+          // Lỗi mạng (backend chưa dậy / offline) KHÔNG cache — lần gọi sau thử lại.
           _myRoadmapPromise = null;
           return null;
         });
@@ -296,11 +376,6 @@
     return _myRoadmapPromise;
   }
 
-  /* ── Render roadmap generated từ API (tab "Lộ trình của tôi") ──
-     Tái sử dụng cấu trúc spine+section giống các roadmap tĩnh khác,
-     nhưng mỗi chặng chỉ có 1 node chính (không rẽ nhánh trái/phải) vì
-     đây là chuỗi tuần tự theo đúng thứ tự học. Node có course_id (từ
-     nodes_json) cũng tự đồng bộ tiến độ khóa học như roadmap tĩnh. ── */
   function renderGeneratedRoadmap(apiData) {
     window._generatedRoadmapData = apiData;
     var wrap = document.getElementById('rm-flow-wrap');
@@ -308,102 +383,49 @@
     var nodesObj = apiData.nodes || {};
     var nodeIds = sortNodeIds(Object.keys(nodesObj));
     if (!nodeIds.length) {
-      hideMyHeader();
-      wrap.innerHTML = '<div class="rm-flow-empty">Bạn chưa có node nào. Sử dụng phần "Cá nhân" để tạo lộ trình của riêng bạn.</div>';
-      renderStatsPill(MY_ROADMAP_TAB, []);
+      hideHeader();
+      wrap.innerHTML = '<div class="rm-flow-empty">Bạn chưa có chặng nào. Dùng tab <b>Tùy chỉnh</b> để tự dựng lộ trình của riêng bạn.</div>';
+      renderStatsPill({ done: 0, active: 0, locked: 0 });
       return;
     }
-    var sections = nodeIds.map(function (nid) {
-      var nodeData = nodesObj[nid] || {};
-      var node = { id: nid, label: nodeData.title || nid, status: 'locked', course: nodeData.course_id || null };
-      return { main: node, left: [], right: [] };
+    var stages = nodeIds.map(function (nid) {
+      var d = nodesObj[nid] || {};
+      return {
+        id: nid,
+        title: d.title || nid,
+        desc: '',                 // desc của node sinh ra là HTML → chỉ hiện trong drawer
+        html: d.desc || '',
+        topics: [],
+        course: d.course_id || null,
+        res: []
+      };
     });
-    renderMyHeader(apiData, sections);
-    wrap.innerHTML = '<div class="rm-spine"></div>' + buildSectionsHtml(MY_ROADMAP_TAB, sections);
-    renderStatsPill(MY_ROADMAP_TAB, sections);
+    _stages = stages; _stagesFor = MY_TAB;
+
+    var p = progressOf(MY_TAB, stages);
+    renderHeader({
+      emoji: apiData.icon || '🎯',
+      badge: '✨ Dựa trên khảo sát của bạn',
+      title: apiData.title || 'Lộ trình của tôi',
+      desc: 'Chuỗi chặng học được gợi ý riêng cho mục tiêu bạn đã khai trong bộ khảo sát.',
+      stages: stages,
+      progress: p
+    });
+    wrap.innerHTML = buildTrackHtml(MY_TAB, stages);
+    renderStatsPill(p);
     if (window.mountIcons) mountIcons(wrap);
   }
 
-  /* ── Flow chính (roadmap tĩnh) ── */
-  function renderFlow(name) {
-    hideMyHeader();
-    var wrap = document.getElementById('rm-flow-wrap');
-    if (!wrap) return;
-    var sections = normalize(name);
-    if (!sections.length) {
-      wrap.innerHTML = '<div class="rm-flow-empty">Chưa có dữ liệu cho lộ trình này.</div>';
-      renderStatsPill(name, []);
-      return;
-    }
-    wrap.innerHTML = '<div class="rm-spine"></div>' + buildSectionsHtml(name, sections);
-    renderStatsPill(name, sections);
-    ensureAsyncData(name);
-  }
-
-  /* Nạp dữ liệu bất đồng bộ (tiến độ khóa học + done từ server) đúng 1 lần,
-     xong thì render lại tab nếu user vẫn đang xem — các lần render sau
-     dữ liệu đã có sẵn trong cache nên không lặp. */
-  function ensureAsyncData(name) {
-    var need = [];
-    if (!_enrolledReady) need.push(fetchEnrolled());
-    var slug = roadmapSlug(name);
-    if (slug && !_serverDone[slug]) need.push(fetchServerDone(slug));
-    if (!need.length) return;
-    Promise.all(need).then(function () {
-      if (getActive() === name) renderFlow(name);
-    });
-  }
-
-  function renderStatsPill(name, sections) {
-    var pill = document.getElementById('rm-stats-pill');
-    if (!pill) return;
-    var done = 0, active = 0, locked = 0;
-    (sections || []).forEach(function (sec) {
-      [sec.main].concat(sec.left, sec.right).forEach(function (n) {
-        var st = getStatus(name, n);
-        if (st === 'done') done++; else if (st === 'active') active++; else locked++;
-      });
-    });
-    pill.innerHTML =
-      '<span class="rm-stat-item"><span class="rm-stat-dot" style="background:#10B981"></span><b style="color:#10B981">' + done + '</b> Đã học</span>' +
-      '<span class="rm-stat-item"><span class="rm-stat-dot" style="background:#3B82F6"></span><b style="color:#3B82F6">' + active + '</b> Đang học</span>' +
-      '<span class="rm-stat-item"><span class="rm-stat-dot" style="background:#64748B"></span><b style="color:#64748B">' + locked + '</b> Chưa học</span>';
-  }
-
-  /* ── Chuyển tab ── */
-  window.roadmapSelectTab = function (name) {
-    setActive(name);
+  /* ══════════════ CHUYỂN TAB ══════════════ */
+  window.roadmapSelectTab = function (id) {
+    setActive(id);
     renderTabs();
     var flowScroll = document.querySelector('.rm-flow-scroll');
     var statsPill = document.getElementById('rm-stats-pill');
     var personalView = document.getElementById('roadmap-personal-view');
-    if (name === MY_ROADMAP_TAB) {
-      // Render roadmap generated từ API. Lưu ý: .rm-flow-scroll là block
-      // container bình thường (header + flow-wrap xếp DỌC) — không phải flex.
-      if (flowScroll) flowScroll.style.display = '';
-      if (personalView) personalView.style.display = 'none';
-      if (statsPill) statsPill.style.display = 'flex';
-      // GUARD: capture tab được yêu cầu — nếu user chuyển sang tab khác trước
-      // khi fetch xong, callback phải bỏ qua, KHÔNG được ghi đè nội dung tab hiện tại.
-      var requestedTab = name;
-      Promise.all([fetchMyRoadmap(), fetchEnrolled()]).then(function (results) {
-        if (getActive() !== requestedTab) return; // tab đã đổi, không ghi đè
-        var data = results[0];
-        if (data) {
-          renderGeneratedRoadmap(data);
-        } else {
-          hideMyHeader();
-          // QUAN TRỌNG: ghi vào #rm-flow-wrap, KHÔNG PHẢI .rm-flow-scroll —
-          // flowScroll là container cha chứa cả #rm-my-header lẫn #rm-flow-wrap,
-          // ghi đè innerHTML của nó sẽ XÓA VĨNH VIỄN 2 element con này khỏi DOM,
-          // khiến các tab khác không tìm thấy #rm-flow-wrap để render nữa
-          // (getElementById trả null) — nội dung "trống" bị dính lại mọi tab.
-          var emptyWrap = document.getElementById('rm-flow-wrap');
-          if (emptyWrap) emptyWrap.innerHTML = '<div class="rm-flow-empty">Bạn chưa có lộ trình gợi ý nào. Hãy hoàn thành bộ khảo sát để nhận lộ trình phù hợp.</div>';
-        }
-      });
-    } else if (name === 'personal') {
-      hideMyHeader();
+
+    if (id === CUSTOM_TAB) {
+      hideHeader();
       if (flowScroll) flowScroll.style.display = 'none';
       if (statsPill) statsPill.style.display = 'none';
       if (personalView) personalView.style.display = 'flex';
@@ -413,20 +435,49 @@
       } else if (typeof loadPersonalRoadmap === 'function') {
         loadPersonalRoadmap();
       }
-    } else {
-      if (flowScroll) flowScroll.style.display = '';
-      if (statsPill) statsPill.style.display = '';
-      if (personalView) personalView.style.display = 'none';
-      renderFlow(name);
+      return;
     }
+
+    if (flowScroll) flowScroll.style.display = '';
+    if (personalView) personalView.style.display = 'none';
+    if (statsPill) statsPill.style.display = '';
+
+    if (id === MY_TAB) {
+      // GUARD: nếu user đổi tab trước khi fetch xong, callback phải bỏ qua.
+      // fetchServerDone(MY_TAB) đi kèm: roadmapSetStatus PUSH tiến độ tay của
+      // tab này lên server dưới roadmap_id '__my__', nên cũng phải NẠP lại,
+      // không thì đánh dấu xong đổi tab quay về là mất.
+      var requested = id;
+      Promise.all([fetchMyRoadmap(), fetchEnrolled(), fetchServerDone(MY_TAB)]).then(function (results) {
+        if (getActive() !== requested) return;
+        var data = results[0];
+        if (data) {
+          renderGeneratedRoadmap(data);
+        } else {
+          hideHeader();
+          // QUAN TRỌNG: ghi vào #rm-flow-wrap, KHÔNG PHẢI .rm-flow-scroll —
+          // flowScroll là container cha chứa cả #rm-head lẫn #rm-flow-wrap,
+          // ghi đè innerHTML của nó sẽ XÓA 2 element con này khỏi DOM.
+          var emptyWrap = document.getElementById('rm-flow-wrap');
+          if (emptyWrap) {
+            emptyWrap.innerHTML = '<div class="rm-flow-empty">Bạn chưa có lộ trình gợi ý nào. ' +
+              'Hãy <a href="/questionaire">hoàn thành bộ khảo sát</a> để nhận lộ trình phù hợp.</div>';
+          }
+          renderStatsPill({ done: 0, active: 0, locked: 0 });
+        }
+      });
+      return;
+    }
+
+    renderFlow(id);
   };
 
+  /* ══════════════ DRAWER CHI TIẾT ══════════════ */
   function courseButtonHtml(courseId, label) {
     return '<button type="button" class="rm-course-btn" onclick="window.location.href=\'/courses/' + escHtmlR(courseId) + '\'">' +
       '<span data-icon="graduation-cap" data-size="15"></span> ' + (label || 'Xem khóa học') + '</button>';
   }
 
-  /* Khối tiến độ khóa học trong drawer (node gắn course) */
   function courseProgressHtml(courseId) {
     var c = findEnrolled(courseId);
     if (!c) {
@@ -448,97 +499,108 @@
       '</div>' + courseButtonHtml(courseId, btnLabel);
   }
 
-  /* ── Detail Drawer ── */
-  window.roadmapOpenDrawer = function (name, nodeId, label, courseArg) {
+  function resourcesHtml(list) {
+    return (list || []).map(function (r, i) {
+      var rc = RES_CFG[r.type] || RES_CFG.article;
+      var attrs;
+      if (r.course_id) {
+        attrs = 'href="#" onclick="event.preventDefault();window.location.href=\'/courses/' + escHtmlR(r.course_id) + '\'"';
+      } else if (r.url) {
+        attrs = 'href="' + escHtmlR(r.url) + '" target="_blank" rel="noopener noreferrer"';
+      } else {
+        attrs = 'href="#" onclick="event.preventDefault()"';
+      }
+      return '<a class="rm-res-item" ' + attrs + ' style="animation-delay:' + (i * 0.05) + 's">' +
+        '<span class="rm-res-icon"><span data-icon="' + rc.icon + '" data-size="15"></span></span>' +
+        '<span class="rm-res-body"><span class="rm-res-title">' + escHtmlR(r.title) + '</span>' +
+        '<span class="rm-res-meta">' + rc.label + ' · ' + escHtmlR(r.source) + '</span></span>' +
+        '<span data-icon="external-link" data-size="14"></span>' +
+        '</a>';
+    }).join('');
+  }
+
+  /* Fallback theo từ khoá — dùng cho node sinh từ khảo sát */
+  function detailByLabel(label) {
+    if (typeof ROADMAP_DETAILS === 'undefined') return null;
+    var key = String(label).toLowerCase().trim().replace(/^\d+[.)]\s*/, '');
+    return ROADMAP_DETAILS[key] || null;
+  }
+
+  window.roadmapOpenDrawer = function (rmId, stageId) {
     var drawer = document.getElementById('rm-drawer');
     var backdrop = document.getElementById('rm-drawer-backdrop');
     if (!drawer) return;
-    drawer.dataset.roadmap = name;
-    drawer.dataset.nodeId = nodeId;
-    drawer.dataset.label = label;
-    document.getElementById('rm-drawer-title').textContent = label;
 
-    // Key tra ROADMAP_DETAILS: bỏ số thứ tự "1. " ở đầu label
-    var key = String(label).toLowerCase().trim().replace(/^\d+[.)]\s*/, '');
-    var detail = (typeof ROADMAP_DETAILS !== 'undefined') ? ROADMAP_DETAILS[key] : null;
-    var descEl = document.getElementById('rm-drawer-desc');
-    var resWrap = document.getElementById('rm-drawer-resources');
+    var stages = stagesOf(rmId);
+    var idx = -1;
+    for (var i = 0; i < stages.length; i++) { if (stages[i].id === stageId) { idx = i; break; } }
+    if (idx === -1) return;
+    var stage = stages[idx];
 
-    // course_id: node tĩnh (section.course) > node generated (nodes_json) > detail
-    var courseId = courseArg || null;
-    var genDesc = null;
-    if (name === MY_ROADMAP_TAB && window._generatedRoadmapData) {
-      var nodeData = window._generatedRoadmapData.nodes && window._generatedRoadmapData.nodes[nodeId];
-      if (nodeData) {
-        courseId = courseId || nodeData.course_id;
-        genDesc = nodeData.desc;
-      }
-    }
-    if (!courseId && detail) courseId = detail.course_id;
+    drawer.dataset.roadmap = rmId;
+    drawer.dataset.stageId = stageId;
 
-    var status = getStatus(name, { id: nodeId, course: courseId });
+    var fallback = detailByLabel(stage.title);
+    var courseId = stage.course || (fallback && fallback.course_id) || null;
+    var status = getStatus(rmId, stage);
+
+    document.getElementById('rm-drawer-step').textContent = 'Chặng ' + (idx + 1) + '/' + stages.length;
+    document.getElementById('rm-drawer-title').textContent = stage.title;
+
     renderDrawerStatus(status, !!courseId);
 
-    // Ưu tiên desc từ nodes_json (roadmap generated) — desc là HTML phong phú
-    if (genDesc) {
-      descEl.innerHTML = genDesc;
-      resWrap.innerHTML = courseId ? courseProgressHtml(courseId) : '';
-    } else if (detail) {
-      descEl.textContent = detail.desc;
-      resWrap.innerHTML = (detail.resources || []).map(function (r, i) {
-        var rc = RES_CFG[r.type] || RES_CFG.article;
-        var attrs;
-        if (r.course_id) {
-          attrs = 'href="#" onclick="event.preventDefault();window.location.href=\'/courses/' + escHtmlR(r.course_id) + '\'"';
-        } else if (r.url) {
-          attrs = 'href="' + escHtmlR(r.url) + '" target="_blank" rel="noopener noreferrer"';
-        } else {
-          attrs = 'href="#" onclick="event.preventDefault()"';
-        }
-        return '<a class="rm-res-item" ' + attrs + ' style="animation-delay:' + (i * 0.05) + 's">' +
-          '<span class="rm-res-icon" style="background:' + rc.color + '1A"><span data-icon="' + rc.icon + '" data-size="15" data-color="' + rc.color + '"></span></span>' +
-          '<span class="rm-res-body"><span class="rm-res-title">' + escHtmlR(r.title) + '</span>' +
-          '<span class="rm-res-meta"><span style="color:' + rc.color + ';font-weight:600">' + rc.label + '</span> · ' + escHtmlR(r.source) + '</span></span>' +
-          '<span data-icon="external-link" data-size="14" data-color="#64748B"></span>' +
-          '</a>';
-      }).join('');
-      // Node gắn khóa học → thêm khối tiến độ + nút học
-      if (courseId) resWrap.innerHTML += courseProgressHtml(courseId);
-    } else if (courseId) {
-      descEl.textContent = 'Chặng này gắn với một khóa học trên nền tảng — hoàn thành khóa học để hoàn thành chặng.';
-      resWrap.innerHTML = courseProgressHtml(courseId);
+    // Mô tả: HTML từ roadmap sinh sẵn > desc tĩnh > fallback từ khoá
+    var descEl = document.getElementById('rm-drawer-desc');
+    if (stage.html) descEl.innerHTML = stage.html;
+    else descEl.textContent = stage.desc || (fallback && fallback.desc) ||
+      'Chặng này chưa có mô tả chi tiết. Hãy tìm hiểu thêm về "' + stage.title + '" qua tài liệu chính thức.';
+
+    // Chủ đề con — thay cho các node nhánh của bản cũ
+    var topicsEl = document.getElementById('rm-drawer-topics');
+    if ((stage.topics || []).length) {
+      topicsEl.innerHTML = '<div class="rm-drawer-sec-label">Nội dung cần nắm</div>' +
+        '<ul class="rm-drawer-topics">' + stage.topics.map(function (t) {
+          return '<li>' + escHtmlR(t) + '</li>';
+        }).join('') + '</ul>';
+      topicsEl.style.display = '';
     } else {
-      descEl.textContent = 'Chưa có mô tả chi tiết cho mục này. Hãy tự tìm hiểu thêm về "' + label + '" qua tài liệu chính thức hoặc khóa học liên quan.';
-      resWrap.innerHTML = '';
+      topicsEl.innerHTML = '';
+      topicsEl.style.display = 'none';
     }
-    if (window.mountIcons) mountIcons(resWrap);
+
+    // Tài nguyên + khối tiến độ khóa học
+    var res = (stage.res && stage.res.length) ? stage.res : ((fallback && fallback.resources) || []);
+    var resWrap = document.getElementById('rm-drawer-resources');
+    var resHtml = res.length
+      ? '<div class="rm-drawer-sec-label">Tài nguyên</div>' + resourcesHtml(res)
+      : '';
+    resWrap.innerHTML = resHtml + (courseId ? courseProgressHtml(courseId) : '');
+
+    if (window.mountIcons) mountIcons(drawer);
     drawer.classList.add('open');
     if (backdrop) backdrop.classList.add('open');
   };
 
-  /* Node gắn khóa học: trạng thái tự đồng bộ, không cho toggle tay.
-     Node kỹ năng bổ trợ: toggle 3 trạng thái như cũ. */
-  function renderDrawerStatus(status, isCourseNode) {
+  /* Chặng gắn khóa học: trạng thái tự đồng bộ, không cho toggle tay. */
+  function renderDrawerStatus(status, isCourseStage) {
     var wrap = document.getElementById('rm-drawer-status');
     if (!wrap) return;
     var items = [
-      { key: 'locked', label: 'Chưa học', color: '#64748B' },
-      { key: 'active', label: 'Đang học', color: '#3B82F6' },
-      { key: 'done', label: 'Đã học', color: '#10B981' }
+      { key: 'locked', label: 'Chưa học' },
+      { key: 'active', label: 'Đang học' },
+      { key: 'done', label: 'Đã học' }
     ];
-    if (isCourseNode) {
-      var it = items.filter(function (x) { return x.key === status; })[0] || items[0];
+    if (isCourseStage) {
       wrap.innerHTML =
         '<div class="rm-drawer-autonote">' +
-        '<span class="rm-status-chip" style="background:' + it.color + '22;border-color:' + it.color + ';color:' + it.color + '">' + it.label + '</span>' +
-        '<span>Tự đồng bộ từ tiến độ khóa học</span>' +
+        '<span class="rm-status-chip rm-status-chip--' + status + '">' + STATUS_LABEL[status] + '</span>' +
+        '<span>Tự đồng bộ từ tiến độ khóa học trên nền tảng</span>' +
         '</div>';
       return;
     }
     wrap.innerHTML = items.map(function (it) {
-      var isActive = status === it.key;
-      return '<button type="button" class="rm-status-btn' + (isActive ? ' active' : '') + '" style="' +
-        (isActive ? 'background:' + it.color + '22;border-color:' + it.color + ';color:' + it.color + ';' : '') +
+      return '<button type="button" class="rm-status-btn rm-status-btn--' + it.key +
+        (status === it.key ? ' active' : '') +
         '" onclick="window.roadmapSetStatus(\'' + it.key + '\')">' + it.label + '</button>';
     }).join('');
   }
@@ -546,16 +608,14 @@
   window.roadmapSetStatus = function (status) {
     var drawer = document.getElementById('rm-drawer');
     if (!drawer) return;
-    var name = drawer.dataset.roadmap, nodeId = drawer.dataset.nodeId;
-    setOverride(name + ':' + nodeId, status);
-    // Đồng bộ done lên server để giữ tiến độ qua thiết bị khác
-    var slug = roadmapSlug(name);
-    if (slug) pushServerDone(slug, nodeId, status === 'done');
+    var rmId = drawer.dataset.roadmap, stageId = drawer.dataset.stageId;
+    setOverride(rmId + ':' + stageId, status);
+    pushServerDone(rmId, stageId, status === 'done');
     renderDrawerStatus(status, false);
-    if (name === MY_ROADMAP_TAB) {
+    if (rmId === MY_TAB) {
       if (window._generatedRoadmapData) renderGeneratedRoadmap(window._generatedRoadmapData);
     } else {
-      renderFlow(name);
+      renderFlow(rmId);
     }
   };
 
@@ -566,13 +626,15 @@
     if (backdrop) backdrop.classList.remove('open');
   };
 
-  /* ── Browse grid ── */
+  /* ══════════════ PANEL KHÁM PHÁ ══════════════ */
   window.roadmapOpenBrowse = function () {
     var grid = document.getElementById('rm-browse');
     var backdrop = document.getElementById('rm-browse-backdrop');
     renderBrowseList('');
     if (grid) grid.classList.add('open');
     if (backdrop) backdrop.classList.add('open');
+    var input = document.getElementById('rm-browse-search');
+    if (input) { input.value = ''; setTimeout(function () { input.focus(); }, 260); }
   };
   window.roadmapCloseBrowse = function () {
     var grid = document.getElementById('rm-browse');
@@ -582,11 +644,11 @@
   };
   window.roadmapBrowseSearch = function (q) { renderBrowseList(q); };
 
-  /* Số khóa học trên nền tảng mà lộ trình đi qua (đếm course_id duy nhất) */
-  function countCourses(name) {
-    var sections = (typeof ROADMAP_DATA !== 'undefined' && ROADMAP_DATA[name]) || [];
+  /* Số chặng gắn khóa học trên nền tảng (đếm course_id duy nhất) */
+  function countCourses(rmId) {
+    var stages = (typeof ROADMAP_DATA !== 'undefined' && ROADMAP_DATA[rmId]) || [];
     var seen = {};
-    sections.forEach(function (sec) { if (sec.course) seen[sec.course] = 1; });
+    stages.forEach(function (s) { if (s.course) seen[s.course] = 1; });
     return Object.keys(seen).length;
   }
 
@@ -597,27 +659,31 @@
     var pinned = getPinned();
     var groups = {}, order = [];
     ROADMAP_LIST.forEach(function (r) {
-      if (q && r.name.toLowerCase().indexOf(q) < 0 && r.desc.toLowerCase().indexOf(q) < 0) return;
+      // Khớp cả tên nhóm: gõ "bảo mật" phải ra được Cyber Security dù mô tả
+      // của nó không chứa đúng cụm từ đó.
+      var hay = (r.name + ' ' + r.desc + ' ' + r.group).toLowerCase();
+      if (q && hay.indexOf(q) < 0) return;
       if (!groups[r.group]) { groups[r.group] = []; order.push(r.group); }
       groups[r.group].push(r);
     });
     var html = order.map(function (g) {
       var cards = groups[g].map(function (r) {
-        var isPinned = pinned.indexOf(r.name) !== -1;
-        var nCourses = countCourses(r.name);
-        var badge = r.comingSoon
-          ? ' <span class="rm-browse-soon">SẮP CÓ KHÓA HỌC</span>'
-          : (r.isNew ? ' <span class="rm-browse-new">MỚI</span>' : '');
-        var metaHtml = nCourses
-          ? '<div class="rm-browse-meta">📚 ' + nCourses + ' khóa học trên nền tảng</div>'
-          : (r.comingSoon ? '<div class="rm-browse-meta rm-browse-meta--soon">Lộ trình tham khảo — tự đánh dấu tiến độ</div>' : '');
-        return '<div class="rm-browse-card">' +
-          '<div class="rm-browse-card-hd"><span class="rm-browse-emoji">' + r.emoji + '</span>' +
-          '<span class="rm-browse-name">' + escHtmlR(r.name) + badge + '</span>' +
-          '<button type="button" class="rm-browse-pin' + (isPinned ? ' active' : '') + '" onclick="window.roadmapTogglePin(\'' + esc(r.name) + '\')">' + (isPinned ? '✓' : '+') + '</button>' +
-          '</div>' +
+        var isPinned = pinned.indexOf(r.id) !== -1;
+        var nCourses = countCourses(r.id);
+        var nStages = ((typeof ROADMAP_DATA !== 'undefined' && ROADMAP_DATA[r.id]) || []).length;
+        return '<div class="rm-browse-card' + (isPinned ? ' is-pinned' : '') + '">' +
+          '<button type="button" class="rm-browse-open" onclick="window.roadmapGoTo(\'' + esc(r.id) + '\')">' +
+            '<span class="rm-browse-emoji">' + r.emoji + '</span>' +
+            '<span class="rm-browse-name">' + escHtmlR(r.name) + '</span>' +
+          '</button>' +
+          '<button type="button" class="rm-browse-pin' + (isPinned ? ' active' : '') +
+            '" title="' + (isPinned ? 'Bỏ ghim' : 'Ghim lên tab bar') + '"' +
+            ' onclick="window.roadmapTogglePin(\'' + esc(r.id) + '\')">' + (isPinned ? '✓' : '+') + '</button>' +
           '<p class="rm-browse-desc">' + escHtmlR(r.desc) + '</p>' +
-          metaHtml +
+          '<div class="rm-browse-meta">' +
+            '<span class="rm-browse-tag">' + nStages + ' chặng</span>' +
+            (nCourses ? '<span class="rm-browse-tag rm-browse-tag--course">📚 ' + nCourses + ' khóa học</span>' : '') +
+          '</div>' +
           '</div>';
       }).join('');
       return '<div class="rm-browse-group-label">' + escHtmlR(g) + '</div><div class="rm-browse-grid">' + cards + '</div>';
@@ -625,56 +691,58 @@
     list.innerHTML = html || '<div class="rm-flow-empty">Không tìm thấy lộ trình phù hợp.</div>';
   }
 
-  window.roadmapTogglePin = function (name) {
+  /* Mở lộ trình mà không cần ghim */
+  window.roadmapGoTo = function (rmId) {
     var pinned = getPinned();
-    var idx = pinned.indexOf(name);
+    if (pinned.indexOf(rmId) === -1) {
+      pinned.push(rmId);
+      setPinned(pinned);
+    }
+    window.roadmapSelectTab(rmId);
+    window.roadmapCloseBrowse();
+  };
+
+  window.roadmapTogglePin = function (rmId) {
+    var pinned = getPinned();
+    var idx = pinned.indexOf(rmId);
     var wasUnpinned = idx === -1;
-    if (wasUnpinned) pinned.push(name); else pinned.splice(idx, 1);
+    if (wasUnpinned) pinned.push(rmId); else pinned.splice(idx, 1);
     setPinned(pinned);
     renderTabs();
     var searchInput = document.getElementById('rm-browse-search');
     renderBrowseList(searchInput ? searchInput.value : '');
-    if (wasUnpinned) {
-      window.roadmapSelectTab(name);
-      window.roadmapCloseBrowse();
+    // Vừa bỏ ghim đúng tab đang xem → chuyển về tab đầu tiên còn lại
+    if (!wasUnpinned && getActive() === rmId) {
+      window.roadmapSelectTab(getPinned()[0] || CUSTOM_TAB);
     }
   };
 
-  /* ── Entry point — gọi từ navigate('roadmap') ── */
+  /* ══════════════ ENTRY POINT ══════════════ */
   window.initRoadmapPage = function () {
     // Render ngay tab hiện có — không chờ fetch, tránh màn hình trống khi
     // Neon DB cold-start (có thể mất vài giây để phản hồi).
     renderTabs();
     window.roadmapSelectTab(getActive());
-
-    // Nạp trước tiến độ khóa học — render lại tab khi có dữ liệu (ensureAsyncData
-    // trong renderFlow đã lo phần này cho tab tĩnh).
     fetchEnrolled();
 
-    // Kiểm tra xem user đã có roadmap gợi ý từ khảo sát chưa. Nếu có VÀ đây
-    // là lần đầu phát hiện (chưa từng "seen"), tự động ghim + chuyển vào tab
-    // đó đúng 1 lần duy nhất — các lần load trang sau tôn trọng tab user
-    // đang chọn, không tự ý nhảy tab.
+    // Có roadmap gợi ý từ khảo sát → ghim tab "Lộ trình của tôi"; chỉ tự nhảy
+    // vào đó ĐÚNG MỘT LẦN, các lần sau tôn trọng tab user đang chọn.
     fetchMyRoadmap().then(function (data) {
       if (!data) return;
-
       var pinned = getPinned();
-      if (pinned.indexOf(MY_ROADMAP_TAB) === -1) {
-        pinned.unshift(MY_ROADMAP_TAB);
+      if (pinned.indexOf(MY_TAB) === -1) {
+        pinned.unshift(MY_TAB);
         setPinned(pinned);
       }
-
       var alreadySeen = localStorage.getItem(LS_SEEN_GENERATED) === '1';
       if (!alreadySeen) {
         localStorage.setItem(LS_SEEN_GENERATED, '1');
-        setActive(MY_ROADMAP_TAB);
+        setActive(MY_TAB);
         renderTabs();
-        window.roadmapSelectTab(MY_ROADMAP_TAB);
+        window.roadmapSelectTab(MY_TAB);
       } else {
         renderTabs();
-        // Nếu tab đang mở đúng là "Lộ trình của tôi" (vd. lần load đầu đã
-        // render placeholder rỗng vì fetch chưa xong), render lại với data thật.
-        if (getActive() === MY_ROADMAP_TAB) renderGeneratedRoadmap(data);
+        if (getActive() === MY_TAB) renderGeneratedRoadmap(data);
       }
     });
   };

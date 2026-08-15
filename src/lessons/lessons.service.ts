@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -103,6 +104,29 @@ export class LessonsService {
       where: { id: courseId },
     });
     if (!course) throw new NotFoundException('Không tìm thấy khóa học');
+
+    // Bước 1a: PHẢI đã ghi danh khoá này (lỗ hổng BB2-7, MEDIUM, đã chứng
+    // minh khai thác được trên môi trường thật).
+    //
+    // Trước đây endpoint chỉ kiểm tra course tồn tại + lessonNo hợp lệ, KHÔNG
+    // hề kiểm tra Enrollment — gọi thẳng POST /api/lessons/:n/complete với
+    // courseId của MỘT KHOÁ BẤT KỲ (kể cả chưa đăng ký) vẫn cộng XP/streak
+    // bình thường. Đo thật: 6 request tới các khoá chưa ghi danh (python,
+    // java) cộng liền +60 XP; tổng toàn bộ bài học farmable được ngay lập
+    // tức lên tới ~4460 XP, đủ vượt bảng xếp hạng bằng một script vài phút —
+    // và còn ghi "tiến độ" giả cho một khoá chưa từng đăng ký.
+    //
+    // Cùng thông điệp/kiểu lỗi với courses.service.ts#rateCourse (chỗ khác
+    // đã có sẵn đúng kiểm tra này) để giữ nhất quán trải nghiệm lỗi trong
+    // toàn hệ thống.
+    const enrolled = await this.prisma.enrollment.findUnique({
+      where: { userId_courseId: { userId, courseId } },
+    });
+    if (!enrolled) {
+      throw new ForbiddenException(
+        'Bạn cần đăng ký khoá học trước khi hoàn thành bài học',
+      );
+    }
 
     // Bước 1b: CHẶN số thứ tự bài học nằm ngoài khoá học.
     // Không có kiểm tra này thì gọi /api/lessons/<số bất kỳ>/complete sẽ tạo ra

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+import { ALL_PRECEDENCES } from '@/components/PageStyles';
+
 // Root layout TỐI THIỂU — không import CSS global nào ở đây.
 // Mỗi page/layout con tự import ĐÚNG tổ hợp CSS của template gốc
 // (MIGRATION_PLAN.md §4) để tránh class trùng tên giữa các file đè nhau.
@@ -28,6 +30,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: `window.__PE_API_ORIGIN=${JSON.stringify(API_ORIGIN)};`,
           }}
         />
+        {/* ── GHIM THỨ TỰ CÁC NHÓM CSS ──────────────────────────────────────
+            React xếp nhóm `precedence` theo THỨ TỰ LẦN ĐẦU GẶP, không theo
+            tên nhóm. Layout nhóm (base) nạp theme/auth/chatbot và PageStyles
+            tự thêm edu-responsive vào đó, nên hạng 50 bị ghim ngay vị trí thứ
+            4 — TRƯỚC style.css (12) và edu-theme.css (40). Hậu quả đo được:
+            toàn bộ lớp co giãn bị đè, ở 390px sidebar vẫn rộng 272px thay vì
+            thành ngăn kéo, ở 768px vẫn 272px thay vì rail 84px.
+
+            Mấy thẻ <style> rỗng dưới đây đăng ký TRƯỚC mọi thứ khác, đúng thứ
+            tự hạng, nên về sau file nào rơi vào hạng nào cũng nằm đúng chỗ.
+            Chúng không chứa quy tắc nào nên không ảnh hưởng giao diện. */}
+        {ALL_PRECEDENCES.map((p) => (
+          <style key={p} href={`pe-anchor-${p}`} precedence={p}>
+            {`/*${p}*/`}
+          </style>
+        ))}
         {/* ── CSS TỐI THIỂU, NỘI TUYẾN ──────────────────────────────────────
             Mọi thứ "ẩn mặc định" trong app này đều chỉ được ẩn bởi file CSS
             ngoài (/static/css/*). Các file đó nạp qua <link> nên có một khoảng
@@ -59,8 +77,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               '.hidden{display:none!important}.chatbot-hidden{display:none!important}',
               /* hộp thoại: ẩn bằng opacity+visibility, mở bằng .active
                  (dashboard.css .un-overlay/.streak-overlay, ChangePassword.css .cp-overlay) */
-              '.un-overlay,.cp-overlay,.streak-overlay{opacity:0;visibility:hidden}',
-              '.un-overlay.active,.cp-overlay.active,.streak-overlay.active{opacity:1;visibility:visible}',
+              '.un-overlay,.cp-overlay,.streak-overlay,.edu-rq-overlay{opacity:0;visibility:hidden}',
+              '.un-overlay.active,.cp-overlay.active,.streak-overlay.active,.edu-rq-overlay.active{opacity:1;visibility:visible}',
               /* bảng thông báo + menu người dùng, mở bằng .open (style.css:243/372) */
               '.bell-panel,.user-dropdown{opacity:0;visibility:hidden}',
               '.bell-panel.open,.user-dropdown.open{opacity:1;visibility:visible}',

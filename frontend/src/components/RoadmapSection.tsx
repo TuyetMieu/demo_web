@@ -1,7 +1,8 @@
 'use client';
 
-// Port roadmap.html (partial include trong dashboard.html) — markup 1:1.
-// Logic render/kéo-thả nằm nguyên trong roadmap.js + main.js (legacy).
+// Trang "Lộ trình" — mạch học TUYẾN TÍNH (1 lộ trình gốc, không rẽ nhánh).
+// Markup ở đây chỉ là khung; toàn bộ render/kéo-thả nằm trong
+// roadmap.js (danh mục + mạch chặng) và main.js (canvas tab Tùy chỉnh).
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const W = () => window as any;
 
@@ -9,37 +10,39 @@ export default function RoadmapSection() {
   return (
     <div className="page" id="page-roadmap">
       <div className="rm-root">
-        {/* Tab bar (pinned roadmaps + Cá nhân + nút Browse) */}
+        {/* Tab bar — "Tùy chỉnh" luôn đứng đầu, rồi tới các lộ trình đã ghim */}
         <div className="rm-tabbar" id="rm-tabbar"></div>
 
-        {/* Stats pill (done/active/locked của roadmap đang xem) */}
+        {/* Stats pill (đã học / đang học / chưa học của lộ trình đang xem) */}
         <div className="rm-stats-pill" id="rm-stats-pill"></div>
 
-        {/* Flow chính: spine + sections (main + nhánh trái/phải) */}
+        {/* Mạch lộ trình */}
         <div className="rm-flow-scroll">
-          {/* Intro: mục đích trang — định hướng vào các khóa học trên nền tảng */}
           <div className="rm-page-intro">
             <span className="rm-page-intro-icon">🧭</span>
-            <div>
-              <div className="rm-page-intro-title">Lộ trình học tập</div>
-              <p className="rm-page-intro-sub">
-                Hoàn thành <a className="rm-page-intro-link" href="/questionaire">bộ khảo sát</a> để nhận lộ trình sinh riêng
-                cho bạn, hoặc chọn một lộ trình có sẵn. Chặng có huy hiệu <span className="rm-page-intro-chip">📚</span> gắn
-                với khóa học trên nền tảng — tiến độ tự cập nhật khi bạn hoàn thành bài học.
-              </p>
-            </div>
+            <p className="rm-page-intro-sub">
+              Mỗi lộ trình là một mạch thẳng, học lần lượt từ trên xuống. Chặng có nhãn{' '}
+              <span className="rm-page-intro-chip">📚 Khóa học</span> gắn với khóa học trên nền tảng — tiến độ tự cập
+              nhật khi bạn học. Muốn lộ trình riêng? Làm{' '}
+              <a className="rm-page-intro-link" href="/questionaire">bộ khảo sát</a> hoặc tự dựng ở tab{' '}
+              <b>Tùy chỉnh</b>.
+            </p>
           </div>
-          <div className="rm-my-header" id="rm-my-header" style={{ display: 'none' }}></div>
+
+          {/* Header lộ trình: tên, mô tả, vòng tiến độ */}
+          <div className="rm-head" id="rm-head" style={{ display: 'none' }}></div>
+
+          {/* Danh sách chặng (render bởi roadmap.js) */}
           <div className="rm-flow-wrap" id="rm-flow-wrap"></div>
         </div>
 
-        {/* Cá nhân — canvas kéo-thả */}
+        {/* ── Tab "Tùy chỉnh" — canvas kéo-thả để tự dựng lộ trình ── */}
         <div id="roadmap-personal-view">
           <div className="rm-personal-hd">
             <div className="rm-personal-hd-left">
               <div className="rm-personal-icon">✏️</div>
               <div>
-                <div className="rm-personal-label">Lộ trình cá nhân của tôi</div>
+                <div className="rm-personal-label">Lộ trình tùy chỉnh của tôi</div>
                 <div className="rm-personal-sub">Kéo thả · Nhấn đúp để đổi tên · Click mũi tên để xóa</div>
               </div>
             </div>
@@ -51,7 +54,6 @@ export default function RoadmapSection() {
             </div>
           </div>
 
-          {/* Visual toolbar */}
           <div className="rmv-toolbar">
             <button className="rmv-btn rmv-btn-add" onClick={() => W().rmVAddNode()}>
               <span>➕</span> Thêm node
@@ -71,7 +73,6 @@ export default function RoadmapSection() {
             </div>
           </div>
 
-          {/* Canvas */}
           <div id="rm-visual-canvas" tabIndex={0}>
             <div id="rm-vcontent">
               <svg id="rm-arrows-svg" xmlns="http://www.w3.org/2000/svg"></svg>
@@ -79,21 +80,24 @@ export default function RoadmapSection() {
           </div>
         </div>
 
-        {/* Browse grid (26 lộ trình, pin/unpin) */}
+        {/* ── Panel khám phá lộ trình ── */}
         <div className="rm-browse-backdrop" id="rm-browse-backdrop" onClick={() => W().roadmapCloseBrowse()}></div>
         <div className="rm-browse" id="rm-browse" role="dialog" aria-label="Khám phá lộ trình">
           <div className="rm-browse-hd">
-            <span className="rm-browse-title">Khám phá lộ trình</span>
+            <div>
+              <span className="rm-browse-title">Khám phá lộ trình</span>
+              <span className="rm-browse-sub">26 lộ trình nghề nghiệp · click để mở, dấu + để ghim</span>
+            </div>
             <button className="rm-browse-close" onClick={() => W().roadmapCloseBrowse()} aria-label="Đóng">
               <span data-icon="x" data-size="16"></span>
             </button>
           </div>
           <div className="rm-browse-search-wrap">
-            <span data-icon="search" data-size="14" style={{ color: 'var(--t3)' }}></span>
+            <span data-icon="search" data-size="14"></span>
             <input
               type="text"
               id="rm-browse-search"
-              placeholder="Tìm lộ trình..."
+              placeholder="Tìm lộ trình… (frontend, dữ liệu, bảo mật…)"
               onInput={(e) => W().roadmapBrowseSearch(e.currentTarget.value)}
               autoComplete="off"
             />
@@ -101,11 +105,14 @@ export default function RoadmapSection() {
           <div className="rm-browse-list" id="rm-browse-list"></div>
         </div>
 
-        {/* Detail Drawer */}
+        {/* ── Drawer chi tiết chặng ── */}
         <div className="rm-drawer-backdrop" id="rm-drawer-backdrop" onClick={() => W().roadmapCloseDrawer()}></div>
-        <div className="rm-drawer" id="rm-drawer" role="dialog" aria-label="Chi tiết node">
+        <div className="rm-drawer" id="rm-drawer" role="dialog" aria-label="Chi tiết chặng học">
           <div className="rm-drawer-hd">
-            <h2 id="rm-drawer-title">—</h2>
+            <div className="rm-drawer-hd-body">
+              <span className="rm-drawer-step" id="rm-drawer-step"></span>
+              <h2 id="rm-drawer-title">—</h2>
+            </div>
             <button className="rm-drawer-close" onClick={() => W().roadmapCloseDrawer()} aria-label="Đóng">
               <span data-icon="x" data-size="16"></span>
             </button>
@@ -113,6 +120,7 @@ export default function RoadmapSection() {
           <div className="rm-drawer-body">
             <div className="rm-drawer-status" id="rm-drawer-status"></div>
             <p className="rm-drawer-desc" id="rm-drawer-desc"></p>
+            <div className="rm-drawer-topics-wrap" id="rm-drawer-topics"></div>
             <div className="rm-drawer-resources" id="rm-drawer-resources"></div>
           </div>
         </div>

@@ -321,3 +321,58 @@ else document.addEventListener('DOMContentLoaded', _initBell);
 // Quay lại trang bằng client-side routing — xem chú thích ở main.js
 // (_peInitMain). Chạy lại an toàn: _startBadgePolling đã tự chặn hẹn giờ trùng.
 document.addEventListener('pe:page-remount', _initBell);
+
+/* ── Chuông + streak LUÔN đứng cạnh nút ba gạch ở khổ điện thoại ────────
+   Quyết định thiết kế CỐ ĐỊNH cho mọi khổ điện thoại — không còn tùy vào
+   "có đủ chỗ hay không" như bản trước. Avatar ẩn hẳn bằng CSS
+   (`.edu-header-bar .user-chip-wrap` trong edu-responsive.css — ẩn ở đó
+   thay vì chỉ chờ JS để không có khung hình đầu tiên hiện avatar rồi mới
+   biến mất); Cá nhân/Cài đặt/Đăng xuất của nó đã có sẵn trong ngăn kéo nên
+   không mất chức năng gì.
+
+   Phải CHUYỂN HẲN node #bell-wrap/#edu-streak (không nhân bản) vì
+   main.js/dashboard.js tra hai id này bằng getElementById ở nhiều chỗ —
+   có 2 phần tử trùng id là vỡ hoàn toàn logic đó. CSS không có cách nào
+   "hiện một phần tử lồng trong DOM subtree khác" nên buộc phải dùng JS. */
+(function () {
+  var mq = window.matchMedia('(max-width: 639.98px)');
+
+  function applyMobileHeader(isPhone) {
+    var mobileBar = document.querySelector('.edu-mobile-bar');
+    var actions = document.querySelector('.edu-head-actions');
+    var bell = document.getElementById('bell-wrap');
+    var streak = document.getElementById('edu-streak');
+    var chip = document.getElementById('user-chip-wrap');
+    if (!mobileBar || !actions || !bell || !streak || !chip) return;
+
+    var isMoved = bell.parentElement === mobileBar;
+    if (isPhone === isMoved) return; // đã đúng trạng thái, khỏi động DOM
+
+    if (isPhone) {
+      var burger = mobileBar.querySelector('.edu-burger');
+      mobileBar.insertBefore(bell, burger);
+      mobileBar.insertBefore(streak, burger);
+    } else {
+      // trả đúng thứ tự gốc trong HeaderBar.tsx: tìm kiếm, chuông, streak, avatar
+      actions.insertBefore(bell, chip);
+      actions.insertBefore(streak, chip);
+    }
+    // `hidden` chỉ để trình đọc màn hình bỏ qua đúng ngữ nghĩa — việc ẨN
+    // THẬT SỰ do CSS `!important` đảm nhiệm (xem edu-responsive.css), vì
+    // `.edu-header-bar .user-chip-wrap{display:flex}` có độ đặc hiệu cao
+    // hơn `[hidden]{display:none}` mặc định của trình duyệt nên tự riêng
+    // `hidden` không đủ để ẩn avatar.
+    chip.hidden = isPhone;
+  }
+
+  function sync() { applyMobileHeader(mq.matches); }
+
+  // matchMedia bắn đúng lúc vượt qua mốc 639.98px — không cần tự debounce
+  // resize hay đoán khi nào cần tính lại như cách đo cũ.
+  if (typeof mq.addEventListener === 'function') mq.addEventListener('change', sync);
+  else mq.addListener(sync); // Safari cũ chưa có addEventListener trên MediaQueryList
+
+  if (document.readyState !== 'loading') sync();
+  else document.addEventListener('DOMContentLoaded', sync);
+  document.addEventListener('pe:page-remount', sync);
+})();

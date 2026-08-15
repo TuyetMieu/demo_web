@@ -15,6 +15,7 @@
     "start:prod": "node scripts/with-env.js node dist/main",
     "loadtest:prepare": "node scripts/loadtest-prepare.js",
     "loadtest": "node scripts/loadtest.js",
+    "streak:add": "node scripts/add-streak.mjs",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",

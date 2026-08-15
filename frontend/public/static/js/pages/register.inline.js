@@ -90,6 +90,12 @@
           throw new Error(errMsg);
         }
 
+        // Đăng ký bằng mật khẩu luôn đi qua /questionaire BẮT BUỘC trước khi
+        // tới dashboard — lúc đó questionnaireCompleted đã true nên
+        // edu-dashboard.js không còn cách nào tự nhận ra "vừa tạo tài khoản"
+        // từ /user nữa. Ghi cờ ở đây, đọc và xoá đúng 1 lần bên đó.
+        try { sessionStorage.setItem('pe_just_registered', '1'); } catch (e) { /* private mode */ }
+
         document.getElementById('successOverlay').classList.add('show');
         setTimeout(() => {
           document.getElementById('successOverlay').classList.remove('show');

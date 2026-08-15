@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 // Brilliant-inspired re-skin (Programming EDU.dc.html) — vertical nav rail
 // replacing the old horizontal Topbar. Reuses main.js's exact contract:
 // #topbar-nav wraps .nav-btn[data-page] buttons, #nav-underline exists
@@ -70,16 +72,78 @@ const NAV_ITEMS: { page: string; label: string }[] = [
 ];
 
 export default function Sidebar({ activePage = 'dashboard' }: { activePage?: string }) {
+  // Ngăn kéo (drawer) chỉ tồn tại ở khổ điện thoại — xem edu-responsive.css.
+  // Dùng state của React thay vì biến toàn cục như phần lớn code cũ: component
+  // này đã là 'use client', và mọi trang đều dựng lại nó nên không có trạng
+  // thái nào phải đồng bộ xuyên trang.
+  const [navOpen, setNavOpen] = useState(false);
+
+  // Khoá cuộn nền khi ngăn kéo mở, nếu không nền vẫn cuộn dưới lớp phủ.
+  // Đọc/ghi thẳng body.style thay vì thêm class: các file CSS cũ không có
+  // quy ước nào cho việc này nên thêm class mới dễ bị luật khác đè.
+  useEffect(() => {
+    if (!navOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') setNavOpen(false); };
+    document.addEventListener('keydown', onEsc);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener('keydown', onEsc);
+    };
+  }, [navOpen]);
+
+  // Điều hướng xong phải đóng ngăn kéo: trên SPA dashboard việc đổi tab KHÔNG
+  // làm component này unmount, nên nếu không đóng tay thì ngăn kéo che luôn
+  // trang vừa mở.
+  const go = (page: string) => { goToPage(page); setNavOpen(false); };
+
   return (
     <>
       <span id="sidebar-name" style={{ display: 'none' }}>—</span>
       <span id="sidebar-role" style={{ display: 'none' }}>Học viên</span>
 
-      <div className="topbar edu-sidebar-shell">
+      {/* Thanh trên cùng CHỈ hiện ở khổ điện thoại (CSS ẩn từ tablet trở lên):
+          logo + nút ba gạch, đúng bố cục bản thiết kế mobile. */}
+      <div className="edu-mobile-bar">
+        <div
+          className="edu-mobile-brand"
+          onClick={() => go('dashboard')}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') go('dashboard'); }}
+        >
+          <span className="edu-mobile-brand-c1">Programming</span>
+          <span className="edu-mobile-brand-c2">EDU</span>
+        </div>
+        <button
+          type="button"
+          className="edu-burger"
+          aria-label="Mở menu điều hướng"
+          aria-expanded={navOpen}
+          aria-controls="topbar-nav"
+          onClick={() => setNavOpen(true)}
+        >
+          <span /><span /><span />
+        </button>
+      </div>
+
+      {/* Lớp phủ sau ngăn kéo — bấm ra ngoài để đóng */}
+      <div
+        className={`edu-nav-backdrop${navOpen ? ' open' : ''}`}
+        onClick={() => setNavOpen(false)}
+        aria-hidden="true"
+      />
+
+      <div className={`topbar edu-sidebar-shell${navOpen ? ' edu-nav-open' : ''}`}>
+        {/* Không còn nút đóng (dấu X) riêng trong ngăn kéo — thừa vì đã có
+            .edu-nav-backdrop (bấm ra ngoài để đóng, xem onClick bên trên) và
+            trước đây nó đè lên đúng chỗ tên thương hiệu "Programming EDU". */}
+
         <div className="topbar-left">
           <div
             className="brand brand-always"
-            onClick={() => { goToPage('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            onClick={() => { go('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
             style={{ cursor: 'pointer' }}
             title="Về trang chủ"
           >
@@ -94,7 +158,7 @@ export default function Sidebar({ activePage = 'dashboard' }: { activePage?: str
               key={item.page}
               className={`nav-btn${item.page === activePage ? ' active' : ''}`}
               data-page={item.page}
-              onClick={() => goToPage(item.page)}
+              onClick={() => go(item.page)}
               aria-label={item.label}
             >
               <span className="nav-icon">{NAV_ICONS[item.page]}</span>
@@ -124,7 +188,7 @@ export default function Sidebar({ activePage = 'dashboard' }: { activePage?: str
             <span className="edu-tt-txt edu-tt-txt--toDark">Chế độ tối</span>
             <span className="edu-tt-txt edu-tt-txt--toLight">Chế độ sáng</span>
           </button>
-          <button type="button" className="nav-btn" data-page="settings" onClick={() => goToPage('settings')}>
+          <button type="button" className="nav-btn" data-page="settings" onClick={() => go('settings')}>
             <span className="nav-icon">
               <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
             </span>

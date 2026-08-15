@@ -42,6 +42,15 @@ const LEVEL_LABELS: Record<string, string> = {
   advanced: 'Nâng cao',
 };
 
+/**
+ * content_meta.image có phải giá trị do seed tự sinh (chưa ai tùy chỉnh) không?
+ * Seed cũ ghi đúng `static/images/<id>.svg`; chỉ khi khớp y hệt chuỗi đó — hoặc
+ * bỏ trống — ta mới thay bằng ảnh bìa mới, để không đè lên ảnh quản trị tự đặt.
+ */
+function isAutoImage(image: string | undefined, courseId: string): boolean {
+  return !image || image === `static/images/${courseId}.svg`;
+}
+
 @Injectable()
 export class CoursesService {
   private skillsCache: { data: unknown; expiresAt: number } | null = null;
@@ -352,7 +361,14 @@ export class CoursesService {
       description: meta.description ?? '',
       duration: meta.duration ?? '',
       tag: meta.tag ?? (c.language ?? '').toUpperCase(),
-      image: meta.image ?? `static/images/${c.id}.svg`,
+      // Ảnh bìa: từ 13/08/2026 mỗi khóa có ảnh thật (WebP) thay cho icon SVG
+      // phẳng. Giá trị cũ trong content_meta do seed ghi theo ĐÚNG quy ước
+      // `static/images/<id>.svg`, nên coi giá trị khớp y hệt quy ước đó là
+      // "chưa ai tùy chỉnh" và trả về ảnh mới — nhờ vậy không phải ghi lại
+      // cơ sở dữ liệu. Ảnh do quản trị đặt riêng (khác quy ước) vẫn giữ nguyên.
+      image: isAutoImage(meta.image, c.id)
+        ? `static/images/${c.id}.webp`
+        : meta.image,
       color: meta.color ?? c.accentColor ?? '#3B82F6',
       students: '0',
       lessons: c.lessonCount,
@@ -398,6 +414,12 @@ export class CoursesService {
       duration: meta.duration ?? '',
       color: meta.color ?? r.course.accentColor ?? '#3B82F6',
       accentColor: r.course.accentColor ?? meta.color ?? '#3B82F6',
+      // Cùng logic ảnh bìa với mapCourse() — /api/courses đã có ảnh thật từ
+      // 13/08/2026 nhưng mapEnrollment() (nuôi /api/enrolled, tức "Bài học gần
+      // đây" trên dashboard) bị bỏ sót nên card đó vẫn kẹt ở vân chéo CSS.
+      image: isAutoImage(meta.image, r.courseId)
+        ? `static/images/${r.courseId}.webp`
+        : meta.image,
       progress: r.progress,
       completedLessons: done,
       totalLessons: r.course.lessonCount,

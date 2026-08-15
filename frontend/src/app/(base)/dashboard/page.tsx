@@ -32,12 +32,15 @@ const SCRIPTS = [
   '/static/js/dashboard.js',
   // sau cùng: đổ dữ liệu cho các khối mới của màn dash theo design
   '/static/js/edu-dashboard.js',
+  // bài ôn tập tự sinh (thẻ "Ôn tập hôm nay") — phải sau edu-dashboard.js vì
+  // nút "Ôn ngay" ở đó gọi window.peOpenReviewQuiz
+  '/static/js/edu-review-quiz.js',
 ];
 
 export default function DashboardPage() {
   return (
     <>
-      <PageStyles hrefs={["/static/css/style.css","/static/css/dashboard.css","/static/css/pages.css","/static/css/ChangePassword.css","/static/css/skeleton.css","/static/css/dark-mode.css","/static/css/roadmap.css","/static/css/edu-theme.css","/static/css/edu-dashboard.css"]} />
+      <PageStyles hrefs={["/static/css/style.css","/static/css/dashboard.css","/static/css/pages.css","/static/css/ChangePassword.css","/static/css/skeleton.css","/static/css/dark-mode.css","/static/css/roadmap.css","/static/css/edu-theme.css","/static/css/edu-dashboard.css","/static/css/edu-review-quiz.css"]} />
       <title>Programming EDU</title>
       {/* PERF 2026-07-19: mermaid + svg-pan-zoom tải từ jsdelivr — preconnect
           cắt DNS+TLS handshake khỏi đường găng nạp script */}
@@ -91,6 +94,27 @@ export default function DashboardPage() {
                 <div className="edu-d-contest-cta-wrap">
                   <button className="edu-d-cta" id="edu-d-review-cta" type="button"></button>
                 </div>
+              </div>
+
+              {/* ── Hôm nay bạn đã học ──────────────────────────────────
+                  Bộ đếm các bài HOÀN THÀNH TRONG NGÀY, kèm nút gộp đúng
+                  những bài đó thành một đề củng cố. Khác thẻ "Ôn tập hôm
+                  nay" ở trên: bên kia ôn dàn trải mọi bài từng học và giới
+                  hạn một đề mỗi ngày, bên này bó vào buổi học hôm nay và
+                  làm lại bao nhiêu lần cũng được.
+                  Dữ liệu từ /api/quiz/today, do edu-dashboard.js đổ vào.
+                  Ẩn sẵn — chỉ hiện khi lấy được dữ liệu thật. */}
+              <div className="edu-d-card edu-d-today" id="edu-d-today" hidden>
+                <div className="edu-d-today-hd">
+                  <span className="edu-d-today-icon" aria-hidden="true">📖</span>
+                  <span className="edu-d-today-title">Hôm nay bạn đã học</span>
+                  <span className="edu-d-today-count" id="edu-d-today-count">0</span>
+                </div>
+                <ul className="edu-d-today-list" id="edu-d-today-list"></ul>
+                <p className="edu-d-today-sub" id="edu-d-today-sub"></p>
+                <button className="edu-d-cta edu-d-today-cta" id="edu-d-today-cta" type="button">
+                  Ôn lại bài hôm nay
+                </button>
               </div>
             </div>
 
@@ -637,6 +661,28 @@ export default function DashboardPage() {
           <p className="streak-sub">Bạn đang có chuỗi học liên tiếp tuyệt vời.<br />Học một chút hôm nay để không bị gián đoạn nhé!</p>
           <button className="streak-btn-go" onClick={() => W().streakGoLearn()}>Đi học thôi</button>
           <button className="streak-btn-skip" onClick={() => W().streakClose()}>Để sau</button>
+        </div>
+      </div>
+
+      {/* ★ HỘP THOẠI BÀI ÔN TẬP — nút "Ôn ngay" ở thẻ "Ôn tập hôm nay" mở cái
+          này thay vì chỉ nhảy sang tab Kỹ năng. Nội dung do edu-review-quiz.js
+          đổ vào (gọi /courses/:id/quiz/generate — backend tự sinh câu hỏi từ
+          các bài user ĐÃ hoàn thành). Để rỗng ở đây: React không giữ state nào
+          cho khối này nên không ghi đè lên phần JS đã vẽ. */}
+      <div className="edu-rq-overlay" id="edu-rq-overlay" role="dialog" aria-modal="true" aria-labelledby="edu-rq-title">
+        <div className="edu-rq-card">
+          <div className="edu-rq-head">
+            <div className="edu-rq-heads">
+              <div className="edu-rq-title" id="edu-rq-title">Ôn tập hôm nay</div>
+              <div className="edu-rq-sub" id="edu-rq-sub"></div>
+            </div>
+            <button type="button" className="edu-rq-close" id="edu-rq-close" aria-label="Đóng">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+            </button>
+          </div>
+          <div className="edu-rq-track" hidden><div className="edu-rq-bar" id="edu-rq-bar"></div></div>
+          <div className="edu-rq-body" id="edu-rq-body"></div>
+          <div className="edu-rq-foot" id="edu-rq-foot"></div>
         </div>
       </div>
 

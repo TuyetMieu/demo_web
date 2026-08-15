@@ -1,0 +1,538 @@
+/* ══════════════════════════════════════════════════════════════
+   EDU-RESPONSIVE — lớp co giãn cho điện thoại / máy tính bảng.
+
+   Nạp CUỐI CÙNG (hạng 50 trong PageStyles.tsx, sau mọi file edu-*),
+   và PageStyles tự thêm vào MỌI trang nên không trang nào bị sót.
+
+   ── VÌ SAO CÓ FILE NÀY ──────────────────────────────────────────
+   Trước đây các file CSS tự đặt điểm ngắt riêng, tổng cộng 18 mốc
+   khác nhau (480, 576, 600, 620, 640, 700, 720, 760, 768, 820, 860,
+   900, 920, 1023, 1024, 1100, 1240, 1439). Cùng một khối co lại ở
+   hai mốc lệch nhau vài chục pixel nên có dải chiều rộng mà bố cục
+   dở dang. File này KHÔNG xoá các mốc cũ (rủi ro cao, rải khắp 26
+   file) mà chồng lên một hệ thống nhất quán ở ba mốc chuẩn dưới đây.
+
+   ── BA MỐC CHUẨN ────────────────────────────────────────────────
+     < 640px    điện thoại   — sidebar thành NGĂN KÉO, nội dung 1 cột
+     640–1024   máy tính bảng — sidebar thành RAIL biểu tượng 84px
+     ≥ 1024px   desktop      — sidebar đầy đủ 272px (giữ nguyên như cũ)
+
+   Mốc rail cũ là 900px: máy tính bảng dọc (768px) rơi vào nhánh
+   desktop nên sidebar chiếm 272px trên tổng 768px, nội dung chỉ còn
+   496px. Đẩy lên 1024px để iPad dọc cũng dùng rail.
+
+   ── VÌ SAO LÀ 639.98 CHỨ KHÔNG PHẢI 640/641 ─────────────────────
+   Bề rộng vùng nhìn có thể là số LẺ (640.5px trên màn hình có tỉ lệ
+   điểm ảnh không nguyên, hoặc khi kéo cửa sổ). Cặp
+   `max-width:640px` + `min-width:641px` bỏ sót mọi giá trị nằm giữa
+   → rơi vào vùng chết: không nhánh nào khớp, sidebar giữ 272px trong
+   khi #main chỉ chừa 84px, nội dung chui xuống dưới sidebar. Đã đo
+   được đúng lỗi này ở 640px trước khi sửa. Dùng .98 để hai nhánh
+   luôn liền mạch.
+
+   ── CO GIÃN LIÊN TỤC ────────────────────────────────────────────
+   Ngoài ba mốc trên, cỡ chữ và khoảng đệm dùng clamp() nên đổi MƯỢT
+   theo từng pixel chiều rộng, không nhảy bậc ở điểm ngắt.
+
+   ── CHIỀU CAO ───────────────────────────────────────────────────
+   Toàn bộ khung cao toàn màn hình đổi 100vh -> 100dvh. Trên điện
+   thoại, 100vh tính cả thanh địa chỉ lúc nó còn hiện; khi cuộn làm
+   thanh đó thu lại thì phần tử vẫn giữ chiều cao cũ nên đáy bị cắt.
+   dvh đo theo vùng nhìn THỰC TẾ tại từng thời điểm.
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Thang chữ co giãn — min ở 360px, max ở 1440px.
+     Dùng cho tiêu đề trang; các cỡ nhỏ giữ nguyên vì đã đủ đọc. */
+  --edu-fs-h1: clamp(28px, 1.35rem + 2.4vw, 44px);
+  --edu-fs-h2: clamp(20px, 1.05rem + 1.1vw, 26px);
+  --edu-fs-sub: clamp(14px, 0.85rem + 0.25vw, 16px);
+  /* Lề ngang của vùng nội dung — hẹp dần trên máy nhỏ */
+  --edu-gutter: clamp(16px, 1rem + 1.4vw, 40px);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   1. CHIỀU CAO THEO VÙNG NHÌN THỰC TẾ
+   Chỉ đổi những khung THỰC SỰ cao toàn màn hình. Không đụng tới
+   `min-height:100vh` ở các trang auth: ở đó 100vh và 100dvh cho kết
+   quả như nhau (nội dung ngắn hơn màn hình) nên đổi là thừa.
+   ══════════════════════════════════════════════════════════════ */
+@supports (height: 100dvh) {
+  .topbar.edu-sidebar-shell { height: 100dvh; }
+  #page-roadmap.active { height: calc(100dvh - 50px); min-height: calc(100dvh - 50px); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   2. THANH TRÊN + NGĂN KÉO (chỉ dựng ở khổ điện thoại)
+   Mặc định ẩn hết để tablet/desktop không đổi gì.
+   ══════════════════════════════════════════════════════════════ */
+.edu-mobile-bar { display: none; }
+.edu-nav-backdrop { display: none; }
+
+/* ══════════════════════════════════════════════════════════════
+   2b. CHẶN CON CỦA #main TRÀN RA NGOÀI
+   #main là flex-column với align-items:center, nên con của nó co theo
+   NỘI DUNG (max-content) chứ không theo bề ngang khung. Một tiêu đề dài
+   không xuống dòng sẽ kéo cả khối rộng hơn khung rồi bị canh giữa —
+   đo được ở 376px: .edu-header-bar rộng 462px, nằm ở x = -43, tức thò
+   ra ngoài mép trái màn hình.
+
+   `max-width:100%` không đổi gì khi nội dung vẫn vừa (mọi khổ desktop
+   hiện tại), chỉ chặn đúng lúc tràn. Cố ý KHÔNG đặt `width:100%` ở đây
+   vì như thế sẽ kéo cụm tìm kiếm/chuông/avatar ra sát mép phải trên
+   desktop — một thay đổi hình thức nằm ngoài phạm vi việc này.
+   ══════════════════════════════════════════════════════════════ */
+#main > * { max-width: 100%; }
+.edu-head-titles { min-width: 0; }
+.edu-page-title, .edu-page-sub { overflow-wrap: break-word; }
+
+/* Chỉ `max-width` là CHƯA đủ: nó kẹp được khung ngoài về 376px nhưng con bên
+   trong vẫn được tính theo bề rộng max-content của khung trước khi kẹp, nên
+   tiêu đề vẫn rộng 420px và bị cắt mất chữ. Gốc rễ là `align-items:center`
+   của #main làm mọi khối con co theo nội dung thay vì theo khung.
+   Từ tablet trở xuống, cho các khối căng hết bề ngang — đúng ý bản thiết kế
+   (ô tìm kiếm và thẻ nội dung đều tràn viền) và xoá luôn cả lớp bài toán này.
+   Giữ nguyên `center` ở desktop để không đổi bố cục đang chạy. */
+@media (max-width: 1023.98px) {
+  #main { align-items: stretch; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   3. MÁY TÍNH BẢNG — sidebar thành rail biểu tượng
+   Lặp lại đúng bộ quy tắc của mốc 900px trong edu-theme.css nhưng
+   mở rộng lên 1023px. Không sửa file kia để nếu cần lùi thay đổi
+   thì chỉ việc bỏ file này.
+   ══════════════════════════════════════════════════════════════ */
+@media (min-width: 640px) and (max-width: 1023.98px) {
+  /* PHẢI viết `.topbar.edu-sidebar-shell` (độ đặc hiệu 0,2,0) chứ không phải
+     `.edu-sidebar-shell` (0,1,0): edu-theme.css đặt `width:272px` bằng chọn
+     lọc hai lớp, mà độ đặc hiệu thắng thứ tự nạp. Chính mốc 900px trong
+     edu-theme.css đang mắc lỗi này — nó đổi được padding của #main xuống 84px
+     nhưng KHÔNG thu nhỏ được sidebar, nên từ 641px đến 900px nội dung chui
+     xuống dưới dải sidebar 272px và mất 188px bề ngang. */
+  .topbar.edu-sidebar-shell { width: 84px; padding: 20px 0; }
+  .edu-sidebar-shell .topbar-left { padding: 0; display: flex; justify-content: center; }
+  .edu-sidebar-shell .brand-always .brand-title,
+  .edu-sidebar-shell .topbar-nav .nav-btn span:not(.nav-icon),
+  .sidebar-bottom-links .nav-btn span:not(.nav-icon),
+  .sidebar-bottom-links .edu-bottom-link span:last-child,
+  .sidebar-bottom-links .edu-tt-txt { display: none !important; }
+  .edu-sidebar-shell .topbar-nav, .sidebar-bottom-links { padding: 0 16px; }
+  .edu-sidebar-shell .topbar-nav .nav-btn,
+  .sidebar-bottom-links .nav-btn,
+  .sidebar-bottom-links .edu-bottom-link { justify-content: center; padding: 0; }
+  .edu-sidebar-shell + #main { padding-left: 84px; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   3b. HEADER MỘT HÀNG — dải RỘNG HƠN khối sidebar ở trên (tới 1279.98px)
+
+   CỐ Ý tách riêng, KHÔNG gộp vào khối 640–1023.98 bên trên: sidebar chỉ
+   thu thành rail tới 1023.98px (từ 1024 trở lên bản thiết kế muốn sidebar
+   đầy đủ 272px), nhưng HEADER thì cần đối xử gọn tới tận 1279.98px.
+
+   VÌ SAO: ở đúng mốc 1024px xảy ra CÚ NHẢY KÉP — sidebar 84→272 (+188px)
+   VÀ ô tìm kiếm 194→400 (+206px), tổng ~394px bị ngốn thêm trong khi vùng
+   nhìn chỉ rộng thêm 1px. Cả hai đều `flex:none` nên phần thiếu dồn hết
+   vào `.edu-head-titles` (flex:1; min-width:0) — nó co về gần 0.
+   Đo thật trước khi sửa:
+       1023px: tiêu đề rộng 478px →  3 dòng   (bình thường)
+       1024px: tiêu đề rộng  14px → 39 DÒNG   (vỡ dọc từng chữ cái)
+   1194px (iPad Pro 11" ngang) và 1280px cũng hỏng ở mức nhẹ hơn.
+   ══════════════════════════════════════════════════════════════ */
+@media (min-width: 640px) and (max-width: 1023.98px) {
+  /* Header: MỘT HÀNG DUY NHẤT — tiêu đề bên trái, cụm tìm kiếm/chuông/
+     streak/avatar bên phải, KHÔNG cho cụm điều khiển rớt xuống hàng riêng
+     bên dưới tiêu đề (yêu cầu: mọi thứ phải "trên cùng 1 đường thẳng").
+     Bản trước dùng flex-wrap để cụm điều khiển tự tránh chỗ khi thiếu —
+     đổi hẳn sang KHÔNG wrap, bù lại bằng cách thu nhỏ MỌI THỨ co giãn được
+     (chữ tiêu đề, ô tìm kiếm) để luôn đủ chỗ.
+
+     Tiêu đề trước đây giữ nguyên 44px cố định của desktop tới tận 639.98px
+     mới co (--edu-fs-h1 chỉ áp trong khối điện thoại) — ở khổ tablet 44px
+     kèm câu dài ("Kỷ luật thép đó nha, 7 ngày rồi không đứt streak 🔥") vỡ
+     thành nhiều dòng, tự nó đã cao hơn cụm điều khiển. Áp --edu-fs-h1 ở đây
+     (vốn đã clamp mượt theo bề rộng) để chữ co dần theo màn hình.
+
+     Ở dải này sidebar chỉ 84px nên tính theo `vw` là đủ sát.
+
+     `.edu-head-titles` vẫn được PHÉP xuống nhiều dòng nội bộ (không cắt
+     bằng …) vì đây là câu động viên đầy đủ ý nghĩa, cắt cụt sẽ mất nghĩa —
+     chỉ cụm điều khiển bên phải là không bao giờ rớt xuống dưới nó. */
+  .edu-header-bar { flex-wrap: nowrap; align-items: flex-start; gap: 16px; padding: 24px var(--edu-gutter) 0; margin-bottom: 24px; min-width: 0; }
+  .edu-head-actions { padding-top: 4px; gap: 10px; }
+  .edu-header-bar .search-wrap { width: clamp(130px, 19vw, 220px); height: 46px; padding: 0 14px; }
+  .edu-page-title { font-size: var(--edu-fs-h1); }
+  .edu-page-sub { font-size: var(--edu-fs-sub); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   3b-2. TỪ 1024px TRỞ LÊN — đo theo CHỖ THẬT SỰ CÒN LẠI
+
+   Từ 1024px sidebar giữ nguyên 272px (bản thiết kế muốn vậy), nên chỗ cho
+   nội dung là `100vw - 272px` chứ KHÔNG phải `100vw`. Mọi công thức dựa
+   trên `vw` thuần đều ước lượng thừa đúng 272px — chính vì thế ở 1024px cỡ
+   chữ vẫn tính ra 46px rồi kẹp về 44px (mức TO NHẤT) trong khi cột tiêu đề
+   thật chỉ còn ~291px, ra 5 dòng chữ khổng lồ trong một cột hẹp.
+
+   Dùng `calc((100vw - 272px) * hệ_số)` để cỡ chữ và ô tìm kiếm bám đúng
+   phần còn lại. Hệ quả: cả hai lớn dần MƯỢT theo màn hình và chỉ đạt mức
+   tối đa của bản thiết kế (44px / 400px) khi thật sự có đủ chỗ (~1440px+),
+   thay vì nhảy bậc ở 1024px và 1280px như trước.
+   ══════════════════════════════════════════════════════════════ */
+@media (min-width: 1024px) {
+  .edu-header-bar { flex-wrap: nowrap; align-items: flex-start; }
+  .edu-page-title { font-size: clamp(28px, calc((100vw - 272px) * 0.042), 44px); }
+  .edu-header-bar .search-wrap { width: clamp(150px, calc((100vw - 272px) * 0.26), 400px); }
+
+  /* Cụm điều khiển PHẢI co được. edu-dashboard.css đặt `flex: none` cho nó —
+     cộng với sàn 260px của tiêu đề thì tổng vượt quá chỗ còn lại và TRÀN
+     NGANG (đo được đúng 2px ở 1024px sau khi thêm công thức calc bên trên).
+     Công thức calc chỉ ước lượng theo bề rộng vùng nhìn, KHÔNG biết padding
+     của header hay sàn của tiêu đề — cố dò hệ số cho vừa là cách chữa mong
+     manh, đổi padding một chút là hỏng lại.
+     Cho `flex: 0 1 auto` + `min-width: 0` để chính flexbox tự cân: khi thiếu
+     chỗ nó thu ô tìm kiếm lại đúng bằng phần còn thiếu (không dưới 140px),
+     nên không bao giờ tràn dù các số đo khác có đổi. */
+  .edu-head-actions { flex: 0 1 auto; min-width: 0; }
+  .edu-header-bar .search-wrap { min-width: 140px; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   3c. CHỐT AN TOÀN — tiêu đề KHÔNG BAO GIỜ bị bóp về 0
+
+   Áp ở MỌI bề rộng, không gắn với mốc nào. Hai luật trên chỉ chỉnh cho
+   ĐẸP ở các dải đã biết; luật này bảo đảm không bao giờ VỠ ở bất kỳ bề
+   rộng nào — kể cả khổ máy lạ, cửa sổ kéo tay, hay khi sau này ai đó thêm
+   một nút nữa vào cụm điều khiển.
+
+   Cơ chế: cho `.edu-head-titles` một SÀN bề rộng, và cho ô tìm kiếm
+   ĐƯỢC PHÉP CO (`flex: 0 1 auto` thay vì `flex: none` mà edu-dashboard.css
+   đang đặt). Khi thiếu chỗ, flexbox sẽ thu ô tìm kiếm lại thay vì nghiền
+   nát tiêu đề — vì tiêu đề đã có sàn nên không còn là chỗ "co được vô hạn"
+   duy nhất. Đây mới là gốc rễ của lỗi 39 dòng ở 1024px.
+   ══════════════════════════════════════════════════════════════ */
+.edu-head-titles { min-width: min(260px, 100%); }
+.edu-header-bar .search-wrap { flex: 0 1 auto; min-width: 120px; }
+
+/* ══════════════════════════════════════════════════════════════
+   4. ĐIỆN THOẠI (≤ 640px)
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 639.98px) {
+
+  /* ── 4.1 Thanh trên cùng ───────────────────────────────────── */
+  /* Ở khổ điện thoại, avatar bị ẨN HẲN (xem luật `.user-chip-wrap` cuối mục
+     4.3) và chuông + streak được edu-chrome.js CHUYỂN HẲN node thật vào đây,
+     đứng cạnh nút ba gạch — quyết định thiết kế cố định, không còn tùy theo
+     "có đủ chỗ hay không" như bản trước. Vị trí này dễ chạm bằng ngón cái
+     nhất khi cầm điện thoại một tay.
+
+     `gap` (không phải justify-content:space-between) vì số phần tử ở đây
+     THAY ĐỔI lúc chạy: bình thường chỉ có brand + nút ba gạch, sau khi
+     edu-chrome.js chạy thì có thêm chuông + streak chen vào giữa. space-between
+     dàn đều khoảng cách cho MỌI cặp phần tử liền kề — 4 phần tử sẽ bị tách xa
+     nhau, chuông/streak trôi lơ lửng giữa brand và nút ba gạch thay vì đứng
+     sát cạnh nút đó. `margin-right:auto` trên brand ăn hết khoảng trống còn
+     lại nên mọi thứ SAU nó luôn dồn sát mép phải với gap đều nhau. */
+  /* NỀN KÍNH MỜ TÁCH RA ::before thay vì đặt background/backdrop-filter
+     thẳng trên .edu-mobile-bar. Lý do KHÔNG phải để sửa lỗi panel thông báo
+     lộ chữ (đã xác minh bằng thực nghiệm — tắt hẳn backdrop-filter không đổi
+     gì hiện tượng đó, xem chú thích ở mục 5b; nguyên nhân thật là độ mờ nền
+     panel, sửa ở đó). Tách ra đây đơn thuần vì `backdrop-filter` VẪN đúng là
+     tạo containing block cho hậu duệ `position:fixed` theo đặc tả CSS — kể
+     từ khi #bell-wrap dọn vào thanh này (edu-chrome.js), cứ để backdrop-filter
+     trên chính .edu-mobile-bar là một quả bom hẹn giờ cho bất kỳ phần tử
+     `fixed` nào thêm vào sau này, dù lần này chưa phải là thủ phạm. Tách ra
+     pseudo-element giữ NGUYÊN hiệu ứng kính mờ nhìn thấy được mà loại bỏ hẳn
+     rủi ro đó cho tương lai — không tốn gì thêm nên cứ giữ. */
+  .edu-mobile-bar {
+    position: sticky; top: 0; z-index: 90;
+    display: flex; align-items: center;
+    gap: 10px;
+    padding: 14px var(--edu-gutter);
+    border-bottom: 1px solid var(--edu-card-border);
+  }
+  .edu-mobile-bar::before {
+    content: '';
+    position: absolute; inset: 0; z-index: -1;
+    background: var(--edu-nav-bg);
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  }
+  .edu-mobile-brand {
+    display: flex; flex-direction: column; line-height: 1.05;
+    font-size: 19px; font-weight: 800; letter-spacing: -.02em;
+    cursor: pointer;
+    margin-right: auto;
+  }
+  .edu-mobile-brand-c1 {
+    background: var(--edu-accent-grad);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .edu-mobile-brand-c2 { color: var(--edu-t1); }
+
+  /* Chuông + streak khi đứng trong thanh trên cùng (đã được JS chuyển vào) —
+     không được mang theo margin/padding của ngữ cảnh header cũ. */
+  .edu-mobile-bar #bell-wrap, .edu-mobile-bar #edu-streak { flex: none; }
+  .edu-mobile-bar .edu-streak-num { font-size: 15px; }
+
+  /* Nút ba gạch — 44px là ngưỡng vùng chạm tối thiểu cho ngón tay */
+  .edu-burger {
+    display: flex; flex-direction: column; justify-content: center; gap: 5px;
+    width: 44px; height: 44px; flex: none;
+    padding: 0 10px;
+    background: none; border: 0; cursor: pointer;
+  }
+  .edu-burger span {
+    display: block; height: 2.5px; border-radius: 2px;
+    background: var(--edu-accent);
+  }
+  .edu-burger span:nth-child(2) { width: 80%; }
+
+  /* ── 4.2 Sidebar -> ngăn kéo trượt từ phải ─────────────────── */
+  .topbar.edu-sidebar-shell {
+    width: min(82vw, 320px);
+    left: auto; right: 0;
+    padding: 22px 0 24px;
+    transform: translateX(100%);
+    transition: transform .28s cubic-bezier(.22,.61,.36,1);
+    border-right: none;
+    border-left: 1px solid var(--edu-sidebar-border);
+    background: var(--edu-panel-bg);
+    box-shadow: var(--edu-panel-shadow);
+    z-index: 200;
+  }
+  .topbar.edu-sidebar-shell.edu-nav-open { transform: translateX(0); }
+  @media (prefers-reduced-motion: reduce) {
+    .topbar.edu-sidebar-shell { transition: none; }
+  }
+
+  /* Nội dung chiếm trọn bề ngang — không còn chừa chỗ cho sidebar */
+  .edu-sidebar-shell + #main { padding-left: 0; }
+
+  .edu-nav-backdrop {
+    display: block; position: fixed; inset: 0; z-index: 150;
+    background: rgba(20,14,34,.5);
+    backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+    opacity: 0; visibility: hidden;
+    transition: opacity .24s ease, visibility .24s ease;
+  }
+  .edu-nav-backdrop.open { opacity: 1; visibility: visible; }
+
+  /* Ngăn kéo là menu ĐẦY ĐỦ nên phải hiện lại nhãn chữ. Mốc 900px trong
+     edu-theme.css ẩn chúng bằng `display:none !important` để dựng rail biểu
+     tượng, và 900px bao trùm luôn dải điện thoại này — không bật lại thì ngăn
+     kéo mở ra chỉ có một cột biểu tượng trơ trọi, khác hẳn bản thiết kế.
+     Phải dùng !important để thắng đúng luật đó. */
+  /* `:not(.brand-short)` cũng BẮT BUỘC, cùng lý do với `:not(.edu-tt-txt)`
+     ngay dưới: nhãn rút gọn "PE" mang CẢ HAI lớp `brand-title brand-short`.
+     Chọn lọc này (0,3,0) thắng luật ẩn `.edu-sidebar-shell .brand-short`
+     (0,2,0), nên "PE" hiện chồng lên nút đóng ở góc ngăn kéo. */
+  .edu-sidebar-shell .brand-always .brand-title:not(.brand-short),
+  .edu-sidebar-shell .topbar-nav .nav-btn span:not(.nav-icon),
+  .sidebar-bottom-links .nav-btn span:not(.nav-icon),
+  /* `:not(.edu-tt-txt)` là BẮT BUỘC. Nút đổi giao diện có HAI nhãn nằm cạnh
+     nhau, và nhãn thứ hai (--toLight) cũng là `span:last-child`. Nếu để chọn
+     lọc này chạm tới nó thì nó thắng cặp luật bên dưới về độ đặc hiệu —
+     (0,3,1) so với (0,2,0) — nên `display:inline` đè lên `display:none`, rồi
+     bị flex container biến thành `block`. Kết quả đo được: ngăn kéo hiện
+     CÙNG LÚC cả "Chế độ tối" lẫn "Chế độ sáng", hai dòng ngược nghĩa nhau. */
+  .sidebar-bottom-links .edu-bottom-link span:last-child:not(.edu-tt-txt) { display: inline !important; }
+  /* Nhãn đổi giao diện là một CẶP (Chế độ tối / Chế độ sáng) mà edu-theme
+     ẩn-hiện theo body.dark. Mốc 900px ẩn cả hai bằng !important, nên nếu chỉ
+     bật đại cả cặp thì hiện cùng lúc hai dòng ngược nghĩa. Phải chép lại đúng
+     luật theo body.dark, cũng bằng !important để thắng luật ẩn kia. */
+  .sidebar-bottom-links .edu-tt-txt--toDark { display: inline-flex !important; }
+  .sidebar-bottom-links .edu-tt-txt--toLight { display: none !important; }
+  body.dark .sidebar-bottom-links .edu-tt-txt--toDark { display: none !important; }
+  body.dark .sidebar-bottom-links .edu-tt-txt--toLight { display: inline-flex !important; }
+
+  .edu-sidebar-shell .brand-short { display: none !important; }
+
+  /* Mục điều hướng: cao 48px cho dễ chạm, chữ 16px như bản thiết kế */
+  .edu-sidebar-shell .topbar-left { padding: 0 22px; margin-bottom: 8px; }
+  .edu-sidebar-shell .topbar-nav,
+  .edu-sidebar-shell .sidebar-bottom-links { padding: 0 14px; }
+  .edu-sidebar-shell .topbar-nav .nav-btn,
+  .sidebar-bottom-links .nav-btn,
+  .sidebar-bottom-links .edu-bottom-link {
+    height: 48px; font-size: 16px; justify-content: flex-start; padding: 0 14px;
+  }
+
+  /* ── 4.3 Header nội dung: xếp dọc, ô tìm kiếm full ─────────── */
+  .edu-header-bar {
+    flex-direction: column; align-items: stretch; gap: 14px;
+    padding: 20px var(--edu-gutter) 0;
+    margin-bottom: 22px;
+    /* `min-width:auto` mặc định của flex item ghim khối này ở bề rộng
+       min-content (đo được 462px) — max-width chỉ cắt phần NHÌN THẤY về
+       376px còn con bên trong vẫn dàn theo 462px nên tiêu đề bị cụt chữ.
+       Đặt 0 để bỏ sàn đó thì stretch mới có tác dụng. */
+    min-width: 0;
+    width: 100%;
+  }
+  /* Đặt bề rộng dứt khoát thay vì trông chờ vào stretch — hai khối này có
+     flex:1 / flex:none nên hành vi cross-axis khó đoán khi đổi trục. */
+  .edu-head-titles, .edu-head-actions { width: 100%; min-width: 0; max-width: 100%; }
+  .edu-head-actions { flex-wrap: wrap; }
+  .edu-page-title { font-size: var(--edu-fs-h1); }
+  .edu-page-sub { font-size: var(--edu-fs-sub); }
+  .edu-head-actions { padding-top: 0; gap: 14px; order: 2; }
+  .edu-header-bar .search-wrap {
+    width: 100%; height: 52px; padding: 0 18px; order: -1; flex: 1;
+  }
+  .edu-skel--title { height: 34px; }
+
+  /* Avatar LUÔN ẩn ở khổ điện thoại — Cá nhân/Cài đặt/Đăng xuất (những việc
+     avatar mở ra) đã có sẵn trong ngăn kéo nên không mất chức năng gì, chỉ
+     mất một đường tắt. Nhường chỗ cho chuông + streak lên thanh trên cùng
+     (edu-chrome.js). `!important` BẮT BUỘC: edu-dashboard.css có luật
+     `.edu-header-bar .user-chip-wrap{display:flex}` độ đặc hiệu (0,2,0) cao
+     hơn `[hidden]{display:none}` mặc định của trình duyệt (0,1,0) nên avatar
+     vẫn hiện dù đã đặt hidden — đo được, xem hc-forced-compact.png. Ẩn bằng
+     CSS ở đây (không chỉ chờ JS) để không có khung hình đầu tiên hiện avatar
+     rồi mới biến mất. */
+  .edu-header-bar .user-chip-wrap { display: none !important; }
+
+  /* ── 4.4 Lưới nội dung về 1 cột ────────────────────────────── */
+  .edu-d-grid, .edu-d-stats, .edu-d-recent, .edu-leader-grid { grid-template-columns: 1fr; }
+  #main > .page, .page { padding-left: var(--edu-gutter); padding-right: var(--edu-gutter); }
+
+  /* "Bài học gần đây": 1 thẻ mỗi khung nhìn thay vì 2 — ở 375px mỗi thẻ
+     chỉ còn ~150px thì tên khoá bị xuống 4-5 dòng. */
+  .edu-d-track > .edu-d-lesson { flex: 0 0 100%; }
+  .edu-d-lesson { height: clamp(200px, 52vw, 260px); }
+
+  /* Thẻ/khoảng đệm gọn lại cho vừa màn hình hẹp */
+  .edu-d-card { border-radius: 18px; }
+  .edu-d-sec-title { font-size: var(--edu-fs-h2); }
+
+  /* ── 4.5 Ngăn/hộp thoại trượt: full màn hình ───────────────── */
+  .rm-browse, .rm-drawer { width: 100vw; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   5. MÀN HÌNH THẤP (điện thoại xoay ngang, cửa sổ bị kéo dẹt)
+   Ở đây chiều cao mới là thứ khan hiếm chứ không phải chiều rộng:
+   cắt bớt khoảng đệm dọc và hạ cỡ tiêu đề để còn chỗ cho nội dung.
+   ══════════════════════════════════════════════════════════════ */
+@media (max-height: 560px) and (min-width: 640px) {
+  .edu-header-bar { padding-top: 16px; margin-bottom: 16px; }
+  .edu-page-title { font-size: clamp(24px, 4vh, 34px); }
+  .edu-page-sub { display: none; }
+  .edu-sidebar-shell { padding: 14px 0; }
+  .edu-sidebar-shell .topbar-nav .nav-btn { height: 40px; }
+}
+
+/* Ngăn kéo trên máy thấp: cho cuộn riêng bên trong, tránh mục cuối bị khuất */
+@media (max-height: 620px) and (max-width: 639.98px) {
+  .topbar.edu-sidebar-shell { overflow-y: auto; }
+  .edu-sidebar-shell .topbar-nav .nav-btn,
+  .sidebar-bottom-links .nav-btn,
+  .sidebar-bottom-links .edu-bottom-link { height: 42px; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   5b. BẢNG THẢ XUỐNG (chuông / menu người dùng) TRÊN ĐIỆN THOẠI
+
+   Hai bảng này `position:absolute; right:0` so với nút bấm, mà nút nằm
+   sát mép phải. style.css@516 còn đẩy thêm `right:-40px`. Trên máy hẹp
+   chúng thò hẳn ra ngoài: đo ở 360px thấy bảng chuông nằm từ x=-165
+   đến 107, tức 3/4 nội dung nằm ngoài màn hình bên TRÁI.
+
+   Đổi sang `fixed` neo theo VÙNG NHÌN với lề hai bên — luôn nằm trọn
+   trong màn hình bất kể nút bấm ở đâu, và tự cuộn nếu danh sách dài.
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 639.98px) {
+  .bell-panel,
+  .user-dropdown {
+    position: fixed;
+    top: 68px;
+    left: var(--edu-gutter);
+    right: var(--edu-gutter);
+    width: auto;
+    max-width: none;
+    max-height: min(70dvh, 520px);
+    overflow-y: auto;
+    /* style.css đặt `background: var(--card)` = --edu-card-bg, chỉ mờ 55%
+       (rgba(255,255,255,.55) ở chế độ sáng) — đủ dùng khi panel còn nằm trên
+       nền TRỐNG của trang (khổ desktop, position:absolute), nhưng giờ panel
+       `fixed` đè thẳng lên NỘI DUNG TRANG (tiêu đề H1 đậm "Kỷ luật thép đó
+       nha…" chẳng hạn) thì cần ĐẶC HẲN mới đủ che.
+
+       ĐÃ THỬ --edu-panel-bg (96% mờ) trước — TƯỞNG đủ nhưng đo lại vẫn KHÔNG
+       đủ: cô lập bằng cách tô panel màu đỏ 100% rồi so sánh — với nền dưới có
+       độ tương phản cao (chữ đen đậm/to trên nền sáng), 4% hụt vẫn đủ để mắt
+       nhận ra viền chữ mờ lẫn vào nội dung thông báo. (Từng nghi ngờ nguyên
+       nhân là `backdrop-filter` trên `.edu-mobile-bar` tạo containing block
+       sai cho phần tử `fixed` — ĐÃ LOẠI TRỪ bằng thực nghiệm: tắt hẳn
+       backdrop-filter lẫn position:sticky không đổi gì kết quả. Vẫn tách
+       backdrop-filter ra ::before bên dưới vì đó là điều đúng nên làm về mặt
+       CSS, chỉ là không phải nguyên nhân của lỗi này.)
+       --edu-panel-bg-solid là ĐẶC 100%, không alpha — CHỈ ở khổ điện thoại,
+       không đụng hành vi desktop. */
+    background: var(--edu-panel-bg-solid) !important;
+    box-shadow: var(--edu-panel-shadow);
+  }
+
+  /* Vùng chạm: 44px là ngưỡng tối thiểu cho ngón tay. Đo được các mục
+     trong menu người dùng chỉ cao 32px và nút "đánh dấu đã đọc" 14px. */
+  .user-dropdown-item { min-height: 44px; }
+  .bell-mark-all { min-height: 32px; padding: 6px 10px; }
+  .bell-panel-item { min-height: 44px; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   5c. KHỚP BẢN THIẾT KẾ MOBILE (DashBoard.png)
+
+   Bản thiết kế cho ô tìm kiếm chiếm TRỌN một hàng, rồi mới tới cụm
+   chuông/streak/avatar. Chỉ đặt `width:100%` là chưa đủ vì ô này còn
+   `flex:1` nên vẫn co lại chia hàng với cái chuông — phải khoá cả ba
+   giá trị của flex.
+
+   Bốn ô thống kê nhỏ trong thiết kế xếp 2 cột (2×2) chứ không phải
+   dồn dọc thành 4 hàng — dồn dọc làm màn hình dài lê thê.
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 639.98px) {
+  .edu-header-bar .search-wrap { flex: 0 0 100%; }
+
+  .edu-d-ministats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 14px;
+    padding: 20px;
+  }
+
+  /* Nhãn phụ đề in trên ảnh bìa thẻ "Bài học gần đây": tên khoá dài
+     (vd "Bên trong Database Engine: Tối ưu, Giao dịch & Phục hồi") xuống
+     2-3 dòng rồi đè lên tiêu đề bên dưới. Giới hạn 1 dòng, cắt bằng dấu … */
+  .edu-d-lesson-art {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Tên khoá trên thẻ: tối đa 2 dòng cho khỏi đẩy nút "Tiếp tục" ra ngoài */
+  .edu-d-lesson-name {
+    font-size: 17px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Mũi tên ‹ › của băng chuyền: 30px là quá nhỏ để chạm chính xác. Nới vùng
+     chạm lên 40px mà KHÔNG phóng to hình mũi tên (icon vẫn 17px như cũ). */
+  .edu-d-arrow { width: 40px; height: 40px; }
+  .edu-d-arrows { gap: 4px; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   6. CHỐNG TRÀN NGANG
+   Một khối rộng quá (bảng, khối mã, ảnh) làm CẢ TRANG cuộn ngang và
+   mọi thứ khác lệch theo. Chặn ở gốc: ảnh/khối mã không được vượt
+   quá bề ngang khung chứa.
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 1023.98px) {
+  html, body { overflow-x: hidden; }
+  #main img, #main video, #main canvas, #main svg:not([width]) { max-width: 100%; height: auto; }
+  #main pre, #main table { max-width: 100%; overflow-x: auto; }
+}

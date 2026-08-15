@@ -673,6 +673,21 @@ function skSkillToggle(row) {
   var REACT_EMOJIS = { like: '👍', love: '❤️', haha: '😂', wow: '😮', sad: '😢', angry: '😡' };
   var REACT_LABELS = { like: 'Thích', love: 'Yêu thích', haha: 'Haha', wow: 'Wow', sad: 'Buồn', angry: 'Phẫn nộ' };
 
+  /* ── Nút react của POST ───────────────────────────────────────
+     Trước đây nút này vẽ cứng icon SVG "thumbs-up" + chữ "Thích", nên thả
+     tym/haha/wow xong nút vẫn hiện 👍 Thích — chỉ đổi mỗi màu nền. Bình luận
+     thì đã đúng từ đầu (dùng REACT_EMOJIS), giờ post dùng chung một hàm với
+     patch DOM để hai đường render không lệch nhau nữa.
+     Không dùng icon SVG được: icons.js chỉ có `thumbs-up`, không có
+     heart/laugh/wow/sad/angry — nên thống nhất xài emoji như bình luận. */
+  function _reactBtnInnerHtml(myReaction, totalR) {
+    var emoji = myReaction ? REACT_EMOJIS[myReaction] : REACT_EMOJIS.like;
+    var label = myReaction ? REACT_LABELS[myReaction] : REACT_LABELS.like;
+    return '<span class="fpc-react-emoji">' + emoji + '</span> ' + label +
+      (totalR > 0 ? ' <span class="fpc-react-count">' + totalR + '</span>' : '');
+  }
+
+
   var _forumMediaFiles = [];
 
   var _currentCat = 'all';
@@ -885,6 +900,7 @@ function skSkillToggle(row) {
       var totalR = Object.values(reactions).reduce(function (a, b) { return a + b; }, 0);
       var liked = !!myReaction;
       var reactClass = myReaction ? ('reacted-' + myReaction) : '';
+      var reactBtnInner = _reactBtnInnerHtml(myReaction, totalR);
 
       var pickerItems = Object.keys(REACT_EMOJIS).map(function (k) {
         return '<span class="reaction-item" onclick="forumSetReaction(\'' + p.id + '\',\'' + k + '\')" title="' + REACT_LABELS[k] + '">' + REACT_EMOJIS[k] + '</span>';
@@ -916,8 +932,7 @@ function skSkillToggle(row) {
         '<div class="fpc-actions">' +
         '<div class="fpc-react-wrap">' +
         '<button class="fpc-react-btn' + (liked ? ' liked' : '') + ' ' + reactClass + '" onclick="forumSetReaction(\'' + p.id + '\',\'' + (myReaction || 'like') + '\')">' +
-        '<span data-icon="thumbs-up" data-size="13"' + (liked ? ' data-color="#60A5FA"' : '') + '></span> Thích' +
-        (totalR > 0 ? ' <span class="fpc-react-count">' + totalR + '</span>' : '') +
+        reactBtnInner +
         '</button>' +
         '<div class="reaction-picker">' + pickerItems + '</div>' +
         '</div>' +
@@ -1048,27 +1063,10 @@ function skSkillToggle(row) {
     // Update onclick to toggle current reaction
     btn.setAttribute('onclick', "forumSetReaction('" + postId + "','" + (myReaction || 'like') + "')");
 
-    // Update icon color
-    var icon = btn.querySelector('[data-icon]');
-    if (icon) {
-      if (liked) { icon.setAttribute('data-color', '#60A5FA'); } else { icon.removeAttribute('data-color'); }
-      if (window.mountIcons) mountIcons(btn);
-    }
-
-    // Update count
-    var countEl = btn.querySelector('.fpc-react-count');
-    if (totalR > 0) {
-      if (countEl) {
-        countEl.textContent = totalR;
-      } else {
-        var span = document.createElement('span');
-        span.className = 'fpc-react-count';
-        span.textContent = totalR;
-        btn.appendChild(span);
-      }
-    } else if (countEl) {
-      countEl.remove();
-    }
+    // Vẽ lại emoji + nhãn + số đếm bằng ĐÚNG hàm mà _renderPosts dùng — trước
+    // đây chỗ này chỉ đổi màu icon nên thả tym xong nút vẫn kẹt ở "👍 Thích"
+    // cho tới khi tải lại trang (lúc đó _renderPosts mới vẽ lại từ đầu).
+    btn.innerHTML = _reactBtnInnerHtml(myReaction, totalR);
 
     // Quick pop animation on the button
     btn.style.transform = 'scale(1.15)';
@@ -1244,14 +1242,9 @@ function skSkillToggle(row) {
         return '<span class="fpc-cmt-react-item" onclick="forumSetCmtReaction(\'' + postId + '\',\'' + c.id + '\',\'' + k + '\')" title="' + REACT_LABELS[k] + '">' + REACT_EMOJIS[k] + '</span>';
       }).join('');
 
-      var reactSummaryHtml = '';
-      if (totalR > 0) {
-        var topEmojis = Object.keys(reactions)
-          .filter(function (k) { return reactions[k] > 0; })
-          .sort(function (a, b) { return reactions[b] - reactions[a]; })
-          .slice(0, 2).map(function (k) { return REACT_EMOJIS[k]; }).join('');
-        reactSummaryHtml = '<span class="fpc-cmt-react-summary">' + topEmojis + ' ' + totalR + '</span>';
-      }
+      // Chỉ còn SỐ LƯỢNG (xem chú thích ở phần trả lời bên dưới).
+      var reactSummaryHtml = totalR > 0
+        ? '<span class="fpc-cmt-react-summary">' + totalR + '</span>' : '';
 
       var repliesHtml = replies.map(function (r) {
         var rReactions = r.reactions || {};
@@ -1263,14 +1256,10 @@ function skSkillToggle(row) {
         var rPickerHtml = Object.keys(REACT_EMOJIS).map(function (k) {
           return '<span class="fpc-cmt-react-item" onclick="forumSetReplyReaction(\'' + postId + '\',\'' + c.id + '\',\'' + r.id + '\',\'' + k + '\')" title="' + REACT_LABELS[k] + '">' + REACT_EMOJIS[k] + '</span>';
         }).join('');
-        var rSummaryHtml = '';
-        if (rTotalR > 0) {
-          var rTopEmojis = Object.keys(rReactions)
-            .filter(function (k) { return rReactions[k] > 0; })
-            .sort(function (a, b) { return rReactions[b] - rReactions[a]; })
-            .slice(0, 2).map(function (k) { return REACT_EMOJIS[k]; }).join('');
-          rSummaryHtml = '<span class="fpc-cmt-react-summary">' + rTopEmojis + ' ' + rTotalR + '</span>';
-        }
+        // Chỉ còn SỐ LƯỢNG: emoji ở đây lặp lại đúng cái nút bên trái vừa hiện,
+        // nhìn thành "😮 Wow 😮 1" — thừa.
+        var rSummaryHtml = rTotalR > 0
+          ? '<span class="fpc-cmt-react-summary">' + rTotalR + '</span>' : '';
         return (
           '<div class="fpc-reply-item">' +
           '<div class="fpc-reply-avatar">' + (r.avatar || '🧑') + '</div>' +
@@ -1450,16 +1439,13 @@ function skSkillToggle(row) {
     if (actions) {
       var summaryEl = actions.querySelector('.fpc-cmt-react-summary');
       if (totalR > 0) {
-        var topEmojis = Object.keys(reactions)
-          .filter(function (k) { return reactions[k] > 0; })
-          .sort(function (a, b) { return reactions[b] - reactions[a]; })
-          .slice(0, 2).map(function (k) { return REACT_EMOJIS[k]; }).join('');
+        // Chỉ SỐ LƯỢNG, không lặp lại emoji đã hiện trên nút bên trái.
         if (summaryEl) {
-          summaryEl.innerHTML = topEmojis + ' ' + totalR;
+          summaryEl.textContent = totalR;
         } else {
           var span = document.createElement('span');
           span.className = 'fpc-cmt-react-summary';
-          span.innerHTML = topEmojis + ' ' + totalR;
+          span.textContent = totalR;
           // Insert after the react-wrap
           var reactWrap = actions.querySelector('.fpc-cmt-react-wrap');
           if (reactWrap && reactWrap.nextSibling) {

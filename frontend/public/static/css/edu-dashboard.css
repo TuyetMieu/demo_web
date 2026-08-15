@@ -185,17 +185,36 @@ body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
 }
 
 /* ── Bài học gần đây ─────────────────────────────────────────── */
-/* Khung nhìn cố định 2 thẻ; toàn bộ khóa đã đăng ký nằm trên một "ray"
-   trượt bằng transform để chuyển thẻ mượt thay vì vẽ lại đột ngột. */
+/* `.edu-d-track` LÀ khung cuộn (overflow-x tự nhiên của trình duyệt), không
+   phải một ray tĩnh bị đẩy bằng transform như bản trước. Đổi vì bản transform
+   có 2 lỗi:
+     1. Bước trượt tính bằng `(bề_ngang_khung + gap) / PER_PAGE` với PER_PAGE
+        cố định = 2 — đúng cho khổ desktop (2 thẻ mỗi khung) nhưng SAI cho khổ
+        điện thoại, nơi mỗi thẻ chiếm trọn khung (1 thẻ/khung, xem
+        edu-responsive.css). Bấm mũi tên ở đó chỉ trượt được NỬA thẻ.
+     2. Không vuốt được bằng tay/ngón — chỉ có 2 nút mũi tên.
+   overflow-x + scroll-snap giải quyết cả hai: trình duyệt tự tính khoảng
+   cuộn đúng theo bề rộng thẻ THẬT (không cần biết trước "mấy thẻ một khung"),
+   và cho vuốt/kéo bằng cảm ứng, trackpad, con lăn chuột — miễn phí, không
+   cần code kéo-thả tay. Nút mũi tên gọi `track.scrollBy()` bằng đúng bề rộng
+   một thẻ đo được lúc đó (xem edu-dashboard.js applyStep). */
 .edu-d-recent { overflow: hidden; }
 .edu-d-track {
   display: flex;
   gap: 20px;
-  will-change: transform;
-  transition: transform .42s cubic-bezier(.22,.61,.36,1);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  /* Ẩn thanh cuộn — đã có 2 nút mũi tên làm gợi ý điều hướng, thanh cuộn
+     ngang chỉ thừa và phá bố cục thẻ. */
+  scrollbar-width: none;
 }
-.edu-d-track > .edu-d-lesson { flex: 0 0 calc((100% - 20px) / 2); }
-@media (prefers-reduced-motion: reduce) { .edu-d-track { transition: none; } }
+.edu-d-track::-webkit-scrollbar { display: none; }
+.edu-d-track > .edu-d-lesson { flex: 0 0 calc((100% - 20px) / 2); scroll-snap-align: start; }
+@media (prefers-reduced-motion: reduce) { .edu-d-track { scroll-behavior: auto; } }
 
 .edu-d-lesson {
   position: relative; height: 290px;
@@ -207,10 +226,33 @@ body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
     linear-gradient(160deg,#2b2350,#171426);
 }
 body.dark .edu-d-lesson { box-shadow: 0 12px 34px rgba(0,0,0,.5); }
+/* Ảnh bìa thật (song song .edu-c-art.has-img của lưới "Khóa học") — vân chéo
+   ở trên vẫn là background-image mặc định nên là lớp lót lúc ảnh chưa tải
+   xong hoặc khóa không có ảnh (c.image rỗng → không thêm .has-img). */
+.edu-d-lesson.has-img {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* .edu-d-lesson-foot chỉ phủ tối trong PHẠM VI HỘP CỦA NÓ (absolute, không có
+   top) — đủ cho vân chéo cố định nhưng ảnh thật sáng/tối tùy khóa nên không
+   đảm bảo chữ luôn đọc được. Thêm lớp phủ full-card, cùng kiểu
+   .edu-c-art.has-img::before của lưới Khóa học, để chắc chắn ở mọi ảnh. */
+.edu-d-lesson.has-img::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(12,9,22,.18) 0%, rgba(12,9,22,.20) 45%, rgba(12,9,22,.88) 100%);
+  pointer-events: none;
+}
 .edu-d-lesson-art {
-  position: absolute; top: 14px; left: 16px;
+  position: absolute; top: 14px; left: 16px; z-index: 1;
   font-family: ui-monospace, Menlo, monospace; font-size: 11px;
   color: rgba(255,255,255,.45);
+}
+/* Trên ảnh thật thì nhãn góc trên cũng cần sáng hơn mới đọc được — cùng lý do
+   với .edu-c-art.has-img .edu-c-art-label ở lưới Khóa học. */
+.edu-d-lesson.has-img .edu-d-lesson-art {
+  color: rgba(255,255,255,.85);
+  text-shadow: 0 1px 3px rgba(0,0,0,.6);
 }
 .edu-d-lesson-foot {
   position: absolute; left: 0; right: 0; bottom: 0;
@@ -437,11 +479,31 @@ body.dark .edu-d-date-day { color: #93a9ff; }
     repeating-linear-gradient(115deg, rgba(255,255,255,.07) 0 2px, transparent 2px 9px),
     linear-gradient(160deg,#2e2554,#181426);
 }
+/* Có ảnh bìa thật: ảnh phủ kín khối, vân chéo bên trên thành lớp lót lúc ảnh
+   chưa tải xong. Phủ thêm dải tối từ dưới lên để chữ nhãn (phụ đề / danh mục)
+   luôn đọc được, kể cả trên ảnh nền sáng như "ADVANCED DATABASE". */
+.edu-c-art.has-img {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.edu-c-art.has-img::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(12,9,22,.82) 0%, rgba(12,9,22,.35) 38%, transparent 68%);
+  pointer-events: none;
+}
 .edu-c-art-label {
   font-family: ui-monospace, Menlo, monospace;
   font-size: 11px;
   color: rgba(255,255,255,.45);
 }
+/* Trên ảnh thật thì nhãn phải sáng hơn hẳn mới đọc được */
+.edu-c-art.has-img .edu-c-art-label {
+  position: relative; z-index: 1;
+  color: rgba(255,255,255,.9);
+  text-shadow: 0 1px 3px rgba(0,0,0,.55);
+}
+.edu-c-art.has-img .edu-c-enrolled { z-index: 2; }
 /* Nhãn "Đang học" — trước dùng xanh lá đặc (rgba(34,197,94,.9)) lấy từ bộ màu
    cũ, chọi hẳn với dải tím của design. Đổi sang chính gradient accent, thêm
    chấm sáng nhỏ cho ra nghĩa "đang diễn ra". */

@@ -64,8 +64,21 @@ const RANK: Record<string, number> = {
   'edu-forms.css': 46,
   'edu-card.css': 47,
   'edu-landing.css': 48,
+  // hộp thoại bài ôn tập — sau edu-dashboard.css vì dùng lại token/nút của nó
+  'edu-review-quiz.css': 49,
+  // lớp co giãn điện thoại/tablet — PHẢI cuối cùng, xem RESPONSIVE_CSS bên dưới
+  'edu-responsive.css': 50,
 };
 const DEFAULT_RANK = 30;
+
+/**
+ * Lớp co giãn dùng chung, tự thêm vào MỌI trang.
+ *
+ * Không liệt kê trong `hrefs` của từng trang vì đây là quy tắc toàn cục: bỏ
+ * sót một trang là trang đó vỡ trên điện thoại, mà 18 chỗ gọi PageStyles thì
+ * rất dễ sót khi thêm trang mới. Gom về một chỗ để không thể quên.
+ */
+const RESPONSIVE_CSS = '/static/css/edu-responsive.css';
 
 /** Tên nhóm precedence — React xếp <head> theo thứ tự nhóm được đăng ký. */
 export function cssPrecedence(href: string): string {
@@ -82,9 +95,11 @@ export const ALL_PRECEDENCES: string[] = Array.from(
   .map((r) => `pe${String(r).padStart(3, '0')}`);
 
 export default function PageStyles({ hrefs }: { hrefs: string[] }) {
+  // Lọc trùng phòng khi một trang đã tự liệt kê file co giãn.
+  const all = hrefs.includes(RESPONSIVE_CSS) ? hrefs : [...hrefs, RESPONSIVE_CSS];
   return (
     <>
-      {hrefs.map((href) => (
+      {all.map((href) => (
         <link
           key={href}
           rel="stylesheet"

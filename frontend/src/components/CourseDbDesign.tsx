@@ -177,8 +177,17 @@ export default function CourseDbDesign({ courseId }: { courseId: string }) {
                   )}
                 </div>
                 {/* không kèm .cd-hero-visual: class cũ ép ô vuông 150px, chọi
-                    với khung 220×158 của design (không JS nào dùng class đó) */}
-                <div className="edu-cd-hero-art edu-cd-hero-art--emoji">🗄️</div>
+                    với khung 220×158 của design (không JS nào dùng class đó).
+                    Ảnh bìa thật (13/08/2026) thay cho emoji 🗄️ — ba khóa CSDL
+                    không đi qua API /courses ở trang này nên dựng đường dẫn
+                    theo đúng quy ước `static/images/<id>.webp` của backend. */}
+                <div className="edu-cd-hero-art">
+                  <img
+                    src={`/static/images/${courseId}.webp`}
+                    alt=""
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                </div>
               </div>
 
               {/* Nội dung khóa học — lộ trình dạng nút do course_db_design.js dựng

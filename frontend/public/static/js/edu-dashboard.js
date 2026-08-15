@@ -13,8 +13,9 @@
 
   var API_BASE = (typeof API === 'string' && API) || '/api';
 
-  /* Bảng tiêu đề đúng như `heads` trong file design. Tên người dùng được
-     ghép vào lời chào của màn dashboard sau khi /user trả về. */
+  /* Bảng tiêu đề đúng như `heads` trong file design. Riêng dashboard không
+     dùng entry này — xem dashboardHead(), tiêu đề LẪN phụ đề đều đổi theo
+     trạng thái user (vừa tạo tài khoản / streak / bình thường). */
   var HEADS = {
     dashboard: ['Chào mừng trở lại', 'Hôm nay bạn sẽ học gì? Tiếp tục hành trình chinh phục kỹ năng lập trình của bạn.'],
     courses: ['Khóa học', 'Chọn khóa học và theo dõi tiến độ của bạn'],
@@ -36,6 +37,8 @@
   var MEDALS = ['#d4a017', '#a8a8b8', '#c08552'];
 
   var userName = '';
+  var userStreak = 0;
+  var userIsNew = false;
 
   function $(id) { return document.getElementById(id); }
 
@@ -52,20 +55,48 @@
     return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
   }
 
+  /* ── Lời chào + phụ đề đầu trang dashboard ─────────────────────
+     Ưu tiên: vừa tạo tài khoản > streak > 3 > đăng nhập bình thường.
+     Phụ đề PHẢI đi theo đúng ngữ cảnh của tiêu đề — không dùng chung
+     một câu "Hôm nay bạn sẽ học gì?" cho cả 3 trường hợp, vì nó lặp lại
+     ý "chào mừng"/"streak" đã nói ở tiêu đề mà không thêm thông tin gì.
+     userIsNew/userStreak được init() đổ vào sau khi /user trả về —
+     trước đó dùng giá trị mặc định (false/0) nên hiện cặp câu bình
+     thường trong nhịp chờ, không nhấp nháy sang "vừa tạo tài khoản". */
+  function dashboardHead() {
+    if (userIsNew) {
+      return {
+        title: 'Chào mừng đến với PE' + (userName ? ', ' + userName : '') + ' 🎉',
+        sub: 'Khám phá lộ trình học và bắt đầu bài học đầu tiên của bạn nhé!'
+      };
+    }
+    if (userStreak > 3) {
+      return {
+        title: 'Kỷ luật thép đó nha, ' + userStreak + ' ngày rồi không đứt streak 🔥',
+        sub: 'Học một bài hôm nay để giữ chuỗi ngày này tiếp tục nhé.'
+      };
+    }
+    return {
+      title: 'Hôm nay bắt đầu học nào' + (userName ? ', ' + userName : '') + ' 👋',
+      sub: 'Tiếp tục hành trình chinh phục kỹ năng lập trình của bạn.'
+    };
+  }
+
   /* ── Tiêu đề trang ─────────────────────────────────────────── */
   function setHead(page) {
     var h = HEADS[page] || HEADS.dashboard;
     var t = $('edu-page-title'), s = $('edu-page-sub');
     if (!t) return;
-    if (page === 'dashboard') {
-      t.textContent = h[0] + (userName ? ', ' + userName : '') + ' 👋';
+    var dash = page === 'dashboard' ? dashboardHead() : null;
+    if (dash) {
+      t.textContent = dash.title;
     } else {
       t.textContent = h[0];
     }
     // main.js đã tính sẵn "N khóa học · M đang học" cho mục Khóa học —
     // dùng lại thay vì viết cứng, và theo dõi vì nó cập nhật sau khi fetch.
     var live = page === 'courses' && $('courses-count-sub');
-    if (s) s.textContent = (live && live.textContent.trim()) || h[1];
+    if (s) s.textContent = (live && live.textContent.trim()) || (dash ? dash.sub : h[1]);
     if (live && !live.__eduWatched) {
       live.__eduWatched = true;
       new MutationObserver(function () {
@@ -82,45 +113,49 @@
 
   /* ── Bài học gần đây ───────────────────────────────────────── */
   // Design: 2 thẻ 290px, ảnh nền vân chéo tối, vòng tiến độ conic-gradient.
-  // Hai mũi tên ‹ › trượt qua toàn bộ khóa học viên đã đăng ký, mỗi lần 1 thẻ.
-  var PER_PAGE = 2;
+  // Hai mũi tên ‹ › cuộn qua toàn bộ khóa học viên đã đăng ký, mỗi lần 1 thẻ.
+  // `.edu-d-track` tự cuộn (overflow-x + scroll-snap, xem edu-dashboard.css) —
+  // JS chỉ đo bề rộng MỘT thẻ thật để biết cuộn bao xa, không tự bịa số thẻ
+  // mỗi khung như bản cũ (PER_PAGE cố định từng làm bấm mũi tên chỉ trượt
+  // nửa thẻ ở khổ điện thoại, nơi CSS đổi sang 1 thẻ/khung).
+  var GAP = 20;   // phải khớp `.edu-d-track { gap }` trong edu-dashboard.css
   var _recent = [];   // toàn bộ khóa đã đăng ký, sắp theo tiến độ giảm dần
-  var _offset = 0;    // vị trí thẻ đầu tiên đang hiển thị
   var _suggesting = false;  // true khi đang gợi ý khóa phổ biến (chưa đăng ký gì)
 
-  function maxOffset() { return Math.max(0, _recent.length - PER_PAGE); }
-
-  function syncArrows() {
-    var wrap = document.querySelector('.edu-d-arrows');
-    // ít hơn hoặc bằng 2 khóa thì không có gì để trượt
-    if (wrap) wrap.style.display = _recent.length > PER_PAGE ? '' : 'none';
-    var prev = $('edu-d-prev'), next = $('edu-d-next');
-    if (prev) prev.disabled = _offset <= 0;
-    if (next) next.disabled = _offset >= maxOffset();
+  function recentTrack() {
+    var box = $('edu-d-recent');
+    return box && box.querySelector('.edu-d-track');
   }
 
-  // Trượt bằng transform trên ray: không vẽ lại DOM nên chuyển mượt.
-  var GAP = 20;
-  function applyTransform() {
-    var box = $('edu-d-recent');
-    var track = box && box.querySelector('.edu-d-track');
-    if (!track) return;
-    var step = (box.clientWidth + GAP) / PER_PAGE;   // bề ngang 1 thẻ + khoảng cách
-    track.style.transform = 'translateX(' + (-_offset * step) + 'px)';
+  /** Bề rộng một thẻ + khoảng cách — đo THẬT từ DOM, đúng ở mọi khổ màn hình. */
+  function cardStep(track) {
+    var card = track.querySelector('.edu-d-lesson');
+    return card ? card.getBoundingClientRect().width + GAP : track.clientWidth;
+  }
+
+  function syncArrows() {
+    var track = recentTrack();
+    var wrap = document.querySelector('.edu-d-arrows');
+    if (!track) { if (wrap) wrap.style.display = 'none'; return; }
+    var scrollable = track.scrollWidth > track.clientWidth + 1;
+    if (wrap) wrap.style.display = scrollable ? '' : 'none';
+    var prev = $('edu-d-prev'), next = $('edu-d-next');
+    if (prev) prev.disabled = track.scrollLeft <= 1;
+    if (next) next.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - 1;
   }
 
   function shiftRecent(delta) {
-    var next = Math.min(maxOffset(), Math.max(0, _offset + delta));
-    if (next === _offset) return;
-    _offset = next;
-    applyTransform();
-    syncArrows();
+    var track = recentTrack();
+    if (!track) return;
+    track.scrollBy({ left: delta * cardStep(track), behavior: 'smooth' });
+    // scrollBy không đổi scrollLeft NGAY (còn đang cuộn mượt) — cập nhật
+    // trạng thái nút sau khi trình duyệt bắt kịp, tránh nút bị lệch một nhịp.
+    setTimeout(syncArrows, 260);
   }
 
   function renderRecent(courses) {
     _recent = (courses || []).slice()
       .sort(function (a, b) { return (b.progress || 0) - (a.progress || 0); });
-    _offset = 0;
     paintRecent();
   }
 
@@ -135,7 +170,7 @@
       return;
     }
 
-    // dựng TẤT CẢ thẻ một lần lên ray; chuyển thẻ chỉ là đổi transform
+    // dựng TẤT CẢ thẻ một lần vào khung cuộn — trình duyệt tự lo việc cuộn
     box.innerHTML = '<div class="edu-d-track">' + _recent.map(function (c) {
       var pct = Math.max(0, Math.min(100, Math.round(c.progress || 0)));
       var deg = Math.round(pct * 3.6);
@@ -143,8 +178,19 @@
       var ringColor = pct < 40 ? '#f0526b' : '#22c55e';
       var ring = 'conic-gradient(' + ringColor + ' ' + deg + 'deg, rgba(255,255,255,.22) ' + deg + 'deg 360deg)';
       var href = '/courses/' + encodeURIComponent(c.id);
+      // Ảnh bìa thật. CỐ Ý dùng ảnh GỐC, KHÔNG dùng _courseCardArt()/-card.webp:
+      // bản -card.webp được cắt tay riêng cho khối 365×150 rất ngang của lưới
+      // "Khóa học" (main.js). Thẻ ở đây ~274×290 — gần vuông — nhét crop ngang
+      // đó vào background-size:cover sẽ zoom cực mạnh vì phải khớp theo chiều
+      // cao, cắt gần hết bề ngang và lệch tâm (chữ SQL/logo C++ bị cắt cụt như
+      // ảnh lỗi báo). Trang chi tiết khóa học gặp đúng vấn đề này và đã chọn
+      // dùng ảnh gốc cho khung "gần vuông" (xem courses/[courseId]/page.tsx) —
+      // .edu-d-lesson vuông hơn thế nữa nên theo cùng lựa chọn.
+      var cardStyle = c.image
+        ? ' style="background-image:url(\'' + esc('/' + String(c.image).replace(/^\/+/, '')) + '\')"'
+        : '';
       return (
-        '<div class="edu-d-lesson" onclick="window.location.href=\'' + href + '\'">' +
+        '<div class="edu-d-lesson' + (c.image ? ' has-img' : '') + '" onclick="window.location.href=\'' + href + '\'"' + cardStyle + '>' +
         '<span class="edu-d-lesson-art">' + esc(c.subtitle || c.tag || 'Khóa học') + '</span>' +
         '<div class="edu-d-lesson-foot">' +
         '<div>' +
@@ -163,14 +209,9 @@
       );
     }).join('') + '</div>';
 
-    // đặt vị trí ngay, không cho hiệu ứng chạy ở lần vẽ đầu
+    // vẽ lại từ đầu mỗi lần (đổi khóa/khi loadRecent chạy lại) -> về đầu khung
     var track = box.querySelector('.edu-d-track');
-    if (track) {
-      track.style.transition = 'none';
-      applyTransform();
-      void track.offsetWidth;          // ép reflow để bỏ qua transition lần đầu
-      track.style.transition = '';
-    }
+    if (track) track.scrollLeft = 0;
     syncArrows();
   }
 
@@ -179,18 +220,26 @@
     if (prev) prev.addEventListener('click', function () { shiftRecent(-1); });
     if (next) next.addEventListener('click', function () { shiftRecent(1); });
 
-    // đổi bề rộng cửa sổ → bước trượt đổi theo, phải tính lại
+    // Vuốt tay/kéo trackpad đổi scrollLeft mà không qua shiftRecent() — lắng
+    // nghe sự kiện scroll của chính track để 2 nút mũi tên luôn khớp trạng
+    // thái thật, không chỉ khớp lần bấm cuối. Gắn qua delegation trên box cha
+    // vì track bị dựng lại (innerHTML) mỗi lần loadRecent chạy lại.
+    var box = $('edu-d-recent');
     var t;
+    if (box) {
+      box.addEventListener('scroll', function (e) {
+        if (!e.target.classList || !e.target.classList.contains('edu-d-track')) return;
+        clearTimeout(t);
+        t = setTimeout(syncArrows, 80);
+      }, true);
+    }
+
+    // đổi bề rộng cửa sổ (xoay máy, kéo cửa sổ) → bề rộng thẻ đổi theo,
+    // trạng thái nút phải tính lại; bản thân việc cuộn do trình duyệt lo.
+    var rt;
     window.addEventListener('resize', function () {
-      clearTimeout(t);
-      t = setTimeout(function () {
-        var track = document.querySelector('.edu-d-track');
-        if (!track) return;
-        track.style.transition = 'none';
-        applyTransform();
-        void track.offsetWidth;
-        track.style.transition = '';
-      }, 120);
+      clearTimeout(rt);
+      rt = setTimeout(syncArrows, 120);
     });
   }
 
@@ -317,8 +366,20 @@
   }
 
   /* ── Ôn tập hôm nay ────────────────────────────────────────
-     /streak/review-quiz-status trả { streak, is_unlocked, days_remaining };
-     bài ôn mở khoá khi học liên tiếp đủ 5 ngày (hằng số phía backend).
+     /streak/review-quiz-status trả
+       { streak, is_unlocked, lessons_completed, lessons_required,
+         lessons_remaining, done_today }.
+
+     Mở khoá theo SỐ BÀI ĐÃ HỌC TRONG NGÀY (lessons_completed đếm lại từ 0 mỗi
+     ngày mới, không cộng dồn) — học đủ 5 bài HÔM NAY mới mở. Mở rồi thì MỖI
+     NGÀY một đề: nộp xong, thẻ chuyển sang trạng thái "đã ôn hôm nay" tới
+     sáng mai, và số bài lại đếm lại từ 0 khi sang ngày mới.
+
+     Ba trạng thái của thẻ:
+       1. chưa đủ bài   -> "Mở khoá bài ôn tập", còn N bài nữa
+       2. sẵn sàng      -> "Ôn tập hôm nay", nút Ôn ngay
+       3. đã ôn hôm nay -> "Đã ôn hôm nay", nút Xem kỹ năng
+
      Số "cần ôn" đếm từ /skills theo đúng luật của dashboard.js:
      progress === 0 → chưa học, >= 70 → đạt, còn lại → cần ôn. */
   function countNeedReview(skillsRes) {
@@ -346,32 +407,122 @@
     var title = $('edu-d-review-title'), cap = $('edu-d-review-cap'),
         num = $('edu-d-review-num'), sub = $('edu-d-review-sub'), cta = $('edu-d-review-cta');
 
-    if (status.is_unlocked) {
-      var need = countNeedReview(skillsRes);
-      title.textContent = 'Ôn tập hôm nay';
-      cap.textContent = need ? 'KỸ NĂNG' : 'XONG';
-      num.textContent = need ? need : '✓';
-      sub.textContent = need
-        ? need + ' kỹ năng cần ôn lại'
-        : 'Bạn đã ôn hết — quay lại sau nhé';
-      cta.textContent = need ? 'Ôn ngay' : 'Xem kỹ năng';
-      cta.onclick = function () {
-        if (typeof window.navigateToSkills === 'function') window.navigateToSkills();
-        else if (typeof window.navigate === 'function') window.navigate('skills');
-        if (need && typeof window.skSetFilter === 'function') window.skSetFilter('review');
-      };
-    } else {
-      var left = status.days_remaining || 0;
-      var goal = (status.streak || 0) + left;
+    var goToSkills = function () {
+      if (typeof window.navigateToSkills === 'function') window.navigateToSkills();
+      else if (typeof window.navigate === 'function') window.navigate('skills');
+    };
+
+    if (!status.is_unlocked) {
+      // ── 1. Chưa đủ bài ──
+      var required = status.lessons_required || 5;
+      var doneN = status.lessons_completed || 0;
+      var left = status.lessons_remaining != null
+        ? status.lessons_remaining
+        : Math.max(0, required - doneN);
       title.textContent = 'Mở khoá bài ôn tập';
       cap.textContent = 'CÒN';
       num.textContent = left;
-      sub.textContent = 'Học liên tiếp ' + goal + ' ngày để mở khoá · đang ' +
-        (status.streak || 0) + '/' + goal;
+      sub.textContent = 'Học ' + required + ' bài để mở khoá · đang ' +
+        doneN + '/' + required;
       cta.textContent = 'Học một bài';
       cta.onclick = function () { if (typeof window.navigate === 'function') window.navigate('courses'); };
+    } else if (status.done_today) {
+      // ── 2. Đã ôn hôm nay: mỗi ngày một đề, chờ sang ngày mới ──
+      title.textContent = 'Đã ôn hôm nay';
+      cap.textContent = 'XONG';
+      num.textContent = '✓';
+      sub.textContent = 'Hẹn gặp lại vào ngày mai nhé';
+      cta.textContent = 'Xem kỹ năng';
+      cta.onclick = goToSkills;
+    } else {
+      // ── 3. Sẵn sàng ──
+      var need = countNeedReview(skillsRes);
+      title.textContent = 'Ôn tập hôm nay';
+      cap.textContent = need ? 'KỸ NĂNG' : 'SẴN SÀNG';
+      num.textContent = need ? need : '★';
+      sub.textContent = need
+        ? need + ' kỹ năng cần ôn lại'
+        : 'Đề hôm nay trộn câu từ các bài bạn đã học';
+      cta.textContent = 'Ôn ngay';
+      cta.onclick = function () {
+        // Mở thẳng bài ôn tự sinh (edu-review-quiz.js). Kể cả khi không kỹ năng
+        // nào "cần ôn", vẫn cho làm — đề hằng ngày lấy câu từ mọi bài đã học
+        // chứ không chỉ từ kỹ năng đang yếu.
+        if (typeof window.peOpenReviewQuiz === 'function') {
+          window.peOpenReviewQuiz();
+          return;
+        }
+        goToSkills();
+        if (need && typeof window.skSetFilter === 'function') window.skSetFilter('review');
+      };
     }
-    card.classList.toggle('edu-d-review--locked', !status.is_unlocked);
+    // Tô kiểu "khoá" cho cả trạng thái chưa đủ bài lẫn đã ôn xong hôm nay —
+    // cả hai đều là "chưa bấm được để ôn ngay bây giờ".
+    card.classList.toggle(
+      'edu-d-review--locked',
+      !status.is_unlocked || !!status.done_today,
+    );
+    card.hidden = false;
+  }
+
+  /* ── Hôm nay bạn đã học ────────────────────────────────────
+     /quiz/today trả
+       { count, questions_available, min_questions, can_quiz,
+         lessons: [{ id, title, course_title, question_count, completed_at }] }
+
+     Ba trạng thái:
+       · chưa học bài nào hôm nay -> ẩn hẳn thẻ (không bịa "0 bài")
+       · có học nhưng chưa đủ câu -> liệt kê bài, nút bị vô hiệu kèm lý do
+       · đủ câu                    -> nút mở đề gộp từ đúng những bài đó
+
+     Cố ý KHÔNG dùng chung nút với thẻ "Ôn tập hôm nay": đề bên kia lấy câu
+     từ mọi bài từng học và mỗi ngày một lần; đề ở đây bó vào buổi học hôm
+     nay và làm lại thoải mái. */
+  function renderToday(data) {
+    var card = $('edu-d-today');
+    if (!card) return;
+
+    // Không có dữ liệu, hoặc hôm nay chưa học gì -> ẩn, đúng nguyên tắc
+    // "không dựng khối rỗng" của các thẻ khác trên màn này.
+    if (!data || !data.count) { card.hidden = true; return; }
+
+    var countEl = $('edu-d-today-count'), listEl = $('edu-d-today-list'),
+        subEl = $('edu-d-today-sub'), cta = $('edu-d-today-cta');
+
+    countEl.textContent = data.count + (data.count > 1 ? ' bài' : ' bài');
+
+    // Liệt kê tối đa 4 bài cho vừa thẻ, dư thì gộp thành "+N bài nữa".
+    var MAX_ROWS = 4;
+    var shown = (data.lessons || []).slice(0, MAX_ROWS);
+    var rest = (data.lessons || []).length - shown.length;
+    listEl.innerHTML = shown.map(function (l) {
+      return '<li class="edu-d-today-item">' +
+        '<span class="edu-d-today-dot" aria-hidden="true"></span>' +
+        '<span class="edu-d-today-name">' + esc(l.title) + '</span>' +
+        '<span class="edu-d-today-course">' + esc(l.course_title) + '</span>' +
+        '</li>';
+    }).join('') + (rest > 0
+      ? '<li class="edu-d-today-item edu-d-today-more">+' + rest + ' bài nữa</li>'
+      : '');
+
+    if (data.can_quiz) {
+      subEl.textContent = 'Gộp ' + data.questions_available +
+        ' câu hỏi từ những bài này thành một đề';
+      cta.disabled = false;
+      cta.textContent = 'Ôn lại bài hôm nay';
+      cta.onclick = function () {
+        if (typeof window.peOpenReviewQuiz === 'function') window.peOpenReviewQuiz('today');
+      };
+    } else {
+      // Nói THẲNG lý do ngay trên thẻ thay vì để người dùng bấm rồi mới nhận
+      // màn hình lỗi cụt — đây chính là trải nghiệm đang gặp hiện nay.
+      subEl.textContent = 'Cần ít nhất ' + (data.min_questions || 5) +
+        ' câu hỏi mới tạo được đề · những bài này mới có ' +
+        (data.questions_available || 0);
+      cta.disabled = true;
+      cta.textContent = 'Chưa đủ câu hỏi';
+      cta.onclick = null;
+    }
     card.hidden = false;
   }
 
@@ -437,6 +588,17 @@
     Promise.all([getJson('/streak/review-quiz-status'), getJson('/skills')])
       .then(function (res) { renderReview(res[0], res[1]); });
   }
+  function loadToday() {
+    getJson('/quiz/today').then(renderToday);
+  }
+
+  // edu-review-quiz.js gọi lại sau khi nộp bài: điểm mới có thể đổi tiến độ
+  // kỹ năng nên số "cần ôn" trên thẻ phải tính lại, và cờ "đã ôn hôm nay"
+  // cũng vừa bật lên.
+  window.eduReloadReviewCard = function () {
+    loadReview();
+    loadToday();
+  };
 
   function getJson(path) {
     return fetch(API_BASE + path)
@@ -465,8 +627,21 @@
   /* ── Khởi động ─────────────────────────────────────────────── */
   function init() {
     getJson('/user').then(function (u) {
-      var name = u && (u.name || (u.user && u.user.name));
+      var raw = (u && u.user) || u || {};
+      var name = raw.name;
       if (name) userName = String(name).trim().split(/\s+/).slice(-1)[0];
+      userStreak = raw.streak != null ? raw.streak : 0;
+      // "Vừa tạo tài khoản": /user báo chưa hoàn thành khảo sát — đúng cho
+      // OAuth (vào thẳng /dashboard, chưa từng qua /questionaire) — HOẶC cờ
+      // register.inline.js ghi lúc đăng ký xong. Đăng ký bằng mật khẩu luôn
+      // đi qua /questionaire BẮT BUỘC trước khi tới đây, lúc đó
+      // questionnaireCompleted đã true nên chỉ riêng cờ mới bắt được case này.
+      var justRegistered = false;
+      try { justRegistered = sessionStorage.getItem('pe_just_registered') === '1'; } catch (e) { /* private mode */ }
+      userIsNew = Boolean(raw.first_login || raw.needs_questionnaire || justRegistered);
+      if (justRegistered) {
+        try { sessionStorage.removeItem('pe_just_registered'); } catch (e) { /* noop */ }
+      }
       setHead(currentPage());
     });
     setHead(currentPage());
@@ -474,6 +649,7 @@
     bindArrows();
     loadRecent();
     loadReview();
+    loadToday();
     loadLeaderSide();
     loadAllStats();
     getJson('/leaderboard?type=weekly').then(renderLb);

@@ -9,7 +9,16 @@ import { StreakService, toStudyDate } from 'src/common/streak/streak.service';
 import { AchievementsService } from 'src/achievements/achievements.service';
 import { TX_OPTIONS } from 'src/common/prisma-tx.options';
 
-const REVIEW_QUIZ_STREAK_REQUIRED = 5;
+/**
+ * Bài ôn tập mở khoá theo SỐ BÀI ĐÃ HỌC TRONG NGÀY, đếm lại từ 0 mỗi ngày mới.
+ *
+ * Từng thử đếm CỘNG DỒN không mất đi (mọi bài đã học từ trước tới nay) —
+ * nhưng vậy thì ai cũng chỉ cần vượt mốc 5 bài MỘT LẦN DUY NHẤT trong đời là
+ * mở khoá vĩnh viễn, thẻ mất luôn ý nghĩa nhắc học mỗi ngày. Đếm lại theo
+ * NGÀY HỌC (múi giờ nghiệp vụ, cùng mốc `toStudyDate()` dùng cho chuỗi ngày
+ * và cờ "đã ôn hôm nay") thì mỗi ngày phải học đủ 5 bài mới mở khoá hôm đó.
+ */
+const REVIEW_QUIZ_LESSONS_REQUIRED = 5;
 
 /**
  * Task 138 — parse chuỗi '12.5h' -> số giờ, clamp 0..500.
@@ -211,17 +220,52 @@ export class StatsService {
 
   // ---------- Task 143 ----------
   async getReviewQuizStatus(userId: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { streak: true },
-    });
-    const streak = user?.streak ?? 0;
+    const [user, todayRows, latest] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { streak: true },
+      }),
+      // Lọc thô 48 giờ ở SQL rồi so ngày chính xác trong JS bằng toStudyDate()
+      // — tránh tự tính mốc nửa đêm theo múi giờ (dễ lệch giờ mùa hè/đông),
+      // và đảm bảo "hôm nay" hiểu giống hệt `doneToday` bên dưới.
+      this.prisma.lessonProgress.findMany({
+        where: {
+          userId,
+          status: 'completed',
+          completedAt: { gte: new Date(Date.now() - 48 * 3_600_000) },
+        },
+        select: { completedAt: true },
+      }),
+      this.prisma.reviewQuizResult.findFirst({
+        where: { userId },
+        orderBy: { submittedAt: 'desc' },
+        select: { submittedAt: true },
+      }),
+    ]);
+
+    const todayKey = toStudyDate().getTime();
+    const lessonsCompleted = todayRows.filter(
+      (r) => toStudyDate(r.completedAt).getTime() === todayKey,
+    ).length;
+
+    const doneToday =
+      !!latest && toStudyDate(latest.submittedAt).getTime() === todayKey;
+
+    const isUnlocked = lessonsCompleted >= REVIEW_QUIZ_LESSONS_REQUIRED;
 
     return {
       ok: true,
-      streak,
-      is_unlocked: streak >= REVIEW_QUIZ_STREAK_REQUIRED,
-      days_remaining: Math.max(0, REVIEW_QUIZ_STREAK_REQUIRED - streak),
+      streak: user?.streak ?? 0,
+      is_unlocked: isUnlocked,
+      /** Số bài hoàn thành TRONG NGÀY HÔM NAY — đếm lại từ 0 mỗi ngày mới. */
+      lessons_completed: lessonsCompleted,
+      lessons_required: REVIEW_QUIZ_LESSONS_REQUIRED,
+      lessons_remaining: Math.max(
+        0,
+        REVIEW_QUIZ_LESSONS_REQUIRED - lessonsCompleted,
+      ),
+      /** Đã nộp một đề ôn trong ngày học hôm nay chưa (mỗi ngày một đề). */
+      done_today: doneToday,
     };
   }
 }
