@@ -15,3 +15,5 @@ scripts
 .windsurf
 
 .agents
+
+dist/
