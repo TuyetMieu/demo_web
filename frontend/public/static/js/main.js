@@ -678,10 +678,10 @@ function handleFetch(r) {
     return null;
   }
   if (!r.ok) {
-    return r.json().then(function(body) {
-      throw new Error((body && body.message) || ('HTTP ' + r.status));
-    }).catch(function() {
-      throw new Error('HTTP ' + r.status);
+    // Body lỗi backend có 2 dạng: {message} (cũ) và {error:{status,message}}
+    // (NestJS bọc) — đọc cả hai; body không parse được thì fallback 'HTTP n'.
+    return r.json().catch(function() { return null; }).then(function(body) {
+      throw new Error((body && (body.message || (window.__PE_errMsg ? window.__PE_errMsg(body.error) : (body.error && body.error.message)))) || ('HTTP ' + r.status));
     });
   }
   return r.json();
@@ -1616,7 +1616,7 @@ function changePassword() {
 
 /* ── API loaders ── */
 function loadUser() {
-  fetch(API + "/user")
+  return fetch(API + "/user")
     .then(handleFetch)
     .then(function (u) {
       if (!u) return;
@@ -1926,14 +1926,30 @@ function loadCoursesAndEnrolled() {
       if (!data) return;
       try { sessionStorage.setItem(_COURSES_CACHE_KEY, JSON.stringify(data)); } catch (e) {}
       _applyCoursesData(data);
+    })
+    .catch(function (e) {
+      // Fetch hỏng mà không bắt lỗi → skeleton quay vô hạn. Hiện khối lỗi
+      // theo pattern .empty sẵn có + nút thử lại.
+      console.warn('loadCoursesAndEnrolled lỗi:', e);
+      var grid = document.getElementById('courses-grid');
+      if (grid) {
+        grid.innerHTML =
+          '<div class="empty">' +
+            '<div class="empty-icon">⚠️</div>' +
+            '<p>Không tải được danh sách khoá học.</p>' +
+            '<button type="button" class="pill-btn" style="margin-top:12px" onclick="loadCoursesAndEnrolled()">Thử lại</button>' +
+          '</div>';
+      }
+      var sub = document.getElementById('courses-count-sub');
+      if (sub) sub.textContent = 'Không tải được danh sách khoá học';
     });
 }
 
 function loadAll() {
-  loadUser();
-  loadStats();
+  loadUser().catch(function (e) { console.warn('loadUser lỗi:', e); });
+  loadStats().catch(function (e) { console.warn('loadStats lỗi:', e); });
   loadCoursesAndEnrolled();
-  loadNotifications();
+  loadNotifications().catch(function (e) { console.warn('loadNotifications lỗi:', e); });
 }
 
 

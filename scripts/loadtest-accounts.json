@@ -1,0 +1,82 @@
+[
+  {
+    "email": "loadtest-001@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-002@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-003@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-004@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-005@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-006@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-007@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-008@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-009@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-010@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-011@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-012@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-013@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-014@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-015@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-016@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-017@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-018@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-019@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  },
+  {
+    "email": "loadtest-020@pe-loadtest.local",
+    "password": "LoadTest#2026"
+  }
+]

@@ -21,7 +21,13 @@ describe('QuizzesService', () => {
     prisma = {
       lessonProgress: { findMany: jest.fn() },
       lesson: { findMany: jest.fn() },
-      quiz: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
+      quiz: {
+        create: jest.fn(),
+        findUnique: jest.fn(),
+        update: jest.fn(),
+        // CAS generated -> submitted trong submitQuiz; mặc định giành được quyền.
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+      },
       reviewQuizResult: {
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -101,6 +107,23 @@ describe('QuizzesService', () => {
       await expect(service.submitQuiz(1, 9, [])).rejects.toThrow(
         ForbiddenException,
       );
+    });
+
+    it('hai request song song cùng nộp -> request thua CAS nhận 409, không ghi kết quả', async () => {
+      // Cả hai đều đọc ra status 'generated' (race), nhưng CAS trong
+      // transaction chỉ cho MỘT request đổi được trạng thái.
+      prisma.quiz.findUnique.mockResolvedValue({
+        id: 9,
+        userId: 1,
+        status: 'generated',
+        questionsJson: SNAPSHOT,
+      });
+      prisma.quiz.updateMany.mockResolvedValue({ count: 0 }); // thua CAS
+
+      await expect(service.submitQuiz(1, 9, [0, 1])).rejects.toThrow(
+        ConflictException,
+      );
+      expect(prisma.reviewQuizResult.create).not.toHaveBeenCalled();
     });
 
     it('đã nộp rồi -> 409, không ghi kết quả lần 2', async () => {

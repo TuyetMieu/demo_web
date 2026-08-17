@@ -25,6 +25,7 @@ import { ForumService } from './forum.service';
 // hàng trăm KB vào DB, và mọi lần tải feed sau đó đều kéo nguyên khối đó về.
 const MAX_CONTENT = 10_000;
 const MAX_TITLE = 300;
+const MAX_CATEGORY = 50;
 
 export class CreatePostDto {
   @IsString({ message: 'Nội dung bài viết không được để trống' })
@@ -40,13 +41,37 @@ export class CreatePostDto {
   })
   title?: string;
 
-  @IsOptional() @IsString() category?: string;
+  @IsOptional()
+  @IsString()
+  @MaxLength(MAX_CATEGORY, {
+    message: `Danh mục không được vượt quá ${MAX_CATEGORY} ký tự`,
+  })
+  category?: string;
 }
 
+// Cùng trần độ dài với CreatePostDto: không giới hạn thì route PUT trở thành
+// đường vòng để nhét nội dung quá khổ vào DB.
 export class UpdatePostDto {
-  @IsOptional() @IsString() content?: string;
-  @IsOptional() @IsString() title?: string;
-  @IsOptional() @IsString() category?: string;
+  @IsOptional()
+  @IsString()
+  @MaxLength(MAX_CONTENT, {
+    message: `Nội dung không được vượt quá ${MAX_CONTENT} ký tự`,
+  })
+  content?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(MAX_TITLE, {
+    message: `Tiêu đề không được vượt quá ${MAX_TITLE} ký tự`,
+  })
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(MAX_CATEGORY, {
+    message: `Danh mục không được vượt quá ${MAX_CATEGORY} ký tự`,
+  })
+  category?: string;
 }
 
 /**
@@ -80,6 +105,9 @@ export class CreateCommentDto {
 
 export class UpdateCommentDto {
   @IsString({ message: 'Nội dung bình luận không được để trống' })
+  @MaxLength(MAX_CONTENT, {
+    message: `Bình luận không được vượt quá ${MAX_CONTENT} ký tự`,
+  })
   content!: string;
 }
 

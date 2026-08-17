@@ -250,7 +250,19 @@ export class CourseAdminService {
       );
     }
 
+    // Xoá dữ liệu phụ thuộc theo ĐÚNG thứ tự khoá ngoại trước khi xoá khoá —
+    // khoá từng có học viên vẫn còn lesson_progress (unenroll cố ý giữ lại),
+    // course_ratings, missions, quizzes... nên xoá thẳng course sẽ nổ P2003.
+    // Xoá TƯỜNG MINH, không dựa vào onDelete: Cascade trong schema: DB thật
+    // dùng chung với bản Django nên có thể không có CASCADE.
     await this.prisma.$transaction(async (tx) => {
+      await tx.reviewQuizResult.deleteMany({
+        where: { quiz: { courseId: id } },
+      });
+      await tx.quiz.deleteMany({ where: { courseId: id } });
+      await tx.lessonProgress.deleteMany({ where: { courseId: id } });
+      await tx.courseRating.deleteMany({ where: { courseId: id } });
+      await tx.mission.deleteMany({ where: { courseId: id } });
       await tx.lesson.deleteMany({ where: { courseId: id } });
       await tx.course.delete({ where: { id } });
     });

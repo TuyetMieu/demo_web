@@ -1,3 +1,25 @@
+      /* ── RETURN-URL (?next=) từ proxy.ts ── */
+      // Chỉ nhận path nội bộ ("/..." nhưng không "//...") để chống open redirect.
+      function safeNext() {
+        try {
+          const n = new URLSearchParams(window.location.search).get("next");
+          if (n && n.charAt(0) === "/" && n.charAt(1) !== "/") return n;
+        } catch (e) {}
+        return null;
+      }
+
+      // User đăng nhập TRƯỚC khi cookie pe_has_session tồn tại (phiên cũ) bị
+      // proxy đá về đây dù token còn hạn: ghi lại cookie rồi trả về trang cũ.
+      (function () {
+        const next = safeNext();
+        if (!next) return;
+        let access = null;
+        try { access = localStorage.getItem("pe_access"); } catch (e) {}
+        if (!access) return;
+        try { document.cookie = "pe_has_session=1; path=/; max-age=28800; SameSite=Lax"; } catch (e) {}
+        window.location.replace(next);
+      })();
+
       /* ── PARTICLES ── */
       const colors = ["#EF5350", "#C62828", "#42A5F5", "#1565C0", "#FFFFFF"];
       const pc = document.getElementById("particles");
@@ -100,7 +122,7 @@
             throw new Error(errMsg);
           }
 
-          const nextUrl = "/dashboard?streak=1";
+          const nextUrl = safeNext() || "/dashboard?streak=1";
           document.getElementById("successOverlay").classList.add("show");
           setTimeout(() => {
             document.getElementById("successOverlay").classList.remove("show");
@@ -114,44 +136,24 @@
       }
 
       /* ── HANDLE FORGOT PASSWORD ── */
-      async function handleForgot() {
+      function handleForgot() {
         const email = document.getElementById("login-email").value.trim();
         if (!email) {
           showError("Vui lòng nhập email để khôi phục mật khẩu.");
           return;
         }
 
-        try {
-          /* ── [BACKEND] GỌI API QUÊN MẬT KHẨU ──────────────────────────
-           *
-           *  const res = await fetch('https://api.yourbackend.com/auth/forgot-password', {
-           *    method: 'POST',
-           *    headers: { 'Content-Type': 'application/json' },
-           *    body: JSON.stringify({ email }),
-           *  });
-           *  if (!res.ok) throw new Error('Không tìm thấy email này.');
-           *
-           * ───────────────────────────────────────────────────────────────── */
-
-          await new Promise((r) => setTimeout(r, 1000)); // Xóa dòng này khi có API thật
-          document
-            .getElementById("successOverlay")
-            .querySelector(".success-title").textContent = "Email đã được gửi!";
-          document
-            .getElementById("successOverlay")
-            .querySelector(".success-sub").textContent =
-            "Kiểm tra hộp thư để đặt lại mật khẩu.";
-          document.getElementById("successOverlay").classList.add("show");
-          setTimeout(
-            () =>
-              document
-                .getElementById("successOverlay")
-                .classList.remove("show"),
-            3000,
-          );
-        } catch (err) {
-          showError(err.message);
-        }
+        /* Backend CHƯA có endpoint quên mật khẩu — không giả vờ "Email đã
+         * được gửi!" nữa; báo thật cho người dùng. Khi có API thật:
+         *
+         *  const res = await fetch('/auth/forgot-password', {
+         *    method: 'POST',
+         *    headers: { 'Content-Type': 'application/json' },
+         *    body: JSON.stringify({ email }),
+         *  });
+         *  if (!res.ok) throw new Error('Không tìm thấy email này.');
+         */
+        showError("Tính năng khôi phục mật khẩu đang được phát triển. Vui lòng liên hệ hỗ trợ để được trợ giúp.");
       }
 
       function setLoading(on) {

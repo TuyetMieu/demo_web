@@ -48,6 +48,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       );
     }
 
-    return payload;
+    // Trả về user TƯƠI từ DB thay vì payload: email/role trong JWT là snapshot
+    // lúc phát hành token — admin bị hạ quyền vẫn giữ role cũ tới khi access
+    // token hết hạn (30 phút). Đọc từ DB (cache 60s) thì thay đổi quyền có
+    // hiệu lực trong tối đa 60 giây.
+    return { sub: payload.sub, email: user.email, role: user.role };
   }
 }

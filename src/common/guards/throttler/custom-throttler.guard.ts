@@ -25,7 +25,15 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
    * TUYỆT ĐỐI không bật ở production — mất lớp chống dò mật khẩu và chống DoS.
    */
   protected async shouldSkip(context: ExecutionContext): Promise<boolean> {
-    if (process.env.THROTTLE_DISABLED === 'true') return true;
+    // Chốt chặn 2 lớp: ngoài Joi schema (từ chối boot khi THROTTLE_DISABLED=true
+    // ở production), guard cũng tự kiểm tra NODE_ENV — kill-switch chỉ có tác
+    // dụng ngoài production kể cả khi validation bị bỏ qua.
+    if (
+      process.env.THROTTLE_DISABLED === 'true' &&
+      process.env.NODE_ENV !== 'production'
+    ) {
+      return true;
+    }
     return super.shouldSkip(context);
   }
 }

@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsString,
   Matches,
+  MaxLength,
   MinLength,
 } from 'class-validator';
 import {
@@ -44,12 +45,18 @@ export class UpdateProfileDto {
 }
 
 export class ChangePasswordDto {
+  // current: KHÔNG siết min — mật khẩu cũ (kể cả loại ngắn từ thời chưa có
+  // policy) vẫn phải xác nhận được; chỉ chặn trần chống payload quá khổ.
   @IsString({ message: 'Vui lòng nhập mật khẩu hiện tại' })
   @MinLength(1, { message: 'Vui lòng nhập mật khẩu hiện tại' })
+  @MaxLength(128, { message: 'Mật khẩu không được vượt quá 128 ký tự' })
   current!: string;
 
+  // Cùng policy 8..128 với đăng ký (register.dto.ts) — đổi mật khẩu không được
+  // là đường vòng để đặt mật khẩu yếu hơn.
   @IsString({ message: 'Vui lòng nhập mật khẩu mới' })
-  @MinLength(6, { message: 'Mật khẩu mới phải có ít nhất 6 ký tự' })
+  @MinLength(8, { message: 'Mật khẩu mới phải có ít nhất 8 ký tự' })
+  @MaxLength(128, { message: 'Mật khẩu mới không được vượt quá 128 ký tự' })
   new!: string;
 }
 

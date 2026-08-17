@@ -94,7 +94,10 @@
                         document.getElementById('success-modal').classList.remove('hidden');
                     }, 1000);
                 } else {
-                    output.innerHTML = `<span class='text-red-400'>> [LỖI] ${data.message || data.error || 'Chưa đúng, thử lại nhé!'}</span>`;
+                    // data.error có thể là object {status,message,...} (NestJS)
+                    // → rút message qua __PE_errMsg kẻo hiện "[object Object]".
+                    var msg = data.message || (window.__PE_errMsg ? window.__PE_errMsg(data.error) : data.error);
+                    output.innerHTML = `<span class='text-red-400'>> [LỖI] ${msg || 'Chưa đúng, thử lại nhé!'}</span>`;
                     hint.innerText = "Gợi ý: Hãy chọn 'Pin < 20' và 'Về trạm sạc'!";
                     hint.classList.remove('text-white/30');
                     hint.classList.add('text-red-400');

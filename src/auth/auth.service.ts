@@ -184,6 +184,17 @@ export class AuthService {
         where: { email: profile.email, oauthProvider: null },
       });
       if (sameEmail) {
+        // Chống account pre-hijacking: register() KHÔNG xác minh email, nên
+        // tài khoản trùng email hoàn toàn có thể do kẻ tấn công đăng ký trước
+        // bằng email nạn nhân + mật khẩu của hắn. Tài khoản có mật khẩu thật
+        // -> TỪ CHỐI tự liên kết (nếu link, danh tính Google của nạn nhân rơi
+        // vào tài khoản kẻ tấn công kiểm soát). Chỉ auto-link khi password
+        // rỗng — quy ước của tài khoản tạo qua OAuth (bước 3 bên dưới).
+        if (sameEmail.password !== '') {
+          throw new UnauthorizedException(
+            'Email này đã được đăng ký bằng mật khẩu. Vui lòng đăng nhập bằng mật khẩu của bạn.',
+          );
+        }
         const updated = await this.prisma.user.update({
           where: { id: sameEmail.id },
           data: {

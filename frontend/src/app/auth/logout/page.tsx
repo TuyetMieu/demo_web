@@ -17,6 +17,12 @@ export default function LogoutPage() {
     } catch {
       /* private mode */
     }
+    // Xoá cookie cờ phiên để proxy.ts chặn lại các trang cần đăng nhập
+    try {
+      document.cookie = 'pe_has_session=; path=/; max-age=0; SameSite=Lax';
+    } catch {
+      /* private mode */
+    }
     const done = () => window.location.replace('/');
     if (refresh) {
       fetch(`${origin}/auth/logout`, {

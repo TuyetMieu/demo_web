@@ -195,7 +195,9 @@ function checkMatch() {
       alert('✓ Đổi mật khẩu thành công!');
       closeChangePasswordModal();
     } else {
-      currentMsg.textContent = data.error || 'Mật khẩu hiện tại không đúng';
+      // data.error có thể là object {status,message,...} (NestJS) → rút message
+      // qua __PE_errMsg kẻo hiện "[object Object]".
+      currentMsg.textContent = (window.__PE_errMsg ? window.__PE_errMsg(data.error) : data.error) || 'Mật khẩu hiện tại không đúng';
     }
 
   } catch (err) {
@@ -873,6 +875,18 @@ function skSkillToggle(row) {
     Promise.all([getAllPostsAsync(), followReady]).then(function (res) {
       var posts = filteredSorted(res[0]);
       _renderPosts(posts);
+    }).catch(function () {
+      // Fetch hỏng mà không bắt lỗi → kẹt "Đang tải..." vô hạn (cùng pattern
+      // với loadLeaderboard bên dưới): hiện khối lỗi + nút thử lại.
+      if (list) {
+        list.innerHTML =
+          '<div class="empty">' +
+            '<div class="empty-icon">⚠️</div>' +
+            '<p>Không tải được bài đăng.</p>' +
+            '<button type="button" class="pill-btn" style="margin-top:12px" onclick="window.forumRenderPosts()">Thử lại</button>' +
+          '</div>';
+      }
+      if (empty) empty.classList.add('hidden');
     });
   }
 

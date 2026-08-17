@@ -3,6 +3,20 @@ import * as Joi from 'joi';
 export const envValidationSchema = Joi.object({
   PORT: Joi.number().integer().min(1).max(65535).default(5000),
 
+  // Default 'development' khớp cách dùng hiện có (chỉ so sánh === 'production').
+  NODE_ENV: Joi.string()
+    .valid('development', 'test', 'production')
+    .default('development'),
+
+  // Kill-switch rate-limit (chỉ dành cho đo tải nội bộ): optional để env cũ
+  // không có biến này vẫn boot, nhưng ở production chỉ chấp nhận 'false' —
+  // app TỪ CHỐI khởi động nếu công tắc đang bật.
+  THROTTLE_DISABLED: Joi.when('NODE_ENV', {
+    is: 'production',
+    then: Joi.string().valid('false'),
+    otherwise: Joi.string().valid('true', 'false'),
+  }),
+
   DATABASE_URL: Joi.string().required(),
   DIRECT_URL: Joi.string().required(),
 

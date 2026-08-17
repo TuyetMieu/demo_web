@@ -50,6 +50,24 @@ export class LessonsService {
     });
     if (existing) return existing;
 
+    // Lớp phòng thủ thứ hai (ngoài kiểm tra ở completeLesson): CHỈ tự tạo bài
+    // khi lessonNo còn nằm trong [1, lessonCount] của khoá — caller mới nào
+    // quên kiểm tra cũng không bơm được bài rác + XP.
+    const course = await tx.course.findUnique({
+      where: { id: courseId },
+      select: { lessonCount: true },
+    });
+    if (
+      !course ||
+      !Number.isInteger(lessonNo) ||
+      lessonNo < 1 ||
+      lessonNo > course.lessonCount
+    ) {
+      throw new BadRequestException(
+        `Số thứ tự bài học không hợp lệ (khoá này có ${course?.lessonCount ?? 0} bài)`,
+      );
+    }
+
     try {
       return await tx.lesson.create({
         data: {
@@ -132,10 +150,12 @@ export class LessonsService {
     // Không có kiểm tra này thì gọi /api/lessons/<số bất kỳ>/complete sẽ tạo ra
     // một bài học mới và cộng XP — đổi số là farm XP vô hạn, đồng thời bơm phình
     // bảng lessons bằng dữ liệu rác.
+    // KHÔNG miễn kiểm tra khi lessonCount = 0: khoá mới tạo (mặc định 0 bài)
+    // mà cho qua mọi lessonNo thì N=1,2,3,... là farm XP vô hạn y hệt lỗ cũ.
     if (
       !Number.isInteger(lessonNo) ||
       lessonNo < 1 ||
-      (course.lessonCount > 0 && lessonNo > course.lessonCount)
+      lessonNo > course.lessonCount
     ) {
       throw new BadRequestException(
         `Số thứ tự bài học không hợp lệ (khoá này có ${course.lessonCount} bài)`,

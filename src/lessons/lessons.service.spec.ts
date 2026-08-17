@@ -122,5 +122,18 @@ describe('LessonsService.completeLesson', () => {
       expect(prisma.lesson.create).not.toHaveBeenCalled();
       expect(prisma.user.update).not.toHaveBeenCalled();
     });
+
+    it('khoá lessonCount = 0 -> chặn MỌI lessonNo, không còn farm XP vô hạn', async () => {
+      // Khoá mới tạo mặc định 0 bài; guard cũ (lessonCount > 0 && ...) cho qua
+      // hết nên gọi N=1,2,3,... là tự tạo bài rác + cộng 50 XP mỗi lần.
+      prisma.course.findUnique.mockResolvedValue({ id: 'moi', lessonCount: 0 });
+      prisma.enrollment.findUnique.mockResolvedValue({ userId: 1, courseId: 'moi' });
+
+      await expect(
+        service.completeLesson(1, 1, { courseId: 'moi' }),
+      ).rejects.toThrow(BadRequestException);
+      expect(prisma.lesson.create).not.toHaveBeenCalled();
+      expect(prisma.user.update).not.toHaveBeenCalled();
+    });
   });
 });

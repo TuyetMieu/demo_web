@@ -207,13 +207,35 @@ export class CoursesService {
       );
     }
 
-    await this.prisma.courseRating.upsert({
-      where: { userId_courseId: { userId, courseId } },
-      create: { userId, courseId, rating },
-      update: { rating },
-    });
+    // Ghi đánh giá + đồng bộ cột courses.rating trong CÙNG transaction.
+    // Trước đây chỉ upsert vào course_ratings, trong khi mapCourse() đọc cột
+    // tĩnh courses.rating -> user chấm 5 sao nhưng card khoá học vẫn hiện
+    // điểm seed cũ mãi mãi.
+    const result = await this.prisma.$transaction(async (tx) => {
+      await tx.courseRating.upsert({
+        where: { userId_courseId: { userId, courseId } },
+        create: { userId, courseId, rating },
+        update: { rating },
+      });
 
-    return { ok: true, ...(await this.getCourseRating(courseId)) };
+      const agg = await tx.courseRating.aggregate({
+        where: { courseId },
+        _avg: { rating: true },
+        _count: { rating: true },
+      });
+      const average = agg._avg.rating
+        ? Math.round(agg._avg.rating * 10) / 10
+        : 0;
+
+      await tx.course.update({
+        where: { id: courseId },
+        data: { rating: average },
+      });
+
+      return { average, count: agg._count.rating };
+    }, TX_OPTIONS);
+
+    return { ok: true, ...result };
   }
 
   // ---------- Task 95 ----------

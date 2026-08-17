@@ -16,6 +16,13 @@ export default function OAuthCallbackPage() {
       } catch {
         /* private mode */
       }
+      // Cookie cờ phiên cho proxy.ts (trang này lưu token trực tiếp,
+      // không đi qua setTokens của pe-bridge)
+      try {
+        document.cookie = 'pe_has_session=1; path=/; max-age=28800; SameSite=Lax';
+      } catch {
+        /* private mode */
+      }
       window.location.replace('/dashboard');
     } else {
       window.location.replace('/login?error=google_failed');

@@ -271,7 +271,18 @@ export class QuizzesService {
     });
 
     // Bước 3: lưu kết quả + đổi trạng thái trong CÙNG transaction.
+    // Kiểm tra `status === 'submitted'` ở Bước 1 chỉ là chặn nhanh — hai
+    // request song song (bấm đúp) đều đọc ra 'generated' rồi CẢ HAI cùng ghi
+    // kết quả. Dùng compare-and-set như completeLesson: chỉ request đổi được
+    // trạng thái generated -> submitted mới được ghi, request thua rollback.
     await this.prisma.$transaction(async (tx) => {
+      const claimed = await tx.quiz.updateMany({
+        where: { id: quizId, status: 'generated' },
+        data: { status: 'submitted' },
+      });
+      if (claimed.count === 0) {
+        throw new ConflictException('Quiz này đã được nộp');
+      }
       await tx.reviewQuizResult.create({
         data: {
           quizId,
@@ -280,10 +291,6 @@ export class QuizzesService {
           total: questions.length,
           answersJson: detail,
         },
-      });
-      await tx.quiz.update({
-        where: { id: quizId },
-        data: { status: 'submitted' },
       });
     });
 

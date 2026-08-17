@@ -25,14 +25,25 @@
 
   function getAccess() { try { return localStorage.getItem(LS_ACCESS); } catch (e) { return null; } }
   function getRefresh() { try { return localStorage.getItem(LS_REFRESH); } catch (e) { return null; } }
+  /* Cookie CỜ (không chứa token) để proxy.ts của Next đọc được trạng thái
+   * "có phiên" từ server — localStorage server không đọc được. max-age khớp
+   * hạn refresh token (8h), được gia hạn mỗi lần login/refresh. */
+  function setSessionCookie() {
+    try { document.cookie = 'pe_has_session=1; path=/; max-age=28800; SameSite=Lax'; } catch (e) {}
+  }
+  function clearSessionCookie() {
+    try { document.cookie = 'pe_has_session=; path=/; max-age=0; SameSite=Lax'; } catch (e) {}
+  }
   function setTokens(access, refresh) {
     try {
       if (access) localStorage.setItem(LS_ACCESS, access);
       if (refresh) localStorage.setItem(LS_REFRESH, refresh);
     } catch (e) { /* private mode */ }
+    if (access) setSessionCookie();
   }
   function clearTokens() {
     try { localStorage.removeItem(LS_ACCESS); localStorage.removeItem(LS_REFRESH); } catch (e) {}
+    clearSessionCookie();
   }
   window.__PE_setTokens = setTokens;
   window.__PE_clearTokens = clearTokens;

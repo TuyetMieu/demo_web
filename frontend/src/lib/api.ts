@@ -27,6 +27,68 @@ function ls(key: string): string | null {
   }
 }
 
+/**
+ * Refresh access token — dedupe bằng 1 promise đang bay (mirror pe-bridge.js).
+ * ROTATE_REFRESH_TOKENS + BLACKLIST nghĩa là 2 lời gọi refresh song song với
+ * cùng refresh token → lời gọi sau bị 401 (token đã vào blacklist) và đá user
+ * ra ngoài oan. Nếu pe-bridge đã nạp thì delegate sang __PE_refreshAccess để
+ * hai tầng (React + legacy) không refresh song song với nhau.
+ */
+let refreshing: Promise<string | null> | null = null;
+
+function refreshAccess(): Promise<string | null> {
+  if (typeof window !== 'undefined') {
+    const w = window as unknown as { __PE_refreshAccess?: () => Promise<string | null> };
+    if (typeof w.__PE_refreshAccess === 'function') return w.__PE_refreshAccess();
+  }
+  if (refreshing) return refreshing;
+  const refresh = ls(LS_REFRESH);
+  if (!refresh) return Promise.resolve(null);
+  refreshing = fetch(`${origin()}/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh }),
+  })
+    .then(async (rr) => {
+      if (rr.status === 401 || rr.status === 403) {
+        try {
+          localStorage.removeItem(LS_ACCESS);
+          localStorage.removeItem(LS_REFRESH);
+        } catch {
+          /* private mode */
+        }
+        // Xoá cookie cờ phiên để proxy.ts chặn từ server (đồng bộ với pe-bridge)
+        try {
+          document.cookie = 'pe_has_session=; path=/; max-age=0; SameSite=Lax';
+        } catch {
+          /* non-browser */
+        }
+        return null;
+      }
+      if (!rr.ok) return null; // lỗi mạng/5xx: giữ token, thử lại sau
+      const d = await rr.json().catch(() => null);
+      if (!d?.access) return null;
+      try {
+        localStorage.setItem(LS_ACCESS, d.access);
+        if (d.refresh) localStorage.setItem(LS_REFRESH, d.refresh);
+      } catch {
+        /* private mode */
+      }
+      try {
+        document.cookie = 'pe_has_session=1; path=/; max-age=28800; SameSite=Lax';
+      } catch {
+        /* non-browser */
+      }
+      return d.access as string;
+    })
+    .catch(() => null);
+  refreshing.then(
+    () => { refreshing = null; },
+    () => { refreshing = null; },
+  );
+  return refreshing;
+}
+
 export async function apiFetch(path: string, opts: RequestInit = {}): Promise<Response> {
   const base = origin();
   const send = (access: string | null) => {
@@ -37,25 +99,8 @@ export async function apiFetch(path: string, opts: RequestInit = {}): Promise<Re
 
   let res = await send(ls(LS_ACCESS));
   if (res.status === 401) {
-    const refresh = ls(LS_REFRESH);
-    if (refresh) {
-      const rr = await fetch(`${base}/auth/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh }),
-      });
-      if (rr.ok) {
-        const d = await rr.json().catch(() => null);
-        if (d?.access) {
-          try {
-            localStorage.setItem(LS_ACCESS, d.access);
-          } catch {
-            /* private mode */
-          }
-          res = await send(d.access);
-        }
-      }
-    }
+    const access = await refreshAccess();
+    if (access) res = await send(access);
   }
   return res;
 }

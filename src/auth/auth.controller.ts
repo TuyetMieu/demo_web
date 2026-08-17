@@ -5,7 +5,6 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  Query,
   Req,
   Res,
   UseGuards,
@@ -15,6 +14,11 @@ import { AuthGuard } from '@nestjs/passport';
 import { Throttle, seconds } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { Public } from 'src/common/decorators/public.decorators';
+import {
+  FacebookCallbackGuard,
+  GoogleCallbackGuard,
+  type OAuthErrorRequest,
+} from 'src/common/guards/jwt-auth/oauth-callback.guard';
 import type { User } from 'src/generated/prisma';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -67,10 +71,13 @@ export class AuthController {
     return this.authService.logout(dto?.refresh);
   }
 
+  // GET KHÔNG nhận refresh token qua query string: token trong URL lọt vào
+  // access log, browser history và header Referer. Muốn thu hồi token phải
+  // dùng POST với body {refresh}; GET chỉ còn trả ok để không phá client cũ.
   @Get('logout')
   @HttpCode(HttpStatus.OK)
-  logoutGet(@Query('refresh') refresh?: string) {
-    return this.authService.logout(refresh);
+  logoutGet() {
+    return { ok: true };
   }
 
   @Post('refresh')
@@ -88,8 +95,11 @@ export class AuthController {
   }
 
   // ---------- Task 60 ----------
+  // GoogleCallbackGuard (không phải AuthGuard('google') trần): lỗi từ
+  // strategy/service không được ném thành trang JSON 401 mà lưu vào
+  // req.oauthError để redirect về frontend kèm thông báo.
   @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
+  @UseGuards(GoogleCallbackGuard)
   async googleCallback(
     @Req() req: Request,
     @Res() res: Response,
@@ -100,7 +110,10 @@ export class AuthController {
     // GoogleStrategy.validate() đã gán user (qua done(null, user)).
     const user = req.user as User | undefined;
     if (!user) {
-      res.redirect(`${frontendUrl}/auth/callback#error=oauth_failed`);
+      const params = new URLSearchParams({ error: 'oauth_failed' });
+      const message = (req as OAuthErrorRequest).oauthError;
+      if (message) params.set('message', message);
+      res.redirect(`${frontendUrl}/auth/callback#${params.toString()}`);
       return;
     }
 
@@ -127,7 +140,7 @@ export class AuthController {
   // Spec sheet 1 (API #7): giống Google nhưng KHÁC target redirect khi thất bại
   // — dùng mã lỗi riêng facebook_oauth_failed để FE phân biệt provider.
   @Get('facebook/callback')
-  @UseGuards(AuthGuard('facebook'))
+  @UseGuards(FacebookCallbackGuard)
   async facebookCallback(
     @Req() req: Request,
     @Res() res: Response,
@@ -137,7 +150,10 @@ export class AuthController {
 
     const user = req.user as User | undefined;
     if (!user) {
-      res.redirect(`${frontendUrl}/login?error=facebook_failed`);
+      const params = new URLSearchParams({ error: 'facebook_failed' });
+      const message = (req as OAuthErrorRequest).oauthError;
+      if (message) params.set('message', message);
+      res.redirect(`${frontendUrl}/login?${params.toString()}`);
       return;
     }
 
