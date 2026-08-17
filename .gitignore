@@ -11,3 +11,7 @@ node_modules
 .agents
 
 dist/
+
+docs/
+
+test/
