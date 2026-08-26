@@ -7268,7 +7268,11 @@
       state.cmEditor = CodeMirror(pane.querySelector('#code-editor'), {
         value: initialValue,
         mode: 'text/x-sql',
-        theme: 'material-darker',
+        // Theme 'default' nằm sẵn trong codemirror.min.css và là theme SÁNG.
+        // Trước đây là 'material-darker' (tải thêm 1 file CSS từ CDN) — theme
+        // đó tối cố định ở CẢ hai chế độ, không lật theo body.dark được.
+        // Màu chữ/cú pháp của editor giờ do edu-db.css §L11 quy định.
+        theme: 'default',
         lineNumbers: true,
         indentUnit: 2,
         tabSize: 2,
@@ -7283,7 +7287,7 @@
       });
     } else {
       pane.querySelector('#code-editor').innerHTML =
-        `<textarea id="cm-fallback" style="flex:1;width:100%;background:#0F172A;color:#F1F5F9;font-family:'JetBrains Mono',monospace;font-size:14px;padding:16px;border:none;outline:none;resize:none;line-height:1.7;" placeholder="${escapeHtml(ghostHint)}"></textarea>`;
+        `<textarea id="cm-fallback" style="flex:1;width:100%;background:var(--cm-bg,#ffffff);color:var(--cm-fg,#221d33);font-family:'JetBrains Mono',monospace;font-size:14px;padding:16px;border:none;outline:none;resize:none;line-height:1.7;" placeholder="${escapeHtml(ghostHint)}"></textarea>`;
     }
   }
 

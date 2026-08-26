@@ -250,3 +250,697 @@ body.dark .cd-enroll-btn.unenroll { color: #FCA5A5; }
     radial-gradient(circle at 70% 80%, rgba(123, 143, 245, .16), transparent 50%),
     linear-gradient(135deg, #221c36, #181426);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   §L — /lesson/db_design* : TRANG BÀI HỌC CHI TIẾT (4 bước)
+
+   lesson_db_design.css được thiết kế DARK-FIRST: ~73 chỗ hard-code
+   nền tối bán trong suốt (rgba(11,17,33,.5) 53 lần, rgba(15,23,42,.x)
+   20 lần) và bảng chữ --text-100…600 sáng-trên-tối. Phần đầu file này
+   đã lật bảng chữ sang tối-trên-sáng, nhưng KHÔNG lật được các nền
+   hard-code kia: chồng lên trang sáng, chúng ra màu XÁM BÙN, rồi chữ
+   (giờ đã sẫm) nằm trên đó → đo được 401 chỗ dưới chuẩn WCAG AA,
+   nhiều chỗ tỉ lệ 1.0–1.4 tức là gần như VÔ HÌNH.
+
+   Cách sửa — chia bề mặt làm hai loại thay vì bôi xám tất:
+   TOÀN BỘ trang chuyển sang hệ sáng — đề bài, hướng dẫn, gợi ý, bảng
+   kết quả, mini-game, bản đồ pipeline (§L10), ô soạn mã + khối SVG mở
+   bài (§L11–L12). Không còn vùng nào giữ nền tối ở chế độ sáng.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── L0. Token nhấn: trả lại quyền cho bản re-skin ───────────────
+   lesson_db_design.js:2321 gọi
+       documentElement.style.setProperty('--primary', data.accent_color)
+   với accent_color = '#06B6D4' (lesson_content.js:25). Inline style trên
+   <html> thắng MỌI rule :root, nên `--primary: #b93ff0` khai ở đầu file
+   này chết lặng trên đúng trang bài học — trong khi --primary-deep/soft/
+   glow (không bị JS đặt) vẫn là tím. Kết quả: nút "primary" là gradient
+   cyan→tím, viền cyan cạnh nền tím nhạt.
+   Khai lại trên `body`: biến tự thừa kế từ TỔ TIÊN GẦN NHẤT có khai báo,
+   mà mọi thứ nhìn thấy được đều nằm trong body → thắng inline trên <html>
+   mà không cần !important, và không đụng vào JS/dữ liệu khoá học. */
+body {
+  --primary: #b93ff0;
+  --primary-glow: rgba(185, 63, 240, .30);
+  --primary-soft: rgba(185, 63, 240, .10);
+  --primary-deep: #8e2bc0;
+}
+
+/* ── L1. Màu nhấn dùng làm CHỮ ──────────────────────────────────
+   --primary, --module-accent (JS đặt: #F59E0B hổ phách / #8B5CF6 chàm /
+   #10B981 lục … theo module), --success, --warning đều là màu BÃO HOÀ
+   chọn cho nền đen. Làm nền/viền thì đẹp, nhưng dùng làm CHỮ trên nền
+   sáng chỉ đạt 1.6–2.3 (chuẩn 4.5). Tạo bản "chữ" tối hơn, GIỮ NGUYÊN
+   sắc màu để vẫn nhận ra module; nền tối thì dùng lại màu gốc. */
+body:not(.dark) {
+  --primary-text: color-mix(in srgb, var(--primary) 68%, #180a22);
+  --module-accent-text: color-mix(in srgb, var(--module-accent, #b93ff0) 52%, #1a1226);
+  --success-text: #047857;
+  --warning-text: #92400e;
+  --danger-text: #b91c1c;
+  --ctx-steps-text: #5b21b6;
+  --ctx-expected-text: #065f46;
+  --ctx-real-text: #0f766e;
+}
+body.dark {
+  --primary-text: var(--primary);
+  --module-accent-text: var(--module-accent, #d9a1f5);
+  --success-text: var(--success);
+  --warning-text: var(--warning);
+  --danger-text: var(--danger);
+  --ctx-steps-text: #c4b5fd;
+  --ctx-expected-text: #6ee7b7;
+  --ctx-real-text: #5eead4;
+}
+
+/* ── L3. BỀ MẶT ĐỌC → thẻ kính sáng ─────────────────────────────
+   Đây là phần gây "lỗi màu" nặng nhất: đề bài Bước 4, khung hướng dẫn,
+   gợi ý, bảng kết quả, thanh nhiệm vụ Bước 3 và mini-game Bước 2 đều
+   hard-code rgba(11,17,33,.5) / rgba(15,23,42,.65) → xám bùn. Đổi hẳn
+   sang cặp --edu-card-* để chúng đồng bộ với phần còn lại của app và
+   tự đúng khi bật chế độ tối. */
+
+/* Bước 2 — mini-game phân loại cột */
+.mini-game {
+  background: var(--edu-card-bg);
+  border-color: var(--edu-card-border);
+  box-shadow: var(--edu-card-shadow);
+}
+.mini-game-tag { color: var(--warning-text); }
+.mini-hint-inline { color: var(--text-400); }
+.mini-bin[data-correct="true"] .mini-bin-label,
+.mini-bin[data-correct="true"] .bin-icon { color: var(--success-text); }
+.mini-bin[data-correct="false"] .mini-bin-label,
+.mini-bin[data-correct="false"] .bin-icon { color: var(--danger-text); }
+.mini-chip {
+  color: var(--primary-text);
+  border-color: color-mix(in srgb, var(--primary) 34%, transparent);
+}
+.mini-chip:hover { background: color-mix(in srgb, var(--primary) 16%, transparent); }
+
+/* Bước 2 — ô đáp án trắc nghiệm: .opt-letter lấy nền --surface-3
+   (nay là rgba(255,255,255,.86)) đặt trên thẻ trắng → chữ tròn biến mất. */
+.mcq-option .opt-letter {
+  background: var(--edu-track-bg);
+  color: var(--text-300);
+}
+
+/* Bước 3 — thanh nhiệm vụ + xem trước dữ liệu */
+.step3-exercise {
+  background: var(--edu-card-bg);
+  border-color: var(--edu-card-border);
+}
+.step3-topbar {
+  background: var(--edu-pill-bg);
+  border-bottom-color: var(--edu-sidebar-border);
+}
+.data-preview,
+.step3-topbar .data-preview {
+  background: var(--edu-pill-bg);
+  border-color: var(--edu-pill-border);
+}
+.data-preview-content .dp-table-name { color: var(--primary-text); }
+.data-preview-content .dp-col .dp-col-type,
+.dp-col-type { color: var(--text-400); }
+.bank-label { color: var(--text-300); }
+
+/* Bước 4 — ba cột đề bài | IDE | kết quả.
+   `.pane` phủ cả pane-middle, nên L2 phải khai lại nền tối cho nó SAU
+   rule này — thứ tự trong file đã đúng vì L2 nằm trên. Do cùng độ đặc
+   trưng, nhắc lại pane-middle ở cuối §L để chắc chắn thắng. */
+.codecademy-layout .pane,
+.codecademy-layout .results-pane,
+.codecademy-layout .schema-pane {
+  background: var(--edu-card-bg);
+  border-color: var(--edu-card-border);
+}
+.codecademy-layout .results-head,
+.codecademy-layout .schema-head {
+  background: var(--edu-pill-bg);
+  color: var(--text-300);
+  border-bottom-color: var(--edu-card-border);
+}
+.codecademy-layout .results-empty { color: var(--text-400); }
+.codecademy-layout .results-empty strong { color: var(--primary-text); }
+.codecademy-layout .instructions-block {
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
+  border-left-color: var(--primary);
+}
+
+/* Nhãn từng mục hướng dẫn — nền là màu nhấn 18%, chữ là bản pastel
+   dành cho nền đen (#FCD34D/#C4B5FD/#6EE7B7/#5EEAD4) → pastel trên
+   pastel, tỉ lệ 1.3–2.3. Đổi sang bản chữ tối cùng sắc. */
+.codecademy-layout .instructions-block .ctx-tag-scenario { color: var(--primary-text); }
+.codecademy-layout .instructions-block .ctx-tag-steps { color: var(--ctx-steps-text); }
+.codecademy-layout .instructions-block .ctx-tag-example { color: var(--warning-text); }
+.codecademy-layout .instructions-block .ctx-tag-output { color: var(--text-300); }
+.codecademy-layout .instructions-block .ctx-tag-expected { color: var(--ctx-expected-text); }
+.codecademy-layout .instructions-block .ctx-tag-realworld { color: var(--ctx-real-text); }
+.codecademy-layout .instructions-block .context-hint-explore,
+.codecademy-layout .instructions-block .context-hint-explore i { color: var(--warning-text); }
+
+/* Gợi ý 4 cấp */
+.hint-panel {
+  background: var(--edu-pill-bg);
+  border-color: color-mix(in srgb, var(--warning) 38%, transparent);
+}
+.hint-panel-head { color: var(--warning-text); }
+.hint-panel-body { color: var(--text-300); }
+.hint-level-tab { color: var(--text-400); }
+
+/* ── L4. Khối kéo-thả + chữ nhấn trên nền sáng ──────────────────
+   .logic-pill dùng bảng "syntax highlight": nền = màu loại token 18%,
+   chữ = bản pastel của chính màu đó (#C7D2FE/#BFDBFE/#FED7AA/#99F6E4).
+   Cặp pastel-trên-pastel này chỉ đọc được khi cả khối nằm trên nền đen.
+   Kho khối lệnh nay là thẻ sáng → đổi chữ sang bản đậm, GIỮ nguyên nền
+   và chấm neo màu để người học vẫn phân biệt được loại token. */
+body:not(.dark) .logic-pill.pill-kw  { color: #3730a3; }
+body:not(.dark) .logic-pill.pill-col { color: #1d4ed8; }
+body:not(.dark) .logic-pill.pill-val { color: #9a3412; }
+body:not(.dark) .logic-pill.pill-tbl { color: #0f766e; }
+body:not(.dark) .logic-pill.pill-op  { color: #334155; }
+
+/* Nhãn ô thả lấy màu zone (cyan/hổ phách/lục) làm chữ 10px in hoa. */
+body:not(.dark) .drop-line-prompt {
+  color: color-mix(in srgb, var(--zone-color, var(--text-500)) 58%, #14101f);
+}
+
+/* Tiêu đề bài: nền gradient cắt theo chữ, nửa đầu là --module-accent
+   bão hoà → nửa đầu tiêu đề 36px gần như mất trên nền pastel. */
+.lesson-title {
+  color: var(--text-100);
+  background: linear-gradient(135deg, var(--module-accent-text), var(--text-100) 72%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Nhãn/eyebrow ăn theo màu module */
+.step-pill { color: var(--module-accent-text); }
+.story-tag { color: var(--module-accent-text); }
+.story-hook em { color: var(--module-accent-text); }
+.progress-step.active { color: var(--module-accent-text); }
+
+/* Số bước đang chạy: chữ lấy --surface-0 (nay gần trắng) đặt trên viên
+   màu module → trắng-trên-hổ-phách 1.9. Sáng viên lên một chút rồi
+   dùng mực tối: cách duy nhất đạt AA cho CẢ hổ phách, chàm lẫn lục. */
+.progress-step.active .step-num {
+  background: color-mix(in srgb, var(--module-accent) 88%, #ffffff);
+  color: #161022;
+}
+
+/* Bảng khám phá dữ liệu (Bước 1) — cột khoá chính tô bằng --primary. */
+.te-data-table th.te-th-pk,
+.te-data-table .te-td-pk { color: var(--primary-text); }
+.te-panel-sub { color: var(--text-400); }
+
+/* Nút điều hướng cuối trang + nút chạy query trên bản đồ pipeline */
+.nav-next { color: var(--primary-text); }
+.nav-next:hover:not(:disabled) { color: var(--primary-text); }
+.run-query-btn {
+  background: color-mix(in srgb, var(--primary) 86%, #ffffff);
+  color: #17101f;
+  box-shadow: 0 0 18px var(--primary-glow);
+}
+.run-query-btn:hover:not(:disabled) { box-shadow: 0 4px 18px var(--primary-glow); }
+
+/* ── L5. Thang chữ phụ: nâng hai bậc mờ nhất ────────────────────
+   --text-500/600 (#7c7894/#8b87a0) đang gánh chữ 9–12px của thẻ người
+   chơi, thanh 4 bước, nhãn kho khối… trên nền gần trắng chỉ đạt
+   4.0–4.2. Nâng vừa đủ qua 4.5, vẫn mờ hơn hẳn --text-300/400 nên trật
+   tự thị giác không đổi. */
+body:not(.dark) {
+  --text-500: #6a6683;
+  --text-600: #767290;
+}
+
+/* Đầu cột Bước 4: .pane-head (dòng 1852) hard-code rgba(11,17,33,.6)
+   → tên bài + "Bước 4/4" nằm trên xám bùn. Các đầu cột nằm TRONG đảo
+   tối (.ide-head/.terminal-head) đã có rule riêng đặc trưng cao hơn
+   nên không bị rule này kéo sáng theo. */
+.pane-head {
+  background: var(--edu-pill-bg);
+  border-bottom-color: var(--edu-card-border);
+}
+
+/* Ô mã nội dòng: nền là màu nhấn 10%, chữ là màu nhấn NGUYÊN — tím
+   trên tím nhạt, 3.3. Dùng bản chữ tối. */
+.lesson-title code,
+.lesson-intro code,
+.lesson-example code,
+.prompt-block code,
+.mission-sticky-text code,
+.concept-card-body code,
+.ctx-body code { color: var(--primary-text); }
+
+/* Nút loa nằm trên thanh nhiệm vụ (nay sáng) nhưng vẫn là viên tối. */
+.pipeline-sound-toggle {
+  background: var(--edu-pill-bg);
+  border-color: var(--edu-pill-border);
+}
+.pipeline-sound-toggle:hover { background: var(--edu-accent-soft); }
+
+/* Mini-game Bước 2 tô "Đây là PK"/"Không phải PK" thẳng bằng --success
+   /--danger (bão hoà, chọn cho nền đen). Hai vùng này chỉ có CHỮ và
+   viên icon nền nhạt — hạ hai token ngay tại đây là đủ, không đụng tới
+   nút/nền tô đặc dùng chung màu ở nơi khác. */
+body:not(.dark) .mini-game-head,
+body:not(.dark) .mini-bin-label {
+  --success: #047857;
+  --danger: #b91c1c;
+}
+
+/* Số dòng của CodeMirror (theme material-darker) — #545454 trên #212121
+   chỉ đạt 2.1, người học không dò được dòng đang gõ. */
+.CodeMirror-linenumber { color: #8a8a8a; }
+
+/* Hai mức chữ nhấn còn hụt sát ngưỡng khi nằm trên chính viên nền
+   cùng sắc (đo được 4.33 và 4.42 — chuẩn 4.5). */
+body:not(.dark) {
+  --module-accent-text: color-mix(in srgb, var(--module-accent, #b93ff0) 46%, #1a1226);
+  --ctx-real-text: #0d635c;
+}
+
+/* ── L8. Vét nốt các tấm tối lẻ ─────────────────────────────────
+   Ô thả khối lệnh (Bước 3) hard-code rgba(11,17,33,.45) → trên nền
+   sáng thành thanh XÁM BÙN đặc, nhìn như ô đã hỏng chứ không phải chỗ
+   trống chờ thả. Đổi sang ô nét đứt nhạt theo màu zone của từng dòng. */
+body:not(.dark) .drop-line-slot {
+  background: rgba(255, 255, 255, .62);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--zone-color, var(--primary)) 38%, transparent);
+  color: var(--text-400);
+}
+body:not(.dark) .drop-line-slot.filled { background: rgba(255, 255, 255, .78); }
+
+/* Nút "Chạy Query" nằm trên tấm bản đồ tối và mặc định ở trạng thái
+   disabled (opacity .55 + saturate .55). Tím đậm qua hai lớp giảm đó
+   chìm hẳn vào nền — sáng viên nút lên để disabled vẫn nhìn ra là nút. */
+.run-query-btn {
+  background: color-mix(in srgb, var(--primary) 58%, #ffffff);
+  color: #17101f;
+}
+.run-query-btn:disabled { opacity: .68; }
+
+/* ── L9. Hai mini-game còn lại + nút nền màu nhấn ───────────────
+   Ngoài mini-game "phân loại cột" (Bước 2), lesson_db_design còn hai
+   dạng khác xuất hiện ở một số bài — "sắp thứ tự" (.mg-order-*) và
+   "soi lỗi" (.mg-bugspot-*). Cả hai cũng hard-code nền tối:
+     .mg-order-item   rgba(15,23,42,.6)  + chữ --text-200 (nay sẫm)
+     .mg-bugspot-code rgba(11,17,33,.9)  + chữ --text-500 (nay sẫm)
+   Cả hai đều chuyển sang thẻ sáng (khối mã của .mg-bugspot-code được
+   sơn cùng hệ với các ô soạn mã khác ở §L11). */
+.mg-order-item {
+  background: var(--edu-pill-bg);
+  border-color: var(--edu-pill-border);
+}
+.mg-order-num { color: var(--primary-text); }
+
+/* Nút tô đặc bằng màu nhấn: chữ lấy --surface-0 — trên nền tối gốc đó
+   là mực đen đặt lên viên cyan sáng (đúng). Sau khi lật sáng, --surface-0
+   thành gần trắng đặt lên tím #b93ff0 → chỉ 3.5. Trắng thật trên tím
+   ĐẬM hơn đạt 4.6–7.3 mà vẫn nguyên tông thương hiệu. */
+body:not(.dark) .next-btn.primary,
+body:not(.dark) .run-btn.primary,
+body:not(.dark) .mg-order-btn,
+body:not(.dark) .mg-bugspot-btn {
+  background: linear-gradient(135deg, #a533e0, #7d24ab);
+  color: #ffffff;
+}
+body:not(.dark) .next-btn.primary:hover {
+  background: linear-gradient(135deg, #b241ef, #8b2bbd);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   §L10 — BẢN ĐỒ PIPELINE (Bước 3) SANG NỀN SÁNG
+
+   Trước đây khối này được giữ nguyên nền đen theo thiết kế gốc, coi như
+   "tấm tranh tối trong bố cục sáng". Thực tế trên máy: nó chiếm gần nửa
+   màn hình nên không đọc ra là tranh minh hoạ nữa mà thành một mảng đen
+   lạc hẳn khỏi tông pastel/tím của app.
+
+   Toàn bộ mỹ thuật của bản đồ (`.town-map`, thẻ mệnh đề `.qcard`, đường
+   spine SVG, panel dữ liệu `.qdata`) viết cứng màu cho nền đen, nhiều
+   chỗ kèm !important, nên phải sơn lại từng lớp chứ không đổi token là
+   xong. Chỉ áp cho nền sáng — `body.dark` giữ nguyên bản gốc vì ở đó
+   bảng màu cũ vẫn đúng.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Nền bản đồ ─────────────────────────────────────────────── */
+body:not(.dark) .town-map {
+  background:
+    radial-gradient(120% 55% at 30% -8%, rgba(185, 63, 240, .10), transparent 62%),
+    linear-gradient(180deg, rgba(255, 255, 255, .74) 0%, rgba(255, 255, 255, .52) 100%) !important;
+  border: 1px solid var(--edu-card-border) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), var(--edu-card-shadow) !important;
+}
+body:not(.dark) .town-map .town-brand { color: var(--text-400); }
+body:not(.dark) .town-map .town-brand b { color: var(--primary-text); }
+
+/* ── Đường spine + gói dữ liệu chạy trên đó ─────────────────── */
+body:not(.dark) .town-map .town-route-shadow { stroke: rgba(150, 140, 190, .22) !important; }
+body:not(.dark) .town-map .town-route {
+  stroke: rgba(185, 63, 240, .45) !important;
+  filter: drop-shadow(0 0 4px rgba(185, 63, 240, .30)) !important;
+}
+body:not(.dark) .town-map .town-route-flow { stroke: var(--primary) !important; }
+body:not(.dark) .town-map .town-truck.packet .pk-body {
+  background: radial-gradient(circle at 38% 32%, #fdf4ff, #b93ff0 58%, #8e2bc0) !important;
+  box-shadow: 0 0 12px 2px rgba(185, 63, 240, .45) !important;
+}
+body:not(.dark) .town-map .town-truck-badge {
+  color: var(--primary-text);
+  background: rgba(255, 255, 255, .94);
+  border: 1px solid rgba(185, 63, 240, .35);
+}
+
+/* ── Thẻ mệnh đề (FROM / WHERE / SELECT / bảng nguồn) ────────── */
+body:not(.dark) .town-station.qcard .qcard-inner {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(255, 255, 255, .84)), #ffffff;
+  border: 1px solid rgba(150, 140, 190, .20);
+  border-left: 4px solid var(--zc, #8b86a8);
+  box-shadow: 0 6px 18px rgba(120, 110, 170, .14);
+}
+body:not(.dark) .town-station.qcard-source .qcard-inner {
+  border-left-color: var(--primary);
+  background: linear-gradient(180deg, rgba(185, 63, 240, .10), rgba(185, 63, 240, .04)), #ffffff;
+}
+body:not(.dark) .town-station.qcard .qcard-label { color: var(--text-100); }
+body:not(.dark) .town-station.qcard .qcard-label.mono { color: var(--text-200); }
+body:not(.dark) .town-station.qcard .qcard-sub { color: var(--text-400); }
+body:not(.dark) .town-station.qcard .qcard-glyph.src { color: var(--primary-text); }
+body:not(.dark) .town-station.qcard .qcard-count {
+  color: var(--text-300);
+  background: rgba(150, 140, 190, .14);
+}
+body:not(.dark) .town-station.qcard .qcard-ord {
+  background: #ffffff;
+  border: 1px solid rgba(150, 140, 190, .42);
+  color: var(--text-300);
+}
+body:not(.dark) .town-station.qcard:not(.qcard-last)::after { color: rgba(185, 63, 240, .55); }
+
+/* Trạng thái: bóng đổ đen 50% của bản gốc quá nặng trên nền sáng;
+   dấu ✓ #34D399 và số đếm lỗi #fca5a5 là bản pastel cho nền đen. */
+body:not(.dark) .town-station.qcard.active .qcard-inner {
+  box-shadow: 0 0 0 1px var(--zc), 0 10px 24px rgba(120, 110, 170, .22), 0 0 20px -6px var(--zc);
+}
+body:not(.dark) .town-station.qcard.done .qcard-inner { border-left-color: var(--success-text); }
+body:not(.dark) .town-station.qcard.done .qcard-check { color: var(--success-text); }
+body:not(.dark) .town-station.qcard.error .qcard-count { color: var(--danger-text); }
+/* @keyframes không nhận được biến thể theo class trên body, nên nháy
+   sang màu khác phải là một animation riêng: bản gốc nháy sang #fff,
+   trên thẻ trắng thì không thấy gì. */
+@keyframes qcard-flash-light {
+  0%, 100% { border-left-color: var(--zc); }
+  45%      { border-left-color: var(--primary); }
+}
+body:not(.dark) .town-station.qcard.flash .qcard-inner { animation: qcard-flash-light .4s ease; }
+
+/* ── Panel "Nguồn · <bảng>" ──────────────────────────────────── */
+body:not(.dark) .town-map .qdata .town-manifest {
+  background: rgba(255, 255, 255, .78) !important;
+  border: 1px solid var(--edu-card-border) !important;
+}
+body:not(.dark) .town-map .qdata .town-manifest-ttl { color: var(--primary-text); }
+body:not(.dark) .town-map .qdata .town-manifest-sub {
+  color: var(--text-400);
+  border-top-color: rgba(150, 140, 190, .20);
+}
+body:not(.dark) .town-map .qdata .station-mini-table tr.filtered-in {
+  background: rgba(185, 63, 240, .07);
+}
+
+/* Dải lược đồ bảng dưới bản đồ: `.step3-pipeline-map > .data-preview`
+   (0,2,0) đè lên rule `.data-preview` (0,1,0) ở §L3, nên riêng chỗ này
+   vẫn giữ rgba(11,17,33,.5) → thanh xám bùn dưới đáy cột trái. */
+body:not(.dark) .step3-pipeline-map > .data-preview {
+  background: rgba(255, 255, 255, .62);
+  border-color: var(--edu-card-border);
+}
+
+/* Icon trên thẻ mệnh đề: JS ghi màu THẲNG VÀO thuộc tính style của thẻ
+   (`style="color:#FBBF24"`) theo loại mệnh đề — #FBBF24 hổ phách,
+   #34D399 lục, #A78BFA tím nhạt, #22D3EE cyan, #F472B6 hồng. Lại là bộ
+   màu chọn cho nền đen: trên thẻ trắng chỉ đạt 2.9. Khác trường hợp
+   --primary ở §L0 (biến CSS, khai trên body là thắng), đây là thuộc tính
+   color viết thẳng nên chỉ !important mới vượt được.
+   Trộn tối đi cho phần ICON — biến --zc luôn giữ đúng màu JS vừa ghi nên
+   sắc màu phân biệt mệnh đề không đổi; thanh viền trái vẫn rực rỡ. */
+body:not(.dark) .town-station.qcard .qcard-glyph {
+  color: color-mix(in srgb, var(--zc, #8b86a8) 50%, #16101f) !important;
+}
+body:not(.dark) .town-station.qcard .qcard-glyph.src { color: var(--primary-text) !important; }
+
+/* Nhãn kiểu cột (INT / VARCHAR / BOOLEAN) chỉ 10px in hoa — ở cỡ đó
+   --text-400 đọc rất nhọc dù đo được 5.2. */
+body:not(.dark) .dp-col-type,
+body:not(.dark) .data-preview-content .dp-col .dp-col-type { color: var(--text-300); }
+
+/* ══════════════════════════════════════════════════════════════
+   §L11 — Ô SOẠN MÃ + BẢNG ĐIỀU KHIỂN SANG NỀN SÁNG
+
+   Ba bề mặt "kiểu terminal" còn lại: ô query.sql (Bước 3), cột CODE +
+   CONSOLE (Bước 4) và khối "soi lỗi" của mini-game. Tất cả hard-code
+   #0A0E1A / rgba(11,17,33,.x) cùng bảng cú pháp One-Dark
+   (--t-keyword #C678DD, --t-string #98C379 …) — bộ màu chỉ đọc được
+   trên nền đen.
+
+   Bảng cú pháp SÁNG dưới đây theo đúng bộ mà chính lesson_db_design.css
+   đã dùng cho `body.light .mcq-option` (tím #7C3AED / lục #15803D /
+   cam #B45309), mở rộng thêm function + operator cho đủ 6 loại token.
+   ══════════════════════════════════════════════════════════════ */
+
+body:not(.dark) {
+  --cm-bg: #ffffff;
+  --cm-fg: #221d33;
+  --t-keyword: #7c3aed;
+  --t-function: #1d4ed8;
+  --t-string: #15803d;
+  --t-number: #b45309;
+  --t-operator: #0f766e;
+  --t-comment: #6b6880;
+}
+body.dark {
+  --cm-bg: #0e0b16;
+  --cm-fg: #ece9f5;
+}
+
+/* ── Ô query.sql (Bước 3) ─────────────────────────────────────── */
+body:not(.dark) .step3-ide { background: var(--edu-card-bg); }
+body:not(.dark) .step3-ide .ide-display,
+body:not(.dark) .step3-ide .ide-display.pixel-terminal { background: var(--cm-bg); }
+body:not(.dark) .step3-ide .ide-head {
+  background: var(--edu-pill-bg);
+  border-bottom: 1px solid var(--edu-card-border);
+}
+body:not(.dark) #ide-line-numbers,
+body:not(.dark) .ide-line-numbers {
+  color: var(--text-500);
+  background: rgba(150, 140, 190, .07);
+  border-right-color: rgba(150, 140, 190, .16);
+}
+body:not(.dark) .ide-content { color: var(--text-200); }
+/* .pixel-terminal::before vẽ lưới quét cyan 3% — vô hình trên nền trắng
+   và làm ố chữ; tắt hẳn ở chế độ sáng. */
+body:not(.dark) .pixel-terminal::before { display: none; }
+body:not(.dark) .filename-tab {
+  background: rgba(255, 255, 255, .8);
+  color: var(--text-300);
+}
+body:not(.dark) .step3-ide .ide-type-hint { color: var(--primary-text); }
+
+/* Bảng cú pháp — .step3-ide/.mcq-option tự khai màu chứ không đọc
+   var(--t-*), nên phải viết lại từng loại token. */
+body:not(.dark) .step3-ide .ide-content .t-keyword  { color: var(--t-keyword); }
+body:not(.dark) .step3-ide .ide-content .t-string   { color: var(--t-string); }
+body:not(.dark) .step3-ide .ide-content .t-number   { color: var(--t-number); }
+body:not(.dark) .step3-ide .ide-content .t-operator { color: var(--t-operator); }
+body:not(.dark) .step3-ide .ide-content .t-comment  { color: var(--t-comment); }
+
+/* ── Cột CODE + CONSOLE (Bước 4) ──────────────────────────────── */
+body:not(.dark) .codecademy-layout .pane.pane-middle {
+  background: var(--edu-card-bg);
+  border: 1px solid var(--edu-card-border);
+}
+body:not(.dark) .codecademy-layout .pane-middle .ide-head,
+body:not(.dark) .codecademy-layout .pane-middle .terminal-head {
+  background: var(--edu-pill-bg);
+  border-bottom: 1px solid var(--edu-card-border);
+}
+body:not(.dark) .codecademy-layout .pane-middle .terminal,
+body:not(.dark) .codecademy-layout .pane-middle .ide-display { background: var(--cm-bg); }
+body:not(.dark) .terminal { border-top-color: var(--edu-card-border); }
+body:not(.dark) .terminal-output { color: var(--text-300); }
+body:not(.dark) .terminal-output .success-line { color: var(--success-text); }
+body:not(.dark) .terminal-output .error-line { color: var(--danger-text); }
+body:not(.dark) .prompt-arrow { color: var(--primary-text); }
+body:not(.dark) .lang-selector {
+  background: rgba(255, 255, 255, .8);
+  color: var(--text-200);
+  border-color: rgba(150, 140, 190, .25);
+}
+body:not(.dark) .ide-head-title { color: var(--text-300); }
+
+/* ── CodeMirror (theme 'default', xem lesson_db_design.js §step4) ── */
+body:not(.dark) .CodeMirror {
+  background: var(--cm-bg);
+  color: var(--cm-fg);
+}
+body:not(.dark) .CodeMirror-gutters {
+  background: rgba(150, 140, 190, .07);
+  border-right: 1px solid rgba(150, 140, 190, .16);
+}
+body:not(.dark) .CodeMirror-linenumber { color: var(--text-500); }
+body:not(.dark) .CodeMirror-cursor { border-left-color: var(--text-100); }
+body:not(.dark) .CodeMirror-selected { background: rgba(185, 63, 240, .16); }
+body:not(.dark) .CodeMirror-line::selection,
+body:not(.dark) .CodeMirror-line > span::selection { background: rgba(185, 63, 240, .22); }
+body:not(.dark) .CodeMirror-placeholder { color: var(--text-500); }
+body:not(.dark) .CodeMirror .cm-keyword  { color: var(--t-keyword); font-weight: 700; }
+body:not(.dark) .CodeMirror .cm-def,
+body:not(.dark) .CodeMirror .cm-builtin   { color: var(--t-function); }
+body:not(.dark) .CodeMirror .cm-string,
+body:not(.dark) .CodeMirror .cm-string-2  { color: var(--t-string); }
+body:not(.dark) .CodeMirror .cm-number,
+body:not(.dark) .CodeMirror .cm-atom      { color: var(--t-number); }
+body:not(.dark) .CodeMirror .cm-operator,
+body:not(.dark) .CodeMirror .cm-punctuation { color: var(--t-operator); }
+body:not(.dark) .CodeMirror .cm-comment   { color: var(--t-comment); font-style: italic; }
+body:not(.dark) .CodeMirror .cm-variable,
+body:not(.dark) .CodeMirror .cm-variable-2 { color: var(--cm-fg); }
+
+/* Chế độ tối: theme 'default' vốn là theme SÁNG, nên khi bật body.dark
+   phải tự vẽ lại — trước đây việc này do file material-darker lo. */
+body.dark .CodeMirror {
+  background: var(--cm-bg);
+  color: var(--cm-fg);
+}
+body.dark .CodeMirror-gutters {
+  background: rgba(255, 255, 255, .04);
+  border-right: 1px solid rgba(255, 255, 255, .08);
+}
+body.dark .CodeMirror-linenumber { color: #8a85a0; }
+body.dark .CodeMirror-cursor { border-left-color: #ece9f5; }
+body.dark .CodeMirror-selected { background: rgba(185, 63, 240, .28); }
+body.dark .CodeMirror-placeholder { color: #8a85a0; }
+body.dark .CodeMirror .cm-keyword  { color: #d8a0ff; font-weight: 700; }
+body.dark .CodeMirror .cm-def,
+body.dark .CodeMirror .cm-builtin   { color: #8ab4f8; }
+body.dark .CodeMirror .cm-string,
+body.dark .CodeMirror .cm-string-2  { color: #9ae6a0; }
+body.dark .CodeMirror .cm-number,
+body.dark .CodeMirror .cm-atom      { color: #f3b585; }
+body.dark .CodeMirror .cm-operator,
+body.dark .CodeMirror .cm-punctuation { color: #7fd4c8; }
+body.dark .CodeMirror .cm-comment   { color: #8a85a0; font-style: italic; }
+body.dark .CodeMirror .cm-variable,
+body.dark .CodeMirror .cm-variable-2 { color: var(--cm-fg); }
+
+/* ── Khối "soi lỗi" của mini-game ─────────────────────────────── */
+body:not(.dark) .mg-bugspot-code {
+  background: var(--cm-bg);
+  border-color: rgba(150, 140, 190, .22);
+  color: var(--text-200);
+}
+body:not(.dark) .mg-bugspot-lineno { color: var(--text-500); }
+
+/* ── Khối SQL ví dụ trong phần hướng dẫn Bước 4 ───────────────── */
+body:not(.dark) .codecademy-layout .instructions-block .ctx-example-sql {
+  background: rgba(255, 255, 255, .8);
+  border-color: rgba(150, 140, 190, .22);
+  color: var(--text-200);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   §L12 — KHỐI SVG MỞ BÀI (.lesson-hero) SANG NỀN SÁNG
+
+   HERO_SVGS trong lesson_db_design.js là ~2.000 dòng markup SVG dựng
+   sẵn cho 20+ bài. Phần lớn màu đã đi qua token (`fill="var(--text-100)"`
+   78 chỗ, `var(--text-400)` 66, `var(--module-accent)` 149…) nên tự đúng
+   lại khi bỏ khối này khỏi nhóm "đảo tối". Còn lại ~25 màu VIẾT CỨNG
+   chọn cho nền đen.
+
+   Không sửa trong JS mà ánh xạ bằng ATTRIBUTE SELECTOR: `fill`/`stroke`
+   trên thẻ SVG là *presentation attribute*, thua MỌI rule CSS, nên
+   `[fill="#e8edf5"] { fill: … }` ăn mà không cần !important. Đổi ở đây
+   an toàn hơn hẳn việc sửa tay 2.000 dòng markup, và `body.dark` tự
+   giữ nguyên bản gốc.
+   ══════════════════════════════════════════════════════════════ */
+
+body:not(.dark) .lesson-hero {
+  background:
+    radial-gradient(120% 60% at 50% -10%, rgba(185, 63, 240, .10), transparent 60%),
+    linear-gradient(160deg, rgba(255, 255, 255, .78), rgba(255, 255, 255, .58));
+  border: 1px solid var(--edu-card-border);
+}
+
+/* ── Thang chữ/nét: gần-trắng → gần-đen ─────────────────────── */
+body:not(.dark) .lesson-hero [fill="#e8edf5"] { fill: #221d33; }
+body:not(.dark) .lesson-hero [fill="#aebfd6"],
+body:not(.dark) .lesson-hero [fill="#c7d4e8"] { fill: #4b4661; }
+body:not(.dark) .lesson-hero [fill="#7f93ad"],
+body:not(.dark) .lesson-hero [fill="#8ba0bb"] { fill: #6b6880; }
+/* #0e1726 là nền của các HÌNH KHỐI (ô bảng, hộp) chứ không phải chữ →
+   lật thành mặt sáng, không lật thành mực. #0F172A thì ngược lại: nó là
+   CHỮ đặt trên hình đã sáng sẵn, giữ nguyên mới đọc được. */
+body:not(.dark) .lesson-hero [fill="#0e1726"] { fill: rgba(255, 255, 255, .78); }
+
+/* Lớp phủ "sheen" trắng 2–5% — vô hình trên nền sáng, đổi sang tím nhạt
+   để các hộp vẫn tách khỏi nền. */
+body:not(.dark) .lesson-hero [fill="rgba(255,255,255,0.02)"],
+body:not(.dark) .lesson-hero [fill="rgba(255,255,255,.02)"],
+body:not(.dark) .lesson-hero [fill="rgba(255,255,255,0.03)"],
+body:not(.dark) .lesson-hero [fill="rgba(255,255,255,.03)"],
+body:not(.dark) .lesson-hero [fill="rgba(255,255,255,.04)"],
+body:not(.dark) .lesson-hero [fill="rgba(255,255,255,.05)"] { fill: rgba(120, 110, 170, .07); }
+
+/* ── Màu ngữ nghĩa: bản pastel-cho-nền-đen → bản đậm-cho-nền-sáng ──
+   fill và stroke phải là HAI rule riêng. Gộp chung thì một hình chỉ có
+   viền (`fill="none" stroke="#22D3EE"`) sẽ nhận luôn `fill` từ CSS —
+   CSS thắng presentation attribute nên `fill="none"` bị đè, khung viền
+   biến thành khối đặc và nuốt mất chữ bên trong. */
+body:not(.dark) .lesson-hero [fill="#6ee7b7"] { fill: #047857; }
+body:not(.dark) .lesson-hero [fill="#34d399"] { fill: #059669; }
+body:not(.dark) .lesson-hero [stroke="#34d399"] { stroke: #059669; }
+body:not(.dark) .lesson-hero [fill="#f87171"],
+body:not(.dark) .lesson-hero [fill="#F87171"] { fill: #dc2626; }
+body:not(.dark) .lesson-hero [stroke="#f87171"] { stroke: #dc2626; }
+body:not(.dark) .lesson-hero [fill="#fca5a5"] { fill: #b91c1c; }
+body:not(.dark) .lesson-hero [fill="#fda4af"] { fill: #be123c; }
+body:not(.dark) .lesson-hero [fill="#FCD34D"],
+body:not(.dark) .lesson-hero [fill="#fcd34d"],
+body:not(.dark) .lesson-hero [fill="#fbbf24"] { fill: #b45309; }
+body:not(.dark) .lesson-hero [stroke="#FCD34D"],
+body:not(.dark) .lesson-hero [stroke="#fbbf24"],
+body:not(.dark) .lesson-hero [stroke="#F59E0B"] { stroke: #b45309; }
+body:not(.dark) .lesson-hero [fill="#FB923C"] { fill: #c2410c; }
+body:not(.dark) .lesson-hero [stroke="#FB923C"] { stroke: #c2410c; }
+body:not(.dark) .lesson-hero [fill="#38BDF8"],
+body:not(.dark) .lesson-hero [fill="#38bdf8"],
+body:not(.dark) .lesson-hero [fill="#7dd3fc"] { fill: #0369a1; }
+body:not(.dark) .lesson-hero [stroke="#38BDF8"] { stroke: #0369a1; }
+body:not(.dark) .lesson-hero [fill="#22D3EE"] { fill: #0e7490; }
+body:not(.dark) .lesson-hero [stroke="#22D3EE"] { stroke: #0e7490; }
+body:not(.dark) .lesson-hero [fill="#E879F9"] { fill: #a21caf; }
+body:not(.dark) .lesson-hero [stroke="#E879F9"] { stroke: #a21caf; }
+body:not(.dark) .lesson-hero [fill="#a5b4fc"],
+body:not(.dark) .lesson-hero [fill="#c7d2fe"] { fill: #4338ca; }
+body:not(.dark) .lesson-hero [fill="#c4b5fd"] { fill: #6d28d9; }
+
+/* ── Chữ trong SVG tô bằng token màu nhấn ────────────────────────
+   Attribute selector so khớp CHUỖI THÔ của thuộc tính, nên bắt được cả
+   `fill="var(--module-accent)"`. Chỉ nhắm <text>/<tspan>: hình khối vẫn
+   giữ màu nhấn rực rỡ, chỉ CHỮ mới đổi sang bản đậm đọc được. */
+body:not(.dark) .lesson-hero text[fill="var(--module-accent)"],
+body:not(.dark) .lesson-hero tspan[fill="var(--module-accent)"] { fill: var(--module-accent-text); }
+body:not(.dark) .lesson-hero text[fill="var(--primary)"],
+body:not(.dark) .lesson-hero tspan[fill="var(--primary)"] { fill: var(--primary-text); }
+body:not(.dark) .lesson-hero text[fill="var(--success)"] { fill: var(--success-text); }
+body:not(.dark) .lesson-hero text[fill="var(--danger)"] { fill: var(--danger-text); }
+/* Xám phụ trong SVG gánh chú thích 10–12px trên nền gradient pastel —
+   #6b6880 chỉ đạt ~4.3 ở đó. */
+body:not(.dark) .lesson-hero [fill="#7f93ad"],
+body:not(.dark) .lesson-hero [fill="#8ba0bb"] { fill: #57536d; }
+
+/* Bộ đếm ký tự ở thanh chrome ô query.sql — --text-500 trên nền kính
+   gần trắng, 11px. */
+body:not(.dark) .char-count { color: var(--text-300); }
