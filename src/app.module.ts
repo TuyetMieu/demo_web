@@ -6,6 +6,7 @@ import jwtConfig from './config/jwt.config';
 import appConfig from './config/app.config';
 import oauthConfig from './config/oauth.config';
 import throttleConfig from './config/throttle.config';
+import geminiConfig from './config/gemini.config';
 import { HealthController } from './health/health.controller';
 import { ApiGetwayModule } from './api-getway/api-getway.module';
 import { UserModule } from './user/user.module';
@@ -20,6 +21,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ForumModule } from './forum/forum.module';
 import { RoadmapModule } from './roadmap/roadmap.module';
 import { CourseAdminModule } from './course-admin/course-admin.module';
+import { ChatbotModule } from './chatbot/chatbot.module';
 
 @Module({
   imports: [
@@ -28,7 +30,7 @@ import { CourseAdminModule } from './course-admin/course-admin.module';
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: envValidationSchema,
-      load: [appConfig, jwtConfig, oauthConfig, throttleConfig],
+      load: [appConfig, jwtConfig, oauthConfig, throttleConfig, geminiConfig],
     }),
     UserModule,
     AuthModule,
@@ -42,6 +44,7 @@ import { CourseAdminModule } from './course-admin/course-admin.module';
     ForumModule,
     RoadmapModule,
     CourseAdminModule,
+    ChatbotModule,
   ],
   controllers: [HealthController],
 })

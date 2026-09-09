@@ -35,4 +35,14 @@ export const envValidationSchema = Joi.object({
   FACEBOOK_CLIENT_ID: Joi.string().optional(),
   FACEBOOK_CLIENT_SECRET: Joi.string().optional(),
   FACEBOOK_CALLBACK_URL: Joi.string().uri().optional(),
+
+  // Chatbot Gemini: optional() giống OAuth — thiếu key thì chỉ tắt trợ lý AI
+  // (route trả 503), KHÔNG chặn app khởi động.
+  GEMINI_API_KEY: Joi.string().optional().allow(''),
+  GEMINI_MODEL: Joi.string().optional(),
+  GEMINI_BASE_URL: Joi.string().uri().optional(),
+  GEMINI_SYSTEM_PROMPT: Joi.string().optional(),
+  GEMINI_TIMEOUT_MS: Joi.number().integer().min(1000).max(120000).optional(),
+  GEMINI_MAX_CHARS: Joi.number().integer().min(100).max(20000).optional(),
+  GEMINI_HOUR_LIMIT: Joi.number().integer().min(1).optional(),
 });

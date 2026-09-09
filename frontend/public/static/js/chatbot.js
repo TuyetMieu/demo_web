@@ -3,11 +3,19 @@
    ═══════════════════════════════════════════════════════════ */
 
 // Configuration
+//
+// KHÔNG còn apiKey ở đây. Bản cũ nhét Gemini API key thẳng vào file này — mà
+// file này nằm trong /public nên ai mở DevTools cũng đọc được key và dùng hết
+// quota trên tài khoản của mình. Giờ frontend chỉ gọi backend (/api/chatbot/*),
+// backend mới là bên cầm key và gọi Google.
 const CHATBOT_CONFIG = {
-    apiKey: '', // Add your Gemini API key here
-    model: 'gemini-2.5-flash-preview-09-2025',
-    apiUrl: 'https://generativelanguage.googleapis.com/v1beta/models',
-    systemPrompt: 'Bạn là trợ lý AI thân thiện và chuyên nghiệp. Trả lời ngắn gọn, sử dụng Markdown cho code, luôn dùng tiếng Việt. Giúp người dùng với lập trình và học tập.'
+    endpoint: '/api/chatbot/message',
+    statusEndpoint: '/api/chatbot/status',
+    // Số lượt gửi kèm để bot nhớ ngữ cảnh (backend chặn tối đa 20).
+    historyTurns: 10,
+    // Trần ảnh đính kèm — khớp giới hạn MAX_IMAGE_BASE64 của backend.
+    maxImageBytes: 500 * 1024,
+    allowedImageTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
 };
 
 // State
@@ -15,6 +23,9 @@ let chatbotState = {
     isOpen: false,
     isSending: false,
     selectedImage: null,
+    selectedImageType: null,
+    // Lịch sử hội thoại {role: 'user'|'model', text}. Backend không lưu hội
+    // thoại nên client phải gửi kèm thì bot mới nhớ ngữ cảnh.
     messages: []
 };
 
@@ -70,11 +81,25 @@ function handleChatbotImageUpload(e) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Chặn tại đây cho thông báo rõ ràng, thay vì để backend trả 400 sau khi
+    // đã tải nguyên file lên mạng.
+    if (CHATBOT_CONFIG.allowedImageTypes.indexOf(file.type) === -1) {
+        alert('Chỉ hỗ trợ ảnh JPG, PNG, WEBP, HEIC.');
+        removeChatbotImage();
+        return;
+    }
+    if (file.size > CHATBOT_CONFIG.maxImageBytes) {
+        alert('Ảnh quá lớn, hãy dùng ảnh dưới 500KB.');
+        removeChatbotImage();
+        return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
         const base64 = event.target?.result?.split(',')[1];
         if (base64) {
             chatbotState.selectedImage = base64;
+            chatbotState.selectedImageType = file.type;
             displayChatbotImagePreview(event.target?.result);
         }
     };
@@ -96,6 +121,7 @@ function displayChatbotImagePreview(src) {
  */
 function removeChatbotImage() {
     chatbotState.selectedImage = null;
+    chatbotState.selectedImageType = null;
     chatbotElements.imagePreview?.classList.add('chatbot-hidden');
     if (chatbotElements.imageUpload) {
         chatbotElements.imageUpload.value = '';
@@ -244,51 +270,57 @@ function escapeHtml(text) {
 }
 
 /**
- * Call Gemini API
+ * Gọi backend (backend gọi Gemini).
+ *
+ * Trả về {text, ok}. Không ném lỗi ra ngoài: mọi tình huống hỏng đều quy về
+ * một câu tiếng Việt hiển thị được trong bong bóng chat.
  */
 async function callChatbotGemini(prompt, imageBase64 = null) {
-    if (!CHATBOT_CONFIG.apiKey) {
-        return 'Lỗi: Chưa cấu hình API key. Vui lòng thêm Gemini API key vào file chatbot.js';
-    }
-
-    const url = `${CHATBOT_CONFIG.apiUrl}/${CHATBOT_CONFIG.model}:generateContent?key=${CHATBOT_CONFIG.apiKey}`;
-    
-    const parts = [{ text: prompt }];
-    
+    const payload = { history: getChatbotHistory() };
+    if (prompt) payload.message = prompt;
     if (imageBase64) {
-        parts.push({
-            inlineData: {
-                mimeType: 'image/jpeg',
-                data: imageBase64
-            }
-        });
+        payload.image = imageBase64;
+        payload.mimeType = chatbotState.selectedImageType || 'image/jpeg';
     }
-
-    const payload = {
-        contents: [{ parts }],
-        systemInstruction: {
-            parts: [{ text: CHATBOT_CONFIG.systemPrompt }]
-        }
-    };
 
     try {
-        const response = await fetch(url, {
+        // URL tương đối: pe-bridge.js rewrite sang origin backend và tự đính
+        // "Authorization: Bearer" + retry khi 401 — không tự ghép URL/token ở đây.
+        const response = await fetch(CHATBOT_CONFIG.endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
+        const data = await response.json().catch(() => null);
+
         if (!response.ok) {
-            const error = await response.json();
-            return `Lỗi API: ${error.error?.message || 'Không xác định'}`;
+            if (response.status === 401) {
+                return { ok: false, text: 'Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại để tiếp tục trò chuyện.' };
+            }
+            if (response.status === 429) {
+                return { ok: false, text: 'Bạn đã hỏi khá nhiều rồi 😅 Nghỉ một chút rồi quay lại nhé.' };
+            }
+            // Backend trả {error: {status, message, detail}} — dùng __PE_errMsg
+            // để không hiện "[object Object]".
+            const msg = window.__PE_errMsg ? window.__PE_errMsg(data?.error) : data?.error?.message;
+            return { ok: false, text: msg || 'Trợ lý AI gặp sự cố. Vui lòng thử lại.' };
         }
 
-        const data = await response.json();
-        return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Không nhận được phản hồi.';
+        return { ok: true, text: data?.reply || 'Không nhận được phản hồi.' };
     } catch (error) {
         console.error('Chatbot Error:', error);
-        return 'Lỗi kết nối. Vui lòng thử lại.';
+        return { ok: false, text: 'Lỗi kết nối. Vui lòng thử lại.' };
     }
+}
+
+/**
+ * Lấy N lượt gần nhất để gửi kèm làm ngữ cảnh.
+ * Chỉ gửi phần chữ — ảnh cũ không gửi lại (tốn token, và backend chỉ nhận ảnh
+ * của lượt hiện tại).
+ */
+function getChatbotHistory() {
+    return chatbotState.messages.slice(-CHATBOT_CONFIG.historyTurns);
 }
 
 /**
@@ -308,6 +340,10 @@ async function sendChatbotMessage() {
     // Add user message
     addChatbotMessage(text || '(Hình ảnh)', true, imagePreview);
 
+    // Giữ lại ảnh trước khi removeChatbotImage() xoá state — bản cũ gọi API
+    // với chatbotState.selectedImage SAU khi đã xoá nên ảnh không bao giờ được gửi.
+    const image = chatbotState.selectedImage;
+
     // Clear input
     if (chatbotElements.input) {
         chatbotElements.input.value = '';
@@ -320,13 +356,20 @@ async function sendChatbotMessage() {
 
     try {
         // Call API
-        const response = await callChatbotGemini(text, chatbotState.selectedImage);
+        const result = await callChatbotGemini(text, image);
         
         // Remove typing indicator
         removeChatbotTyping();
         
+        // Chỉ ghi vào lịch sử khi thật sự có câu trả lời — nhét thông báo lỗi
+        // ("Lỗi kết nối...") vào history sẽ làm bot tưởng đó là lời nó đã nói.
+        if (result.ok) {
+            chatbotState.messages.push({ role: 'user', text: text || '(Hình ảnh)' });
+            chatbotState.messages.push({ role: 'model', text: result.text });
+        }
+        
         // Format and display response
-        const formatted = formatChatbotMessage(response);
+        const formatted = formatChatbotMessage(result.text);
         
         const messageEl = document.createElement('div');
         messageEl.className = 'chatbot-message chatbot-message-ai';
@@ -353,13 +396,25 @@ async function sendChatbotMessage() {
 }
 
 /**
- * Verify API Key Status
+ * Kiểm tra trợ lý AI có sẵn sàng không (backend đã cấu hình GEMINI_API_KEY chưa).
+ * Chỉ để log cho dev — không chặn UI, vì lỗi thật sự đã có thông báo lúc gửi.
  */
-function verifyChatbotApiKey() {
-    if (!CHATBOT_CONFIG.apiKey || CHATBOT_CONFIG.apiKey === '') {
-        console.warn('⚠️ Chatbot: Chưa cấu hình Gemini API key. Hãy thêm key vào static/js/chatbot.js');
-    } else {
-        console.log('✅ Chatbot: API key đã được cấu hình.');
+async function verifyChatbotApiKey() {
+    try {
+        // Chưa đăng nhập thì đừng ping: route yêu cầu JWT, gọi vào chỉ tạo một
+        // lượt 401 + thử refresh vô ích ngay lúc trang vừa mở.
+        if (!localStorage.getItem('pe_access')) return;
+
+        const res = await fetch(CHATBOT_CONFIG.statusEndpoint);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data?.enabled) {
+            console.log('✅ Chatbot: sẵn sàng (model ' + data.model + ').');
+        } else {
+            console.warn('⚠️ Chatbot: backend chưa cấu hình GEMINI_API_KEY trong .env');
+        }
+    } catch (e) {
+        /* offline hoặc backend chưa chạy — bỏ qua, không làm phiền user */
     }
 }
 
