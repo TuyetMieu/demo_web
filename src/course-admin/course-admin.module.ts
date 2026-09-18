@@ -14,8 +14,11 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Transform } from 'class-transformer';
 import { IsIn, IsInt, IsOptional, IsString } from 'class-validator';
 import { emptyToUndefined } from 'src/auth/dto/register.dto';
@@ -23,6 +26,7 @@ import { CourseLevel, Prisma } from 'src/generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AdminGuard } from 'src/common/guards/admin/admin.guard';
 import { CurrentUserId } from 'src/common/decorators/current-user.decorator';
+import { LessonImportService } from './lesson-import.service';
 
 /** Giá trị hợp lệ của enum course_level trong DB. */
 export const COURSE_LEVELS = ['beginner', 'intermediate', 'advanced'] as const;
@@ -360,7 +364,31 @@ export class CourseAdminService {
 @Controller('admin')
 @UseGuards(AdminGuard)
 export class CourseAdminController {
-  constructor(private readonly admin: CourseAdminService) {}
+  constructor(
+    private readonly admin: CourseAdminService,
+    private readonly importer: LessonImportService,
+  ) {}
+
+  /**
+   * Đọc một file .md/.pdf và trả BẢN NHÁP studio-lesson/v1 — KHÔNG ghi DB.
+   * Admin xem lại rồi mới lưu qua POST admin/lessons như bình thường.
+   */
+  @Post('lessons/import')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      // Giáo trình một bài hiếm khi quá 8 MB; chặn ở đây để không nuốt nguyên
+      // file lớn vào RAM rồi mới từ chối.
+      limits: { fileSize: 8 * 1024 * 1024, files: 1 },
+    }),
+  )
+  importLesson(
+    @UploadedFile()
+    file?: { originalname: string; buffer: Buffer; mimetype?: string },
+  ) {
+    if (!file) throw new BadRequestException('Chưa chọn file để nhập');
+    return this.importer.importFile(file);
+  }
 
   @Get('courses') // Task 234
   listCourses() {
@@ -412,7 +440,7 @@ export class CourseAdminController {
 
 @Module({
   controllers: [CourseAdminController],
-  providers: [CourseAdminService],
+  providers: [CourseAdminService, LessonImportService],
   exports: [CourseAdminService],
 })
 export class CourseAdminModule {}

@@ -302,3 +302,66 @@ td button + button { margin-left: 6px; }
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 #toast.show { opacity: 1; transform: translateY(0); }
+
+/* ── Nhập bài học từ PDF/Markdown ── */
+.wrap {
+  grid-template-areas:
+    'course-table course-form'
+    'lesson-table lesson-form'
+    'lesson-import lesson-import';
+}
+.area-lesson-import { grid-area: lesson-import; }
+@media (max-width: 900px) {
+  .wrap {
+    grid-template-areas:
+      'course-table'
+      'course-form'
+      'lesson-table'
+      'lesson-form'
+      'lesson-import';
+  }
+}
+.import-drop {
+  border: 1px dashed var(--border, rgba(255, 255, 255, 0.18));
+  border-radius: var(--radius, 10px);
+  padding: 18px;
+  text-align: center;
+}
+.import-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+.import-step {
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.07));
+  border-radius: var(--radius, 10px);
+  padding: 10px 12px;
+  background: var(--lift, #101928);
+}
+.import-step h4 {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--t2, #94a3b8);
+}
+.import-step ul { margin: 0; padding-left: 16px; font-size: 12px; }
+.import-step.is-empty { opacity: 0.45; }
+.import-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #312e81;
+  color: #c7d2fe;
+}
+.import-errors {
+  border-left: 3px solid #ef4444;
+  padding: 8px 12px;
+  margin: 12px 0;
+  font-size: 12px;
+}
+.import-errors li { margin: 2px 0; }
+.import-json { min-height: 220px; font-family: ui-monospace, monospace; font-size: 12px; }

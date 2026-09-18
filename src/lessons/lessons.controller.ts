@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -30,6 +31,16 @@ export class CompleteLessonDto {
 @Controller()
 export class LessonsController {
   constructor(private readonly lessons: LessonsService) {}
+
+  /** Nội dung bài học (content_json) cho Studio — chỉ học viên đã ghi danh. */
+  @Get('courses/:courseId/lessons/:lessonNo/content')
+  content(
+    @CurrentUserId() userId: number,
+    @Param('courseId') courseId: string,
+    @Param('lessonNo', ParseIntPipe) lessonNo: number,
+  ) {
+    return this.lessons.getLessonContent(userId, courseId, lessonNo);
+  }
 
   // ---------- Task 117 ----------
   @Post('lessons/:lessonNo/complete')

@@ -112,7 +112,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
         const enrollment = findEnrollment(asList(enrolled, 'enrolled'), courseId);
         // /api/stats trả trường `streak` (không phải `streakDays`).
         // Kèm courseId để biết dữ liệu này thuộc khóa nào (xem chỗ dựng skeleton).
-        setData({ courseId, course, enrollment, streak: stats.streak ?? 0, userName: user.name || '—' });
+        setData({ courseId, course, enrollment, streak: stats.streak ?? 0, userName: user.name || '—', userRole: user.role });
       } catch {
         window.location.replace('/login');
       }
@@ -152,6 +152,9 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
   const enrollment = data?.enrollment;
   const streak = data?.streak ?? 0;
   const userName = data?.userName;
+  // Lối tắt vào Studio bài 11 chỉ dành cho quản trị: học viên vẫn phải đi qua
+  // danh sách bài như bình thường.
+  const isAdmin = data?.userRole === 'admin';
 
   const curriculum = CURRICULA[courseId] || {};
   const completed = enrollment ? enrollment.completedLessons || 0 : 0;
@@ -210,11 +213,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
             <span>Tất cả khóa học</span>
           </button>
-          {courseId === 'python' && !loading && (
-            <a className="edu-cd-btn primary" style={{ marginBottom: 20, display: 'inline-flex' }} href="/lesson/python">
-              Mở Python Studio · List &amp; Mutability
-            </a>
-          )}
           {loading ? (
             /* Vệt chờ dựng theo đúng bố cục thật (2 cột, hero 218px, các khối
                bên dưới) nên khi dữ liệu về nội dung điền vào chỗ cũ, không xô đẩy. */
@@ -318,6 +316,31 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
                   <p className="cd-desc">{course.description}</p>
                 </div>
               </div>
+
+              {/* Block: Bài demo Studio — chỉ quản trị viên thấy, để mở thẳng
+                  bài 11 mà không cần học hết các bài trước. */}
+              {courseId === 'python' && isAdmin && (
+                <div className="cd-block">
+                  <div className="cd-block-hd">
+                    <div className="cd-block-icon">🧪</div>
+                    <h3>Bài demo Python Studio</h3>
+                  </div>
+                  <div className="cd-block-body">
+                    <p className="cd-desc">
+                      Bài 11 · List &amp; Mutability — bản dựng tay đủ 4 bước S1–S4
+                      (dự đoán, phân loại, lắp ghép, sandbox Pyodide). Chỉ quản trị
+                      viên thấy mục này; mở được kể cả khi chưa học các bài trước.
+                    </p>
+                    <a
+                      className="edu-cd-btn primary"
+                      style={{ display: 'inline-flex', marginTop: 12 }}
+                      href="/lesson/python?lesson=10"
+                    >
+                      Mở bài demo
+                    </a>
+                  </div>
+                </div>
+              )}
 
               {/* Block: Yêu cầu */}
               <div className="cd-block">

@@ -3,8 +3,9 @@
 /* eslint-disable @next/next/no-img-element */
 // Full document navigation clears legacy per-page global styles on course pages.
 /* eslint-disable @next/next/no-html-link-for-pages, @next/next/no-page-custom-font */
-import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { apiFetch, asList, findEnrollment } from '@/lib/api';
+import { Card, Choice, Code, Icon, Stepper } from './studio-ui';
 import {
   ANSWER_KEY,
   canAdvance,
@@ -20,131 +21,6 @@ import {
 } from '@/lib/python-studio';
 import s from './studio.module.css';
 
-function Icon({
-  step = 1,
-  n = '',
-  vector = false,
-}: {
-  step?: number;
-  n?: number | string;
-  vector?: boolean;
-}) {
-  return (
-    <img
-      className={s.icon}
-      src={`/static/python-studio/s${step}-img${vector ? 'Vector' : 'Container'}${n}.svg`}
-      alt=""
-    />
-  );
-}
-const STEP_NAMES = [
-  'S1: Hiểu & Dự đoán',
-  'S2: Bẫy ngộ nhận',
-  'S3: Bộ nhớ trực quan',
-  'S4: Sandbox IDE',
-];
-function Stepper({ current }: { current: number }) {
-  return (
-    <div className={s.stepper} aria-label={`Bước ${current} trên 4`}>
-      {STEP_NAMES.map((label, index) => {
-        const n = index + 1;
-        const state =
-          n < current ? s.stepDone : n === current ? s.stepCurrent : s.stepTodo;
-        return (
-          <Fragment key={label}>
-            {index > 0 && <i className={s.stepDivider} />}
-            <span
-              className={`${s.step} ${state}`}
-              aria-current={n === current ? 'step' : undefined}
-            >
-              <span className={s.stepMark}>
-                {n < current ? (
-                  <img src="/static/python-studio/s3-stepper-check.svg" alt="" />
-                ) : (
-                  n
-                )}
-              </span>
-              {label}
-            </span>
-          </Fragment>
-        );
-      })}
-    </div>
-  );
-}
-function Card({
-  children,
-  className = '',
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return <section className={`${s.card} ${className}`}>{children}</section>;
-}
-function Code({ code, active = -1 }: { code: string; active?: number }) {
-  return (
-    <div className={s.codeLines}>
-      {code.split('\n').map((line, i) => (
-        <div className={active === i ? s.activeLine : ''} key={i}>
-          <span>{i + 1}</span>
-          <code>
-            {line
-              .split(
-                /(#.*$|"[^"\n]*"|'[^'\n]*'|\b(?:def|return|for|in|if|else|print|len|round)\b|\b\d+(?:\.\d+)?\b)/g,
-              )
-              .map((part, j) => (
-                <span
-                  key={j}
-                  className={
-                    part.startsWith('#')
-                      ? s.comment
-                      : /^(def|return|for|in|if|else)$/.test(part)
-                        ? s.keyword
-                        : /^\d|^["']/.test(part)
-                          ? s.literal
-                          : ''
-                  }
-                >
-                  {part}
-                </span>
-              ))}
-          </code>
-        </div>
-      ))}
-    </div>
-  );
-}
-function Choice({
-  name,
-  value,
-  selected,
-  onChange,
-  title,
-  detail,
-}: {
-  name: string;
-  value: string;
-  selected: string;
-  onChange: (v: string) => void;
-  title: string;
-  detail?: string;
-}) {
-  return (
-    <label className={`${s.choice} ${selected === value ? s.selected : ''}`}>
-      <input
-        type="radio"
-        name={name}
-        value={value}
-        checked={selected === value}
-        onChange={() => onChange(value)}
-      />
-      <span>
-        {title}
-        {detail && <small>{detail}</small>}
-      </span>
-    </label>
-  );
-}
 const predictionCode =
   'scores_original = [85, 92, 78]\nscores_backup = scores_original\nscores_backup.append(99)\nprint("Gốc:", len(scores_original), "Bản sao:",\n      len(scores_backup))';
 const HINTS = [
@@ -535,7 +411,7 @@ export default function PythonStudio() {
               Thử lại
             </button>
           </Card>
-        ) : !enrolled ? (
+        ) : !enrolled && !isAdmin ? (
           <Card>
             <span className={s.pill}>PYTHON STUDIO · 4 BƯỚC</span>
             <h1>List &amp; Mutability</h1>
@@ -553,6 +429,15 @@ export default function PythonStudio() {
           </Card>
         ) : (
           <>
+            {isAdmin && !enrolled && (
+              <div className={s.warning} role="status">
+                <strong>Chế độ xem trước của quản trị viên</strong>
+                <p>
+                  Bạn chưa ghi danh khoá này nên tiến độ và XP sẽ không được lưu.
+                  Dùng tài khoản học viên nếu muốn kiểm tra phần nộp bài.
+                </p>
+              </div>
+            )}
             <div className={`${s.banner} ${d.step === 2 ? s.slimBanner : ''}`}>
               <div>
                 <span className={s.pill}>

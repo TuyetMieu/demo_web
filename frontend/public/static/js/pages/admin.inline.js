@@ -28,7 +28,7 @@
         tr.innerHTML = `
           <td>${esc(c.id)}</td>
           <td>${esc(c.title || '')}</td>
-          <td>${c.lessons ?? 0}</td>
+          <td>${c.lessonCount ?? c.lessons ?? 0}</td>
           <td style="white-space:nowrap">
             <button class="btn-ghost" onclick="editCourse(event, '${esc(c.id)}')">Sửa</button>
             <button class="btn-danger" onclick="delCourse(event, '${esc(c.id)}')">Xóa</button>

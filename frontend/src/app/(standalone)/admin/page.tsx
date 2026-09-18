@@ -5,6 +5,7 @@
 // @api_admin_required cũ; trang chỉ là shell gọi API.
 import LegacyScripts from '@/components/LegacyScripts';
 import PageStyles from '@/components/PageStyles';
+import LessonImport from '@/components/admin/LessonImport';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const W = () => window as any;
@@ -137,6 +138,9 @@ export default function AdminPage() {
             <button className="btn-ghost" onClick={() => W().resetLessonForm()}>Hủy</button>
           </div>
         </section>
+
+        {/* Nhập bài học từ file — React thuần, tách khỏi admin.inline.js */}
+        <LessonImport />
       </main>
 
       <div id="toast"></div>

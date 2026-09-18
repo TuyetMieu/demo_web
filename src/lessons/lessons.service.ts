@@ -97,6 +97,54 @@ export class LessonsService {
   }
 
   // ---------- Task 110-116 ----------
+  /**
+   * Nội dung một bài học cho học viên ĐÃ ghi danh.
+   *
+   * Studio cần content_json để dựng bài nhập từ PDF/Markdown; trước đây không
+   * có route nào trả nội dung nên mọi bài Python đều phải hard-code ở frontend.
+   * Chặn theo Enrollment giống completeLesson — nội dung bài là tài sản của
+   * khoá, không phải dữ liệu công khai.
+   */
+  async getLessonContent(userId: number, courseId: string, lessonNo: number) {
+    const enrollment = await this.prisma.enrollment.findUnique({
+      where: { userId_courseId: { userId, courseId } },
+      select: { userId: true },
+    });
+    if (!enrollment) {
+      // Quản trị viên xem trước bài học mà không phải ghi danh như học viên.
+      // Đây chỉ là quyền ĐỌC: completeLesson vẫn đòi Enrollment nên không có
+      // đường farm XP từ đây.
+      const viewer = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true },
+      });
+      if (viewer?.role !== 'admin') {
+        throw new ForbiddenException('Bạn chưa đăng ký khóa học này');
+      }
+    }
+
+    const lesson = await this.prisma.lesson.findFirst({
+      where: { courseId, sortOrder: lessonNo },
+      select: {
+        id: true,
+        title: true,
+        subtitle: true,
+        module: true,
+        sortOrder: true,
+        xpReward: true,
+        contentJson: true,
+      },
+    });
+    if (!lesson) throw new NotFoundException('Không tìm thấy bài học');
+
+    const progress = await this.prisma.lessonProgress.findFirst({
+      where: { userId, courseId, lessonId: lesson.id, status: 'completed' },
+      select: { lessonId: true },
+    });
+
+    return { ok: true, lesson, completed: Boolean(progress) };
+  }
+
   async completeLesson(
     userId: number,
     lessonNo: number,
