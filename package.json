@@ -10,7 +10,7 @@
     "postbuild": "cpx \"src/generated/prisma/**/*\" dist/src/generated/prisma",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "node scripts/with-env.js nest start",
-    "start:dev": "node scripts/with-env.js nest start --watch",
+    "start:dev": "node scripts/with-env.js npx nest start --watch",
     "start:debug": "node scripts/with-env.js nest start --debug --watch",
     "start:prod": "node scripts/with-env.js node dist/main",
     "loadtest:prepare": "node scripts/loadtest-prepare.js",

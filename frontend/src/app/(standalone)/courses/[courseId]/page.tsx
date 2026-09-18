@@ -157,13 +157,19 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
   const completed = enrollment ? enrollment.completedLessons || 0 : 0;
   const lessonUrl = LESSON_URLS[courseId] || `/lesson/${courseId}`;
   const progress = enrollment ? enrollment.progress || 0 : 0;
+  const completedNumbers: number[] | null = Array.isArray(enrollment?.completedLessonNumbers)
+    ? enrollment.completedLessonNumbers : null;
+  const nextLesson = completedNumbers
+    ? Array.from({ length: course?.lessons || 0 }, (_, i) => i + 1).find((n) => !completedNumbers.includes(n))
+    : completed + 1;
 
   // Port vòng tính status của main.py course_detail()
   let flatIdx = 0;
   const modules: ModuleRow[] = (curriculum.modules || []).map((module) => {
     const lessons: LessonRow[] = module.lessons.map((title) => {
       const status: LessonRow['status'] =
-        flatIdx < completed ? 'done' : flatIdx === completed ? 'current' : 'locked';
+        (completedNumbers ? completedNumbers.includes(flatIdx + 1) : flatIdx < completed)
+          ? 'done' : flatIdx + 1 === nextLesson ? 'current' : 'locked';
       return { title, status, index: flatIdx++ };
     });
     const done_count = lessons.filter((l) => l.status === 'done').length;
@@ -204,6 +210,11 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
             <span>Tất cả khóa học</span>
           </button>
+          {courseId === 'python' && !loading && (
+            <a className="edu-cd-btn primary" style={{ marginBottom: 20, display: 'inline-flex' }} href="/lesson/python">
+              Mở Python Studio · List &amp; Mutability
+            </a>
+          )}
           {loading ? (
             /* Vệt chờ dựng theo đúng bố cục thật (2 cột, hero 218px, các khối
                bên dưới) nên khi dữ liệu về nội dung điền vào chỗ cũ, không xô đẩy. */
@@ -461,7 +472,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
           srcs={['/static/js/edu-chrome.js', '/static/js/course_detail.js', '/static/js/review_quiz.js', '/static/js/chatbot.js']}
           globals={{
             COURSE_ID: course.id,
-            CURRENT_LESSON_IDX: completed,
+            CURRENT_LESSON_IDX: courseId === 'python' ? Math.max(0, (nextLesson ?? totalLessons) - 1) : completed,
             LESSON_URL: lessonUrl,
           }}
         />

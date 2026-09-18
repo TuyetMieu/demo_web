@@ -132,9 +132,29 @@ export class CoursesService {
     });
 
     const titles = await this.fetchLessonTitles(rows);
+    const pythonCompleted = rows.some((r) => r.courseId === 'python')
+      ? await this.prisma.lessonProgress.findMany({
+          where: { userId, courseId: 'python', status: 'completed' },
+          select: { lesson: { select: { sortOrder: true } } },
+        })
+      : [];
+    const studioLesson = await this.prisma.lesson.findFirst({
+      where: { courseId: 'python', sortOrder: 11 },
+      select: { xpReward: true },
+    });
     return {
       ok: true,
-      enrolled: rows.map((r) => this.mapEnrollment(r, titles)),
+      pythonStudio: {
+        lessonNumber: 11,
+        xpReward: studioLesson && studioLesson.xpReward > 0
+          ? Math.min(studioLesson.xpReward, 500) : 50,
+      },
+      enrolled: rows.map((r) => ({
+        ...this.mapEnrollment(r, titles),
+        ...(r.courseId === 'python'
+          ? { completedLessonNumbers: pythonCompleted.map((p) => p.lesson.sortOrder) }
+          : {}),
+      })),
     };
   }
 
