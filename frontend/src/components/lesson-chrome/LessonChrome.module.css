@@ -1,0 +1,230 @@
+.chrome {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: var(--edu-t1);
+  font-family: var(--edu-font);
+}
+
+.topBar {
+  height: var(--st-chrome-h);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--edu-nav-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--edu-sidebar-border);
+  flex-shrink: 0;
+}
+.topBarInner {
+  max-width: 1280px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.closeBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--edu-t5);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.closeBtn:hover {
+  background: var(--edu-accent-soft);
+}
+.closeBtn:active {
+  transform: scale(0.95);
+}
+
+.track {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 0;
+}
+.segment {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--edu-track-bg);
+  overflow: hidden;
+}
+/* Luôn render thẻ fill (kể cả rộng 0) để width có thể transition — nếu chỉ
+   gắn/gỡ thẻ theo bước thì trình duyệt không có giá trị cũ để nội suy. */
+.segmentFill {
+  width: 0;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--edu-accent-grad);
+  transition: width 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.stepLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--edu-t3);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.streakPill {
+  background: var(--edu-accent-soft);
+  color: var(--edu-accent-text);
+  border-radius: 999px;
+  padding: 4px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.streakPill svg {
+  color: var(--edu-accent);
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.contentContainer {
+  max-width: var(--st-col);
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+/* Chuyển cảnh giữa các bước: thẻ mới trôi lên + hiện dần. Khoá bằng
+   `key={step}` ở LessonChrome.tsx nên mỗi bước là một lần chạy animation. */
+.stepEnter {
+  animation: stepIn 0.34s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+@keyframes stepIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.bottomBar {
+  height: var(--st-action-h);
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+  background: var(--edu-nav-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--edu-sidebar-border);
+  flex-shrink: 0;
+}
+.bottomBarInner {
+  max-width: var(--st-col);
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.primaryBtn {
+  width: 100%;
+  height: 52px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--edu-accent-grad);
+  color: var(--edu-panel-bg-solid);
+  font-size: 16px;
+  font-weight: 700;
+  font-family: inherit;
+  box-shadow: 0 12px 28px var(--edu-accent-soft-strong);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.primaryBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.primaryBtn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.primaryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* Nút chính đổi màu theo kết quả chấm — xanh khi đúng, đỏ khi sai. */
+.primaryBtnOk {
+  composes: primaryBtn;
+  background: var(--st-ok-text);
+}
+.primaryBtnErr {
+  composes: primaryBtn;
+  background: var(--st-err-text);
+}
+
+.secondaryBtn {
+  flex-shrink: 0;
+  height: 52px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 1px solid var(--edu-sidebar-border);
+  background: var(--edu-panel-bg-solid);
+  color: var(--edu-t2);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease;
+}
+.secondaryBtn:hover {
+  background: var(--edu-accent-soft);
+  color: var(--edu-accent-text);
+}
+.secondaryBtn:active {
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stepEnter {
+    animation: none;
+  }
+  .segmentFill {
+    transition: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .topBarInner {
+    gap: 8px;
+    padding: 0 12px;
+  }
+  .contentContainer {
+    padding: 20px 16px;
+  }
+  .bottomBarInner {
+    padding: 0 16px;
+  }
+}

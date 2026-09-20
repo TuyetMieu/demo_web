@@ -66,8 +66,10 @@ const RANK: Record<string, number> = {
   'edu-landing.css': 48,
   // hộp thoại bài ôn tập — sau edu-dashboard.css vì dùng lại token/nút của nó
   'edu-review-quiz.css': 49,
+  // token riêng của Python Studio — sau edu-theme, trước lớp co giãn
+  'studio-tokens.css': 50,
   // lớp co giãn điện thoại/tablet — PHẢI cuối cùng, xem RESPONSIVE_CSS bên dưới
-  'edu-responsive.css': 50,
+  'edu-responsive.css': 60,
 };
 const DEFAULT_RANK = 30;
 

@@ -1,0 +1,74 @@
+.card {
+  background: var(--edu-panel-bg);
+  border: var(--edu-card-border);
+  border-radius: var(--st-card-radius);
+  box-shadow: var(--edu-card-shadow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: var(--edu-accent-soft);
+  color: var(--edu-accent-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--edu-t1);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.description {
+  font-size: 14px;
+  color: var(--edu-t3);
+  line-height: 1.6;
+  margin: 12px 0 0;
+  max-width: 420px;
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 24px;
+}
+.dot,
+.dotActive {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--edu-track-bg);
+  transition: width 0.2s ease, background 0.2s ease;
+}
+.dot {
+  width: 6px;
+}
+.dotActive {
+  width: 24px;
+  background: var(--edu-accent-grad);
+}
+
+@media (max-width: 560px) {
+  .card {
+    padding: 32px 24px;
+  }
+  .title {
+    font-size: 19px;
+  }
+}

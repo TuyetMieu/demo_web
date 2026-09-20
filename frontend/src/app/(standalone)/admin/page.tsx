@@ -141,6 +141,19 @@ export default function AdminPage() {
 
         {/* Nhập bài học từ file — React thuần, tách khỏi admin.inline.js */}
         <LessonImport />
+
+        {/* TASK-02: xem trước khung LessonChrome + Vỏ A/B trước khi nội dung
+            PDF được tự sinh thành bài học (parser thuộc TASK-03, chưa làm). */}
+        <section className="card">
+          <div className="card-head">
+            <h2>Xem trước khung bài học (LessonChrome)</h2>
+            <p className="card-sub">
+              Demo khung + 2 vỏ nội dung (thẻ kiến thức / thẻ câu hỏi) dịch từ thiết kế Stitch, dùng chung
+              token với giao diện site — để soát trước khi nối vào tính năng sinh bài học từ PDF.
+            </p>
+          </div>
+          <a className="btn-primary" href="/admin/lesson-chrome-demo">Mở bản demo</a>
+        </section>
       </main>
 
       <div id="toast"></div>

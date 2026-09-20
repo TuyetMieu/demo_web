@@ -1,0 +1,63 @@
+/* ══════════════════════════════════════════════════════════════
+   STUDIO-TOKENS — lớp mở rộng của edu-theme.css cho Python Studio.
+
+   Nạp SAU edu-theme.css. Chỉ khai báo token mà tầng 1 chưa có.
+   TUYỆT ĐỐI không khai báo lại bất kỳ --edu-* nào ở đây; cần sửa
+   token dùng chung thì sửa thẳng edu-theme.css.
+
+   Tiền tố --st-* để grep ra ngay biến nào là của riêng Studio.
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── phản hồi bài làm ─────────────────────────────────────── */
+  --st-ok-bg:       rgba(34,197,94,.14);
+  --st-ok-text:     #1f9d59;
+  --st-ok-line:     rgba(34,197,94,.45);
+  --st-err-bg:      rgba(240,82,107,.14);
+  --st-err-text:    #d0344b;
+  --st-err-line:    rgba(240,82,107,.45);
+  --st-warn-bg:     rgba(245,158,11,.14);
+  --st-warn-text:   #b45309;
+  --st-warn-line:   rgba(245,158,11,.45);
+  --st-info-bg:     rgba(2,132,199,.12);
+  --st-info-text:   #0284c7;
+  --st-info-line:   rgba(2,132,199,.40);
+
+  /* ── khối code (tối ở cả hai chế độ) ──────────────────────── */
+  --st-code-bg:     #221c36;
+  --st-code-radius: 16px;
+  --st-code-gutter: rgba(255,255,255,.28);
+  --st-syn-keyword: #c792ea;
+  --st-syn-string:  #ecc48d;
+  --st-syn-number:  #f78c6c;
+  --st-syn-comment: #6b6880;
+  --st-syn-plain:   #e6e3f0;
+
+  /* ── kéo thả — dẫn xuất từ tầng 1, không viết lại hex ─────── */
+  --st-chip-bg:     var(--edu-pill-bg);
+  --st-chip-border: var(--edu-pill-border);
+  --st-slot-bg:     var(--edu-accent-soft);
+  --st-slot-border: rgba(185,63,240,.40);
+  --st-drag-shadow: 0 12px 28px rgba(185,63,240,.28);
+
+  /* ── bóng đổ nội bộ Studio ────────────────────────────────── */
+  --st-shadow-sm:   0 2px 6px rgba(34,29,51,.08);
+  --st-shadow-md:   0 6px 18px rgba(34,29,51,.10);
+
+  /* ── kích thước khung màn học ─────────────────────────────── */
+  --st-chrome-h:    56px;
+  --st-action-h:    88px;
+  --st-col:         680px;
+  --st-card-radius: 22px;
+}
+
+body.dark {
+  --st-ok-bg:       rgba(34,197,94,.18);
+  --st-err-bg:      rgba(240,82,107,.18);
+  --st-warn-bg:     rgba(245,158,11,.18);
+  --st-info-bg:     rgba(2,132,199,.18);
+  --st-code-bg:     #16121f;
+  --st-syn-plain:   #cfcbdd;
+  --st-shadow-sm:   0 2px 6px rgba(0,0,0,.40);
+  --st-shadow-md:   0 6px 18px rgba(0,0,0,.45);
+}

@@ -1,0 +1,178 @@
+.card {
+  background: var(--edu-panel-bg);
+  border: var(--edu-card-border);
+  border-radius: var(--st-card-radius);
+  box-shadow: var(--edu-card-shadow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 32px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.headerCentered {
+  composes: header;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--edu-accent-soft);
+  color: var(--edu-accent-text);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--edu-t3);
+  font-weight: 600;
+}
+.metaDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--edu-accent);
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--edu-t1);
+  line-height: 1.4;
+  margin: 0;
+}
+.titleCentered {
+  composes: title;
+  text-align: center;
+}
+
+.description {
+  font-size: 14px;
+  color: var(--edu-t3);
+  line-height: 1.6;
+  margin: 8px 0 0;
+}
+.descriptionCentered {
+  composes: description;
+  text-align: center;
+}
+
+.content {
+  margin-top: 20px;
+}
+
+.hintToggle {
+  margin-top: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--edu-sidebar-border);
+  background: var(--edu-panel-bg-solid);
+  color: var(--edu-accent-text);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+}
+.hintToggle:hover {
+  background: var(--edu-accent-soft);
+  border-color: var(--st-slot-border);
+}
+.hintToggle:active {
+  transform: translateY(1px);
+}
+.hintToggleIcon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+}
+.hintToggleIcon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.hintBox {
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--edu-card-bg);
+  border-radius: 12px;
+  padding: 14px 16px;
+  animation: hintIn 0.24s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+@keyframes hintIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hintBox {
+    animation: none;
+  }
+}
+.hintIcon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--edu-accent-soft);
+  color: var(--edu-accent-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hintLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--edu-t1);
+  margin-bottom: 2px;
+}
+.hintText {
+  font-size: 13px;
+  color: var(--edu-t2);
+  line-height: 1.6;
+}
+.hintText code {
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  color: var(--edu-accent-text);
+}
+
+@media (max-width: 560px) {
+  .card {
+    padding: 22px 20px;
+  }
+  .title,
+  .titleCentered {
+    font-size: 19px;
+  }
+}
