@@ -1,0 +1,177 @@
+{
+  "lesson_code": "C07",
+  "sort_order": 12,
+  "module": "Module 3: List, dict, tuple và set",
+  "title": "Index và slice: chọn đúng phần dữ liệu",
+  "subtitle": "C07 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Index và slice: chọn đúng phần dữ liệu",
+    "subtitle": "C07 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C07",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Index lấy một phần tử; slice lấy một đoạn với điểm dừng không bao gồm. Chỉ số âm đếm từ cuối."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "items = [10,20,30,40,50]\nprint(items[-1], items[1:4:2])\nitems[1:3] = [99]\nprint(items)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "In 50 và [20,40]; sau gán đoạn, list là [10,99,40,50]."
+        },
+        {
+          "n": 2,
+          "body": "Gán slice có thể đổi chiều dài list."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"ytho\" — Index 4 bị loại bởi stop."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "\"Python\"[1:4] là gì?",
+          "options": [
+            {
+              "text": "yth",
+              "correct": true,
+              "detail": "Đúng: các index 1,2,3."
+            },
+            {
+              "text": "ytho",
+              "correct": false,
+              "detail": "Index 4 bị loại bởi stop."
+            },
+            {
+              "text": "Pyt",
+              "correct": false,
+              "detail": "Start là 1, không phải 0."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: các index 1,2,3."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thử slice vượt cuối và index vượt cuối; giải thích vì sao một cái trả đoạn ngắn còn cái kia IndexError."
+      },
+      "scaffold": {
+        "template": "def select_parts(text,items):\n    {{slot1}}\ndef replace_middle(items):\n    result=items.copy()\n    {{slot2}}\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "return text[:3],text[::-1],items[-3:],items[1::2]"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "result[1:3]=[99]"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return result"
+          }
+        ],
+        "bank": [
+          {
+            "label": "return text[:3],text[::-1],items[-3:],items[1::2]",
+            "slot": 1
+          },
+          {
+            "label": "print(text[:3],text[::-1],items[-3:],items[1::2])",
+            "slot": 1
+          },
+          {
+            "label": "result[1:3]=[99]",
+            "slot": 2
+          },
+          {
+            "label": "print(items[-1], items[1:4:2])",
+            "slot": 2
+          },
+          {
+            "label": "return result",
+            "slot": 3
+          },
+          {
+            "label": "print(result)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tô index 0..4 dưới từng ô rồi thêm -5..-1 ở hàng dưới."
+          },
+          {
+            "label": "B2",
+            "text": "Chọn start=1,stop=4,step=2; chỉ ô 20 và 40 sáng."
+          },
+          {
+            "label": "B3",
+            "text": "Thay đoạn [1:3] bằng [99]; hai ô bị thay bởi một ô, cập nhật chỉ số."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết select_parts(text,items) trả (text[:3], text[::-1], items[-3:], items[1::2]). Viết replace_middle(items) trả bản sao với đoạn [1:3] thay bằng [99], không sửa đầu vào."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "In 50 và [20,40]; sau gán đoạn, list là [10,99,40,50]. Gán slice có thể đổi chiều dài list."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "def select_parts(text,items):\n    # Viết lời giải của bạn ở đây\n    pass\ndef replace_middle(items):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "slice (C07-K01)",
+          "call": "(exec('assert select_parts(\"Python\",[1,2,3,4,5])==(\"Pyt\",\"nohtyP\",[3,4,5],[2,4])\\nassert select_parts(\"\",[])==(\"\",\"\",[],[])\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "mutation (C07-K02)",
+          "call": "(exec('x=[1,2,3,4]; assert replace_middle(x)==[1,99,4]; assert x==[1,2,3,4]\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "def select_parts(text,items):\n    return text[:3],text[::-1],items[-3:],items[1::2]\ndef replace_middle(items):\n    result=items.copy()\n    result[1:3]=[99]\n    return result\n"
+    }
+  }
+}

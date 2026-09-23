@@ -1,0 +1,179 @@
+{
+  "lesson_code": "P11",
+  "sort_order": 26,
+  "module": "Module 5: Hàm, module và package",
+  "title": "Module và trung bình có trọng số",
+  "subtitle": "P11 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Module và trung bình có trọng số",
+    "subtitle": "P11 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P11",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Một môn nhiều tín chỉ có trọng số khác môn ít tín chỉ. Đội đã viết công thức vào grading.py. Nhiệm vụ của bạn là dùng module đó từ màn hình báo cáo, không chép công thức vào mọi file."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "from grading import weighted_mean\ngpa = weighted_mean([8, 6], [3, 1])"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "grading.py do hệ thống cấp."
+        },
+        {
+          "n": 2,
+          "body": "weighted_mean tính tổng điểm nhân tín chỉ chia tổng tín chỉ: (8*3+6*1)/4=7.5."
+        },
+        {
+          "n": 3,
+          "body": "Import dùng tên module, không viết đường dẫn hay đuôi .py."
+        }
+      ],
+      "predict": {
+        "question": "Cách import nào đúng ở đây?",
+        "options": [
+          {
+            "id": "a",
+            "title": "from grading import weighted_mean",
+            "detail": "Đúng: gọi hàm đã được module cung cấp.",
+            "correct": true
+          },
+          {
+            "id": "b",
+            "title": "import \"grading.py\"",
+            "detail": "import không nhận chuỗi tên file như vậy.",
+            "correct": false
+          },
+          {
+            "id": "c",
+            "title": "from grading.py import weighted_mean",
+            "detail": "Tên module không có đuôi .py trong cú pháp này.",
+            "correct": false
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu trả7 thay vì7.5: bạn đang bỏ qua tín chỉ hoặc đã viết lại sai công thức."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Kết quả mẫu là gì?",
+          "options": [
+            {
+              "text": "14",
+              "correct": false,
+              "detail": "14 là tổng điểm, chưa chia."
+            },
+            {
+              "text": "7",
+              "correct": false,
+              "detail": "7 là trung bình không trọng số."
+            },
+            {
+              "text": "7.5",
+              "correct": true,
+              "detail": "Đúng: môn8 có trọng số3."
+            }
+          ],
+          "correct": 2,
+          "explanation": "Đúng: môn8 có trọng số3."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thay credits=[1,3], dự đoán gpa=6.5; giải thích điểm nào nặng hơn."
+      },
+      "scaffold": {
+        "template": "from grading import weighted_mean\n\ndef report(marks, credits):\n    {{slot1}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "return weighted_mean(marks, credits)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "return weighted_mean(marks, credits)",
+            "slot": 1
+          },
+          {
+            "label": "print(weighted_mean(marks, credits))",
+            "slot": 1
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chọn tab grading.py chỉ đọc; hiện hợp đồng hàm và công thức, không cần học NumPy để gọi."
+          },
+          {
+            "label": "B2",
+            "text": "Đặt khối import ở main.py; sau load tên weighted_mean xuất hiện trong bảng công cụ."
+          },
+          {
+            "label": "B3",
+            "text": "Đặt lời gọi với hai list; chạy: gửi marks/credits, nhận7.5; không thêm stdout."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Cấp sẵn grading.py trong workspace. Viết report(marks, credits) gọi grading.weighted_mean hoặc hàm import từ đó rồi trả kết quả. Hai list dài bằng nhau, điểm hữu hạn [0,10], tín chỉ nguyên dương; rỗng trả None. Không làm tròn và không sửa đầu vào.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "report([8,6],[3,1]) → 7.5"
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Tìm hợp đồng hàm trong module được cấp."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Import tên hàm, không import đường dẫn file."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "from grading import weighted_mean; trong report return weighted_mean(marks, credits)."
+        }
+      ],
+      "starterCode": "import sys as _sys, types as _types\n\n# --- Tệp kèm bài: grading.py ------------------------------------------------------\n# Studio chạy trong trình duyệt nên không có tệp rời; khối này dựng lại\n# đúng grading.py của gói PE để dòng import bên dưới chạy như trong lab.\n_SRC_GRADING = \"\"\"\ndef weighted_mean(marks, credits):\n    if not marks:\n        return None\n    return sum(m*c for m,c in zip(marks,credits)) / sum(credits)\n\"\"\"\n_mod_grading = _types.ModuleType('grading')\nexec(_SRC_GRADING, _mod_grading.__dict__)\n_sys.modules['grading'] = _mod_grading\n# --------------------------------------------------------------------------\n\nfrom grading import weighted_mean\ndef report(marks, credits):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "Ca mẫu P11-a",
+          "call": "report([8,6],[3,1])",
+          "expect": "7.5"
+        }
+      ],
+      "solutionCode": "import sys as _sys, types as _types\n\n# --- Tệp kèm bài: grading.py ------------------------------------------------------\n# Studio chạy trong trình duyệt nên không có tệp rời; khối này dựng lại\n# đúng grading.py của gói PE để dòng import bên dưới chạy như trong lab.\n_SRC_GRADING = \"\"\"\ndef weighted_mean(marks, credits):\n    if not marks:\n        return None\n    return sum(m*c for m,c in zip(marks,credits)) / sum(credits)\n\"\"\"\n_mod_grading = _types.ModuleType('grading')\nexec(_SRC_GRADING, _mod_grading.__dict__)\n_sys.modules['grading'] = _mod_grading\n# --------------------------------------------------------------------------\n\nfrom grading import weighted_mean\n\ndef report(marks, credits):\n    return weighted_mean(marks, credits)"
+    }
+  }
+}

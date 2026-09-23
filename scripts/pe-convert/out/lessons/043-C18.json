@@ -1,0 +1,173 @@
+{
+  "lesson_code": "C18",
+  "sort_order": 43,
+  "module": "Module 8: GUI cơ bản, biểu đồ, test và capstone nhỏ",
+  "title": "Báo cáo bơi từ file đến kết quả",
+  "subtitle": "C18 · Lộ trình chính · 45 phút",
+  "estimated_minutes": 45,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Báo cáo bơi từ file đến kết quả",
+    "subtitle": "C18 · Lộ trình chính · 45 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C18",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Một báo cáo hoàn chỉnh phải nối đúng người bơi với thời gian trong file. Tách hàm metadata khỏi hàm thống kê để kiểm tra từng phần và cả luồng."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "from statistics import mean\ntimes=[6200,6400]\naverage=mean(times)\nprint(average)\n# 6300 phần trăm giây -> 1:03.00\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Đổi từng m:ss.hh về số nguyên phần trăm giây trước khi tính mean để mọi giá trị cùng đơn vị."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Trả rỗng sẽ che lỗi đường dẫn."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "File thiếu nên trả báo cáo rỗng như file có dòng trắng không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Trả rỗng sẽ che lỗi đường dẫn."
+            },
+            {
+              "text": "Không, đây là hai tình huống khác nhau",
+              "correct": true,
+              "detail": "Đúng: thiếu file giữ FileNotFoundError; dòng trắng có hợp đồng riêng."
+            },
+            {
+              "text": "Luôn tạo file mới",
+              "correct": false,
+              "detail": "Bài đọc không được tự ghi file."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: thiếu file giữ FileNotFoundError; dòng trắng có hợp đồng riêng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thay dòng đầu bằng 0:59.99,1:00.00: trung bình half-up là 1:00.00; kiểm tra carry qua phút."
+      },
+      "scaffold": {
+        "template": "from pathlib import Path\nfrom statistics import mean\nfrom decimal import Decimal,ROUND_HALF_UP\nfrom metadata import parse_filename\ndef file_report(path):\n    {{slot1}}\n    with open(path,encoding=\"utf8\") as stream:\n        lines=stream.readlines()\n    line=lines[0].strip() if lines else \"\"\n    values=[]\n    if line:\n        for token in line.split(\",\"):\n            minute,rest=token.strip().split(\":\")\n            {{slot2}}\n            values.append(int(minute)*6000+int(second)*100+int(hundredth))\n    formatted=None\n    if values:\n        rounded=int(Decimal(str(mean(values))).quantize(Decimal(\"1\"),rounding=ROUND_HALF_UP))\n        minute,rest=divmod(rounded,6000)\n        second,hundredth=divmod(rest,100)\n        formatted=f\"{minute}:{second:02d}.{hundredth:02d}\"\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "result=parse_filename(Path(path).name)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "second,hundredth=rest.split(\".\")"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return dict(result,count=len(values),mean=formatted)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "result=parse_filename(Path(path).name)",
+            "slot": 1
+          },
+          {
+            "label": "times=[6200,6400]",
+            "slot": 1
+          },
+          {
+            "label": "second,hundredth=rest.split(\".\")",
+            "slot": 2
+          },
+          {
+            "label": "average=mean(times)",
+            "slot": 2
+          },
+          {
+            "label": "return dict(result,count=len(values),mean=formatted)",
+            "slot": 3
+          },
+          {
+            "label": "print(dict(result,count=len(values),mean=formatted))",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tạo file An-19-50m-Free.txt, dòng đầu 1:02.00,1:04.00; dòng sau là ghi chú. Đọc readlines rồi chọn dòng 0."
+          },
+          {
+            "label": "B2",
+            "text": "Ghép parse_filename với bước đọc; hiện metadata và chỉ dòng dữ liệu được dùng."
+          },
+          {
+            "label": "B3",
+            "text": "Điền mean rồi half-up và divmod; hiện 6300 -> 1 phút,3 giây,0 phần trăm."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết file_report(path) dùng parse_filename ở C17 (file cấp sẵn metadata.py), chỉ đọc dòng đầu UTF-8 qua readlines; các thời gian hợp lệ m:ss.hh. File rỗng/trắng: count=0,mean=None. Trả metadata cộng count,mean. Dùng statistics.mean; làm tròn half-up đến phần trăm giây. Không sửa file; thiếu file giữ FileNotFoundError."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Đổi từng m:ss.hh về số nguyên phần trăm giây trước khi tính mean để mọi giá trị cùng đơn vị."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "import sys as _sys, types as _types\n\n# --- Tệp kèm bài: metadata.py -----------------------------------------------------\n# Studio chạy trong trình duyệt nên không có tệp rời; khối này dựng lại\n# đúng metadata.py của gói PE để dòng import bên dưới chạy như trong lab.\n_SRC_METADATA = \"\"\"\nimport re\ndef parse_filename(filename):\n    if not filename.endswith(\".txt\"):\n        raise ValueError(\"extension\")\n    parts=filename.removesuffix(\".txt\").split(\"-\")\n    if len(parts)!=4:\n        raise ValueError(\"fields\")\n    name,age_text,distance,stroke=parts\n    if not name or not stroke or not age_text.isdecimal():\n        raise ValueError(\"metadata\")\n    if not re.fullmatch(r\"[1-9]\\d*m\",distance):\n        raise ValueError(\"distance\")\n    return dict(name=name,age=int(age_text),distance=distance,stroke=stroke)\n\"\"\"\n_mod_metadata = _types.ModuleType('metadata')\nexec(_SRC_METADATA, _mod_metadata.__dict__)\n_sys.modules['metadata'] = _mod_metadata\n# --------------------------------------------------------------------------\n\nfrom pathlib import Path\nfrom statistics import mean\nfrom decimal import Decimal, ROUND_HALF_UP\nfrom metadata import parse_filename\ndef file_report(path):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "pipeline (C18-K01)",
+          "call": "(exec('from pathlib import Path\\np=Path(\"An-19-50m-Free.txt\"); p.write_text(\"1:02.00,1:04.00\\\\nignored\",encoding=\"utf8\")\\nr=file_report(p)\\nassert r==dict(name=\"An\",age=19,distance=\"50m\",stroke=\"Free\",count=2,mean=\"1:03.00\")\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "carry_empty (C18-K02)",
+          "call": "(exec('from pathlib import Path\\np=Path(\"Binh-20-100m-Back.txt\"); p.write_text(\"0:59.99,1:00.00\",encoding=\"utf8\")\\nassert file_report(p)[\"mean\"]==\"1:00.00\"\\np.write_text(\"\",encoding=\"utf8\"); assert file_report(p)[\"count\"]==0 and file_report(p)[\"mean\"] is None\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "import sys as _sys, types as _types\n\n# --- Tệp kèm bài: metadata.py -----------------------------------------------------\n# Studio chạy trong trình duyệt nên không có tệp rời; khối này dựng lại\n# đúng metadata.py của gói PE để dòng import bên dưới chạy như trong lab.\n_SRC_METADATA = \"\"\"\nimport re\ndef parse_filename(filename):\n    if not filename.endswith(\".txt\"):\n        raise ValueError(\"extension\")\n    parts=filename.removesuffix(\".txt\").split(\"-\")\n    if len(parts)!=4:\n        raise ValueError(\"fields\")\n    name,age_text,distance,stroke=parts\n    if not name or not stroke or not age_text.isdecimal():\n        raise ValueError(\"metadata\")\n    if not re.fullmatch(r\"[1-9]\\d*m\",distance):\n        raise ValueError(\"distance\")\n    return dict(name=name,age=int(age_text),distance=distance,stroke=stroke)\n\"\"\"\n_mod_metadata = _types.ModuleType('metadata')\nexec(_SRC_METADATA, _mod_metadata.__dict__)\n_sys.modules['metadata'] = _mod_metadata\n# --------------------------------------------------------------------------\n\nfrom pathlib import Path\nfrom statistics import mean\nfrom decimal import Decimal,ROUND_HALF_UP\nfrom metadata import parse_filename\ndef file_report(path):\n    result=parse_filename(Path(path).name)\n    with open(path,encoding=\"utf8\") as stream:\n        lines=stream.readlines()\n    line=lines[0].strip() if lines else \"\"\n    values=[]\n    if line:\n        for token in line.split(\",\"):\n            minute,rest=token.strip().split(\":\")\n            second,hundredth=rest.split(\".\")\n            values.append(int(minute)*6000+int(second)*100+int(hundredth))\n    formatted=None\n    if values:\n        rounded=int(Decimal(str(mean(values))).quantize(Decimal(\"1\"),rounding=ROUND_HALF_UP))\n        minute,rest=divmod(rounded,6000)\n        second,hundredth=divmod(rest,100)\n        formatted=f\"{minute}:{second:02d}.{hundredth:02d}\"\n    return dict(result,count=len(values),mean=formatted)\n"
+    }
+  }
+}

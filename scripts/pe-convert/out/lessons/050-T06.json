@@ -1,0 +1,170 @@
+{
+  "lesson_code": "T06",
+  "sort_order": 50,
+  "module": "Module 9: Tkinter chuyên sâu",
+  "title": "Tooltip, relief và Canvas",
+  "subtitle": "T06 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Tooltip, relief và Canvas",
+    "subtitle": "T06 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#T06",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Tooltip giải thích ngắn khi cần; Canvas biểu diễn đối tượng theo tọa độ. Các đối tượng vẽ cần ID để cập nhật, thay vì vẽ thêm vô hạn."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "canvas=tk.Canvas(root,width=240,height=120)\nitem=canvas.create_rectangle(10,10,50,50,fill=\"teal\")\ncanvas.move(item,20,0)\nprint(canvas.coords(item))\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Tọa độ rectangle chuyển từ [10,10,50,50] thành [30,10,70,50]."
+        },
+        {
+          "n": 2,
+          "body": "Widget relief chỉ thay vẻ viền, không đổi dữ liệu."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Chỉ có một hình\" — create tạo item mới."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Mỗi lần di chuyển lại create_rectangle thay vì move thì sao?",
+          "options": [
+            {
+              "text": "Chỉ có một hình",
+              "correct": false,
+              "detail": "create tạo item mới."
+            },
+            {
+              "text": "Số hình tăng",
+              "correct": true,
+              "detail": "Đúng: cần giữ ID và cập nhật item đó."
+            },
+            {
+              "text": "Canvas tự xóa hình cũ",
+              "correct": false,
+              "detail": "Không có tự xóa."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: cần giữ ID và cập nhật item đó."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Bấm 10 lần; clamp hình không vượt canvas. Bật reduced motion thì vị trí nhảy trực tiếp."
+      },
+      "scaffold": {
+        "template": "import tkinter as tk\nfrom tkinter import ttk\ndef build(root):\n    {{slot1}}\n    item=canvas.create_rectangle(10,10,50,50,fill=\"teal\")\n    tk.Label(root,text=\"Vi tri\",relief=\"sunken\").pack()\n    tip=None\n    def move():\n        x1,y1,x2,y2=canvas.coords(item)\n        canvas.move(item,min(20,240-x2),0)\n    {{slot2}}\n    def hide_tip(event=None):\n        nonlocal tip\n        if tip is not None: tip.destroy(); tip=None\n    def show_tip(event=None):\n        nonlocal tip\n        hide_tip(); tip=tk.Toplevel(root); tip.overrideredirect(True)\n        tip.geometry(f\"+{button.winfo_rootx()}+{button.winfo_rooty()+28}\")\n        ttk.Label(tip,text=\"Dich sang phai\",padding=4).pack()\n    for event in (\"<Enter>\",\"<FocusIn>\"): button.bind(event,show_tip)\n    {{slot3}}\n    return dict(canvas=canvas,item=item,move=move,show_tip=show_tip,hide_tip=hide_tip)\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "canvas=tk.Canvas(root,width=240,height=120); canvas.pack()"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "button=ttk.Button(root,text=\"Phai\",command=move); button.pack()"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "for event in (\"<Leave>\",\"<FocusOut>\"): button.bind(event,hide_tip)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "canvas=tk.Canvas(root,width=240,height=120); canvas.pack()",
+            "slot": 1
+          },
+          {
+            "label": "canvas=tk.Canvas(root,width=240,height=120)",
+            "slot": 1
+          },
+          {
+            "label": "button=ttk.Button(root,text=\"Phai\",command=move); button.pack()",
+            "slot": 2
+          },
+          {
+            "label": "item=canvas.create_rectangle(10,10,50,50,fill=\"teal\")",
+            "slot": 2
+          },
+          {
+            "label": "for event in (\"<Leave>\",\"<FocusOut>\"): button.bind(event,hide_tip)",
+            "slot": 3
+          },
+          {
+            "label": "canvas.move(item,20,0)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "So Label relief sunken/raised; đánh dấu đây là tín hiệu thị giác, vẫn cần nhãn chữ."
+          },
+          {
+            "label": "B2",
+            "text": "Hover/focus vào nút: mở Toplevel tooltip; leave/blur: đóng tooltip."
+          },
+          {
+            "label": "B3",
+            "text": "Bấm Phai: move rectangle +20px; panel tọa độ và hình cập nhật cùng lúc."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết build(root): Canvas 240x120 chứa một rectangle [10,10,50,50]; nút Phai tăng x 20 nhưng cạnh phải tối đa 240. Label relief sunken. Tooltip nút hiện \"Dich sang phai\" khi Enter hoặc FocusIn và đóng khi Leave/FocusOut. Trả canvas/item/move/show_tip/hide_tip.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Tab đến nút cũng mở tooltip; blur đóng; Enter/Leave nhiều lần không tăng số tooltip còn sống."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Tọa độ rectangle chuyển từ [10,10,50,50] thành [30,10,70,50]. Widget relief chỉ thay vẻ viền, không đổi dữ liệu."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import tkinter as tk\nfrom tkinter import ttk\ndef build(root):\n    canvas=tk.Canvas(root,width=240,height=120); canvas.pack()\n    item=canvas.create_rectangle(10,10,50,50,fill=\"teal\")\n    tk.Label(root,text=\"Vi tri\",relief=\"sunken\").pack()\n    tip=None\n    def move():\n        x1,y1,x2,y2=canvas.coords(item)\n        canvas.move(item,min(20,240-x2),0)\n    button=ttk.Button(root,text=\"Phai\",command=move); button.pack()\n    def hide_tip(event=None):\n        nonlocal tip\n        if tip is not None: tip.destroy(); tip=None\n    def show_tip(event=None):\n        nonlocal tip\n        hide_tip(); tip=tk.Toplevel(root); tip.overrideredirect(True)\n        tip.geometry(f\"+{button.winfo_rootx()}+{button.winfo_rooty()+28}\")\n        ttk.Label(tip,text=\"Dich sang phai\",padding=4).pack()\n    for event in (\"<Enter>\",\"<FocusIn>\"): button.bind(event,show_tip)\n    for event in (\"<Leave>\",\"<FocusOut>\"): button.bind(event,hide_tip)\n    return dict(canvas=canvas,item=item,move=move,show_tip=show_tip,hide_tip=hide_tip)\n"
+    }
+  }
+}

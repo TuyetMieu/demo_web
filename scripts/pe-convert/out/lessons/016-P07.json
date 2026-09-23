@@ -1,0 +1,189 @@
+{
+  "lesson_code": "P07",
+  "sort_order": 16,
+  "module": "Module 3: List, dict, tuple và set",
+  "title": "Chọn tuple và set đúng mục đích",
+  "subtitle": "P07 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Chọn tuple và set đúng mục đích",
+    "subtitle": "P07 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P07",
+      "parser": "pe-convert/override",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Danh sách đăng ký có nhiều lượt nhưng một người có thể đăng ký lại. Báo cáo cần cả số lượt và số người khác nhau. Một tuple hai giá trị giúp chuyển hai kết quả cùng lúc."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "ids = [\"S01\", \"S01\", \"S02\"]\nunique_ids = set(ids)\nreport = (len(ids), len(unique_ids))"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "len(ids)=3, len(unique_ids)=2."
+        },
+        {
+          "n": 2,
+          "body": "Set dùng để bỏ trùng, không được dùng thứ tự hiển thị set làm ý nghĩa."
+        },
+        {
+          "n": 3,
+          "body": "Tuple giữ hai vị trí của báo cáo."
+        }
+      ],
+      "predict": {
+        "question": "Có nên lấy “mã đầu tiên” của set để xếp hạng?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Có, luôn ổn định",
+            "detail": "Không dựa vào thứ tự set cho hợp đồng.",
+            "correct": false
+          },
+          {
+            "id": "b",
+            "title": "Không, set không là thứ tự xếp hạng",
+            "detail": "Đúng: xếp hạng cần thứ tự được quy định.",
+            "correct": true
+          },
+          {
+            "id": "c",
+            "title": "Chỉ khi có 2 phần tử",
+            "detail": "Số phần tử không tạo ý nghĩa thứ tự.",
+            "correct": false
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu hai số luôn bằng nhau: bạn đang đếm trên cùng một collection, bỏ mất yêu cầu phân biệt lượt và người."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "report là gì?",
+          "options": [
+            {
+              "text": "(3,2)",
+              "correct": true,
+              "detail": "Đúng: số lượt trước, số mã khác nhau sau."
+            },
+            {
+              "text": "(2,3)",
+              "correct": false,
+              "detail": "Bạn đã đổi thứ tự hai trường."
+            },
+            {
+              "text": "(3,3)",
+              "correct": false,
+              "detail": "Set loại mã lặp."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: số lượt trước, số mã khác nhau sau."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu. Nhật ký thao tác bên dưới mô tả bản script gốc của PE; cách nghĩ giữ nguyên, chỉ khác phần vỏ hàm.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi ids thành [] rồi dự đoán report; kiểm tra (0,0)."
+      },
+      "scaffold": {
+        "template": "def count_ids(ids):\n    \"\"\"Trả về (tổng số lượt, số mã khác nhau).\"\"\"\n    {{slot1}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "return (len(ids), len(set(ids)))"
+          }
+        ],
+        "bank": [
+          {
+            "label": "return (len(ids), len(set(ids)))",
+            "slot": 1
+          },
+          {
+            "label": "print((len(ids), len(set(ids))))",
+            "slot": 1
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chọn 3 thẻ đăng ký; vùng list giữ cả hai S01."
+          },
+          {
+            "label": "B2",
+            "text": "Đặt set(ids); khi chạy, vùng set còn hai nhãn duy nhất, ghi Không có thứ tự xếp hạng."
+          },
+          {
+            "label": "B3",
+            "text": "Đặt hai len vào tuple; chạy: report có ô 0=3, ô 1=2; đổi chỗ ô báo ý nghĩa khác."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết hàm count_ids(ids): ids là list chuỗi. Trả về tuple (tổng số lượt, số mã khác nhau). Chấp nhận đầu vào rỗng, không thay ids.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "list(result) → [3, 2]"
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Hai số đo có ý nghĩa khác nhau."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Set giúp đếm số mã khác nhau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Tạo tuple từ len(ids) và len(set(ids))."
+        }
+      ],
+      "starterCode": "def count_ids(ids):\n    \"\"\"Trả về (tổng số lượt, số mã khác nhau).\"\"\"\n    # Viết lời giải của bạn ở đây\n",
+      "tests": [
+        {
+          "name": "Ca mẫu PE: A, A, B",
+          "call": "count_ids([\"A\", \"A\", \"B\"])",
+          "expect": "(3, 2)"
+        },
+        {
+          "name": "Trả về tuple chứ không phải list",
+          "call": "type(count_ids([\"A\"])).__name__",
+          "expect": "\"tuple\""
+        },
+        {
+          "name": "Danh sách rỗng",
+          "call": "count_ids([])",
+          "expect": "(0, 0)"
+        }
+      ],
+      "solutionCode": "def count_ids(ids):\n    \"\"\"Trả về (tổng số lượt, số mã khác nhau).\"\"\"\n    return (len(ids), len(set(ids)))\n"
+    }
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "lesson_code": "C04",
+  "sort_order": 6,
+  "module": "Module 2: Biến, kiểu dữ liệu và điều kiện",
+  "title": "Tên biến, kiểu động và ghi chú có ích",
+  "subtitle": "C04 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Tên biến, kiểu động và ghi chú có ích",
+    "subtitle": "C04 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C04",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Tên biến trỏ tới đối tượng, nên có thể được gán sang kiểu khác. Tên rõ và docstring giúp người tiếp theo hiểu hợp đồng của hàm."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "value = \"8\"\nprint(type(value).__name__)\nvalue = int(value)\nprint(type(value).__name__)\nMAX_SCORE = 10\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Hai dòng in lần lượt str và int."
+        },
+        {
+          "n": 2,
+          "body": "MAX_SCORE viết hoa là quy ước; Python vẫn cho phép gán lại nó."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"2score\" — Tên không bắt đầu bằng chữ số."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Tên nào hợp lệ và dễ hiểu cho điểm trung bình?",
+          "options": [
+            {
+              "text": "2score",
+              "correct": false,
+              "detail": "Tên không bắt đầu bằng chữ số."
+            },
+            {
+              "text": "class",
+              "correct": false,
+              "detail": "class là từ khóa."
+            },
+            {
+              "text": "mean_score",
+              "correct": true,
+              "detail": "Đúng: snake_case diễn đạt ý nghĩa."
+            }
+          ],
+          "correct": 2,
+          "explanation": "Đúng: snake_case diễn đạt ý nghĩa."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Gán MAX_SCORE=20 rồi chạy lại: giải thích khác nhau giữa quy ước constant và bất biến."
+      },
+      "scaffold": {
+        "template": "import keyword\ndef valid_name(name):\n    \"\"\"Kiểm tra tên Python hợp lệ và không thuộc từ khóa.\"\"\"\n    {{slot1}}\ndef type_trace():\n    value = \"8\"\n    {{slot2}}\n    value = int(value)\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "return name.isidentifier() and not keyword.iskeyword(name)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "before = type(value).__name__"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return before, type(value).__name__"
+          }
+        ],
+        "bank": [
+          {
+            "label": "return name.isidentifier() and not keyword.iskeyword(name)",
+            "slot": 1
+          },
+          {
+            "label": "return name.isidentifier() or not keyword.iskeyword(name)",
+            "slot": 1
+          },
+          {
+            "label": "before = type(value).__name__",
+            "slot": 2
+          },
+          {
+            "label": "value = \"8\"",
+            "slot": 2
+          },
+          {
+            "label": "return before, type(value).__name__",
+            "slot": 3
+          },
+          {
+            "label": "print(before, type(value).__name__)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Phân loại student_id, 2id, class, mean_score bằng str.isidentifier và keyword.iskeyword; hiển thị lý do từng tên."
+          },
+          {
+            "label": "B2",
+            "text": "Theo dõi value từ chuỗi sang số: mũi tên tên biến đổi đối tượng đích; không mô tả chuỗi bị biến đổi tại chỗ."
+          },
+          {
+            "label": "B3",
+            "text": "Điền docstring của hàm cộng điểm; thêm comment giải thích quy tắc giới hạn, không lặp lại từng dòng mã."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết valid_name(name) nhận str, trả True nếu là identifier và không là keyword; thêm docstring. Viết type_trace() trả (\"str\",\"int\") bằng cách tự gán lại value=\"8\" rồi int(value). Nộp một comment giải thích lý do dùng tên snake_case.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Giải thích MAX_SCORE vẫn có thể gán lại; comment phải nêu lý do, không chỉ đọc lại câu lệnh."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Hai dòng in lần lượt str và int. MAX_SCORE viết hoa là quy ước; Python vẫn cho phép gán lại nó."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "import keyword\ndef valid_name(name):\n    \"\"\"Kiểm tra tên Python hợp lệ và không thuộc từ khóa.\"\"\"\n    # Viết lời giải của bạn ở đây\n    pass\ndef type_trace():\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "names (C04-K01)",
+          "call": "(exec('assert valid_name(\"mean_score\")\\nassert not valid_name(\"2score\")\\nassert not valid_name(\"class\")\\nassert not valid_name(\"\")\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "types (C04-K02)",
+          "call": "(exec('assert type_trace()==(\"str\",\"int\")\\nassert valid_name.__doc__\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "import keyword\ndef valid_name(name):\n    \"\"\"Kiểm tra tên Python hợp lệ và không thuộc từ khóa.\"\"\"\n    return name.isidentifier() and not keyword.iskeyword(name)\ndef type_trace():\n    value = \"8\"\n    before = type(value).__name__\n    value = int(value)\n    return before, type(value).__name__\n"
+    }
+  }
+}

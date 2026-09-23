@@ -1,0 +1,132 @@
+{
+  "lesson_code": "A13",
+  "sort_order": 86,
+  "module": "Module 12: Thread, tiến trình, đồng thời và mạng",
+  "title": "TCP và HTTP qua dịch vụ lab cục bộ",
+  "subtitle": "A13 · Nâng cao · 45 phút",
+  "estimated_minutes": 45,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "TCP và HTTP qua dịch vụ lab cục bộ",
+    "subtitle": "A13 · Nâng cao · 45 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A13",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "TCP truyền một luồng bytes nên cần quy tắc đóng khung thông điệp. HTTP đã có giao thức request/response; urlopen đọc response với timeout."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "with socket.create_connection((\"127.0.0.1\",port),timeout=2) as sock:\n    sock.sendall(b\"hello\\n\")\n    reply=sock.makefile(\"rb\").readline()\nwith urlopen(url,timeout=2) as response:\n    text=response.read().decode(\"utf8\")\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Lab dùng loopback và cổng do OS cấp để không phụ thuộc website công cộng."
+        },
+        {
+          "n": 2,
+          "body": "Một recv không bảo đảm nhận đủ cả thông điệp."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Không có ranh giới message ở TCP."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Một lần send tương ứng chính xác một lần recv không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Không có ranh giới message ở TCP."
+            },
+            {
+              "text": "Không, TCP là byte stream",
+              "correct": true,
+              "detail": "Đúng: dùng newline, length prefix hoặc protocol khác."
+            },
+            {
+              "text": "Chỉ khi cùng máy",
+              "correct": false,
+              "detail": "Loopback vẫn là stream."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: dùng newline, length prefix hoặc protocol khác."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Response TCP đến từng byte: code phải vẫn đúng; giới hạn lab message <=1024byte và timeout2giây."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Server bind127.0.0.1:0, lấy port thật; client gửi dònghello, server trả HELLO với newline."
+          },
+          {
+            "label": "B2",
+            "text": "Chia message thành hai lần send; reader vẫn chờ newline và nhận một dòng hoàn chỉnh."
+          },
+          {
+            "label": "B3",
+            "text": "Mở HTTP server lab trả UTF-8 PE; urlopen đọc status/body; thử endpoint404 và timeout."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết tcp_line(host,port,message): message không chứa newline, gửi UTF-8 + newline, đọc một dòng tối đa1025byte với timeout2; thiếu newline hoặc >1024byte ValueError; trả text không newline. Viết fetch_text(url) urlopen timeout2, read tối đa4097byte, >4096 ValueError, UTF-8; HTTPError giữ nguyên. Nộp server loopback để kiểm tra."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Lab dùng loopback và cổng do OS cấp để không phụ thuộc website công cộng. Một recv không bảo đảm nhận đủ cả thông điệp."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import socket\nfrom urllib.request import urlopen\ndef tcp_line(host,port,message):\n    with socket.create_connection((host,port),timeout=2) as sock:\n        sock.sendall((message+\"\\n\").encode(\"utf8\"))\n        with sock.makefile(\"rb\") as stream: data=stream.readline(1025)\n    if len(data)>1024 or not data.endswith(b\"\\n\"): raise ValueError(\"framing\")\n    return data[:-1].decode(\"utf8\")\ndef fetch_text(url):\n    with urlopen(url,timeout=2) as response: data=response.read(4097)\n    if len(data)>4096: raise ValueError(\"too large\")\n    return data.decode(\"utf8\")\n",
+      "procedure": [
+        "import socket",
+        "from urllib.request import urlopen",
+        "def tcp_line(host,port,message):",
+        "    with socket.create_connection((host,port),timeout=2) as sock:",
+        "        sock.sendall((message+\"\\n\").encode(\"utf8\"))",
+        "        with sock.makefile(\"rb\") as stream: data=stream.readline(1025)",
+        "    if len(data)>1024 or not data.endswith(b\"\\n\"): raise ValueError(\"framing\")",
+        "    return data[:-1].decode(\"utf8\")",
+        "def fetch_text(url):",
+        "    with urlopen(url,timeout=2) as response: data=response.read(4097)",
+        "    if len(data)>4096: raise ValueError(\"too large\")",
+        "    return data.decode(\"utf8\")"
+      ]
+    }
+  }
+}

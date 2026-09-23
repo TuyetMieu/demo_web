@@ -1,0 +1,151 @@
+{
+  "lesson_code": "C05",
+  "sort_order": 7,
+  "module": "Module 2: Biến, kiểu dữ liệu và điều kiện",
+  "title": "Toán tử, thứ tự tính và làm tròn xuống",
+  "subtitle": "C05 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Toán tử, thứ tự tính và làm tròn xuống",
+    "subtitle": "C05 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C05",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Một biểu thức đúng cú pháp vẫn có thể tính sai nếu đặt ngoặc sai. Làm tròn xuống khác làm tròn tới số gần nhất."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "import math\nprint(2 + 3 * 4)\nprint((2 + 3) * 4)\nprint(math.floor(8.79 * 10) / 10)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Kết quả là 14, 20 và 8.7."
+        },
+        {
+          "n": 2,
+          "body": "floor hướng về âm vô cùng; với -1.21, floor(x*10)/10 cho -1.3."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"3.4 và 0\" — / mới cho thương thực."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "17 // 5 và 17 % 5 lần lượt là gì?",
+          "options": [
+            {
+              "text": "3 và 2",
+              "correct": true,
+              "detail": "Đúng: thương nguyên và phần dư."
+            },
+            {
+              "text": "3.4 và 0",
+              "correct": false,
+              "detail": "/ mới cho thương thực."
+            },
+            {
+              "text": "2 và 3",
+              "correct": false,
+              "detail": "17 = 5*3+2."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: thương nguyên và phần dư."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi 8.79 thành 8.71: cả hai cùng floor thành 8.7 nhưng round có thể khác ở giá trị trước."
+      },
+      "scaffold": {
+        "template": "import math\ndef arithmetic(a,b):\n    return dict(add=a+b, sub=a-b, mul=a*b, div=a/b,\n                quot=a//b, rem=a%b, power=a**b)\ndef floor_tenth(x):\n    {{slot1}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "return math.floor(x*10)/10"
+          }
+        ],
+        "bank": [
+          {
+            "label": "return math.floor(x*10)/10",
+            "slot": 1
+          },
+          {
+            "label": "print(math.floor(x*10)/10)",
+            "slot": 1
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Ghép cây biểu thức 2+3*4; nhánh nhân chạy trước, ô 3*4 đổi thành 12."
+          },
+          {
+            "label": "B2",
+            "text": "Thay bằng //, %, ** và / trên dữ liệu 17,5; hiển thị cả giá trị và kiểu."
+          },
+          {
+            "label": "B3",
+            "text": "Điền math.floor(x*10)/10, thử 8.79 và -1.21; đối chiếu round(x,1)."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết arithmetic(a,b) cho hai int, b>0, trả dict add/sub/mul/div/quot/rem/power. Viết floor_tenth(x) cho float hữu hạn theo đúng math.floor(x*10)/10. Không gọi round thay floor."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Kết quả là 14, 20 và 8.7. floor hướng về âm vô cùng; với -1.21, floor(x*10)/10 cho -1.3."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "import math\ndef arithmetic(a,b):\n    # Viết lời giải của bạn ở đây\n    pass\ndef floor_tenth(x):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "operators (C05-K01)",
+          "call": "arithmetic(7, 2)",
+          "expect": "dict(add=9, sub=5, mul=14, div=3.5, quot=3, rem=1, power=49)"
+        },
+        {
+          "name": "floor (C05-K02)",
+          "call": "(exec('assert floor_tenth(8.79)==8.7\\nassert floor_tenth(-1.21)==-1.3\\nassert floor_tenth(0)==0\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "import math\ndef arithmetic(a,b):\n    return dict(add=a+b, sub=a-b, mul=a*b, div=a/b,\n                quot=a//b, rem=a%b, power=a**b)\ndef floor_tenth(x):\n    return math.floor(x*10)/10\n"
+    }
+  }
+}

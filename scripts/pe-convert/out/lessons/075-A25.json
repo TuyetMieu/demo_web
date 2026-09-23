@@ -1,0 +1,163 @@
+{
+  "lesson_code": "A25",
+  "sort_order": 75,
+  "module": "Module 11: MySQL, wxPython và đồ họa 3D",
+  "title": "Pyglet, shader và cube nhiều màu",
+  "subtitle": "A25 · Nâng cao · 60 phút",
+  "estimated_minutes": 60,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Pyglet, shader và cube nhiều màu",
+    "subtitle": "A25 · Nâng cao · 60 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A25",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Pyglet có cửa sổ và vòng lặp riêng. Shader mô tả cách biến đổi vị trí và màu từng đỉnh, thay cho các lời gọi fixed-function trong bài trước."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "window=pyglet.window.Window(width=640,height=480)\nprogram=ShaderProgram(Shader(vertex_source,\"vertex\"),Shader(fragment_source,\"fragment\"))\nvertices=program.vertex_list(count,GL_TRIANGLES,position=(\"f\",positions),color=(\"f\",colors))\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Mỗi thuộc tính phải đủ số thành phần cho count đỉnh."
+        },
+        {
+          "n": 2,
+          "body": "Cube được tách thành36 đỉnh tam giác để mỗi mặt có màu riêng."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Pyglet đã có Window và app loop."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Pyglet có cần Tkinter để chạy event loop không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Pyglet đã có Window và app loop."
+            },
+            {
+              "text": "Không",
+              "correct": true,
+              "detail": "Đúng."
+            },
+            {
+              "text": "Chỉ cần khi có màu",
+              "correct": false,
+              "detail": "Màu là dữ liệu render, không quyết định toolkit."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi màu một mặt và resize cửa sổ; chỉ mặt đó đổi màu, aspect trong uniform cập nhật."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Cài pyglet, chạy Window và label PE ở giữa như bước mở đầu của nguồn."
+          },
+          {
+            "label": "B2",
+            "text": "Tạo shader position/color, sáu mặt cube thành12 tam giác; kiểm tra buffer36đỉnh."
+          },
+          {
+            "label": "B3",
+            "text": "Giữ phím trái/phải làm góc quay liên tục theo dt, không phụ thuộc số lần key press."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết pyglet cube dùng OpenGL3.3 shader, vertex positions và colors36đỉnh. Uniform angle/aspect, depth test; giữ LEFT/RIGHT quay90độ/giây; label bài mở đầu chạy độc lập trước cube. Nộp log context và ảnh sáu mặt khi xoay. Không dùng API vertex_list cũ ngoài ShaderProgram."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Mỗi thuộc tính phải đủ số thành phần cho count đỉnh. Cube được tách thành36 đỉnh tam giác để mỗi mặt có màu riêng."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import math,pyglet\nfrom pyglet.gl import GL_TRIANGLES,GL_DEPTH_TEST,glEnable\nfrom pyglet.graphics.shader import Shader,ShaderProgram\nVS=\"\"\"#version 330 core\nin vec3 position; in vec3 color; out vec3 tint;\nuniform float angle; uniform float aspect;\nvoid main(){\n  float c=cos(angle),s=sin(angle);\n  vec3 p=vec3(c*position.x+s*position.z,position.y,-s*position.x+c*position.z);\n  p=vec3(p.x,0.94*p.y-0.342*p.z,0.342*p.y+0.94*p.z);\n  p.z-=5.0; float f=2.41421356;\n  gl_Position=vec4(f*p.x/aspect,f*p.y,-1.002002*p.z-0.2002002,-p.z);\n  tint=color;\n}\"\"\"\nFS=\"\"\"#version 330 core\nin vec3 tint; out vec4 outputColor;\nvoid main(){outputColor=vec4(tint,1.0);}\n\"\"\"\ndef main():\n    window=pyglet.window.Window(640,480,\"PE shader cube\",resizable=True)\n    program=ShaderProgram(Shader(VS,\"vertex\"),Shader(FS,\"fragment\"))\n    vertices=[(-1,-1,-1),(1,-1,-1),(1,1,-1),(-1,1,-1),(-1,-1,1),(1,-1,1),(1,1,1),(-1,1,1)]\n    faces=[(0,1,2,3),(4,5,6,7),(0,1,5,4),(2,3,7,6),(1,2,6,5),(0,3,7,4)]\n    palette=[(1,0,0),(0,1,0),(0,0,1),(1,1,0),(1,0,1),(0,1,1)]\n    positions=[]; colors=[]\n    for face,color in zip(faces,palette):\n        for j in (0,1,2,0,2,3): positions.extend(vertices[face[j]]); colors.extend(color)\n    mesh=program.vertex_list(36,GL_TRIANGLES,position=(\"f\",positions),color=(\"f\",colors))\n    keys=pyglet.window.key.KeyStateHandler(); window.push_handlers(keys); angle=0.0\n    def update(dt):\n        nonlocal angle\n        direction=int(keys[pyglet.window.key.RIGHT])-int(keys[pyglet.window.key.LEFT])\n        angle=(angle+direction*math.pi/2*dt)%(2*math.pi)\n    @window.event\n    def on_draw():\n        window.clear(); glEnable(GL_DEPTH_TEST); program.use()\n        program[\"angle\"]=angle; program[\"aspect\"]=window.width/max(1,window.height)\n        mesh.draw(GL_TRIANGLES); program.stop()\n    @window.event\n    def on_close():\n        pyglet.clock.unschedule(update); mesh.delete(); program.delete(); window.close()\n    pyglet.clock.schedule_interval(update,1/60); pyglet.app.run()\nif __name__==\"__main__\": main()\n",
+      "procedure": [
+        "import math,pyglet",
+        "from pyglet.gl import GL_TRIANGLES,GL_DEPTH_TEST,glEnable",
+        "from pyglet.graphics.shader import Shader,ShaderProgram",
+        "VS=\"\"\"#version 330 core",
+        "in vec3 position; in vec3 color; out vec3 tint;",
+        "uniform float angle; uniform float aspect;",
+        "void main(){",
+        "  float c=cos(angle),s=sin(angle);",
+        "  vec3 p=vec3(c*position.x+s*position.z,position.y,-s*position.x+c*position.z);",
+        "  p=vec3(p.x,0.94*p.y-0.342*p.z,0.342*p.y+0.94*p.z);",
+        "  p.z-=5.0; float f=2.41421356;",
+        "  gl_Position=vec4(f*p.x/aspect,f*p.y,-1.002002*p.z-0.2002002,-p.z);",
+        "  tint=color;",
+        "}\"\"\"",
+        "FS=\"\"\"#version 330 core",
+        "in vec3 tint; out vec4 outputColor;",
+        "void main(){outputColor=vec4(tint,1.0);}",
+        "\"\"\"",
+        "def main():",
+        "    window=pyglet.window.Window(640,480,\"PE shader cube\",resizable=True)",
+        "    program=ShaderProgram(Shader(VS,\"vertex\"),Shader(FS,\"fragment\"))",
+        "    vertices=[(-1,-1,-1),(1,-1,-1),(1,1,-1),(-1,1,-1),(-1,-1,1),(1,-1,1),(1,1,1),(-1,1,1)]",
+        "    faces=[(0,1,2,3),(4,5,6,7),(0,1,5,4),(2,3,7,6),(1,2,6,5),(0,3,7,4)]",
+        "    palette=[(1,0,0),(0,1,0),(0,0,1),(1,1,0),(1,0,1),(0,1,1)]",
+        "    positions=[]; colors=[]",
+        "    for face,color in zip(faces,palette):",
+        "        for j in (0,1,2,0,2,3): positions.extend(vertices[face[j]]); colors.extend(color)",
+        "    mesh=program.vertex_list(36,GL_TRIANGLES,position=(\"f\",positions),color=(\"f\",colors))",
+        "    keys=pyglet.window.key.KeyStateHandler(); window.push_handlers(keys); angle=0.0",
+        "    def update(dt):",
+        "        nonlocal angle",
+        "        direction=int(keys[pyglet.window.key.RIGHT])-int(keys[pyglet.window.key.LEFT])",
+        "        angle=(angle+direction*math.pi/2*dt)%(2*math.pi)",
+        "    @window.event",
+        "    def on_draw():",
+        "        window.clear(); glEnable(GL_DEPTH_TEST); program.use()",
+        "        program[\"angle\"]=angle; program[\"aspect\"]=window.width/max(1,window.height)",
+        "        mesh.draw(GL_TRIANGLES); program.stop()",
+        "    @window.event",
+        "    def on_close():",
+        "        pyglet.clock.unschedule(update); mesh.delete(); program.delete(); window.close()",
+        "    pyglet.clock.schedule_interval(update,1/60); pyglet.app.run()",
+        "if __name__==\"__main__\": main()"
+      ]
+    }
+  }
+}

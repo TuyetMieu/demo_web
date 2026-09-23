@@ -1,0 +1,159 @@
+{
+  "lesson_code": "P22",
+  "sort_order": 78,
+  "module": "Module 12: Thread, tiến trình, đồng thời và mạng",
+  "title": "Tiến trình con và mã kết thúc",
+  "subtitle": "P22 · Nâng cao · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Tiến trình con và mã kết thúc",
+    "subtitle": "P22 · Nâng cao · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P22",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Một công cụ riêng có thể xuất báo cáo giúp chương trình chính. Tiến trình con có vùng chạy riêng; stdout mang dữ liệu, returncode báo trạng thái kết thúc. Hai giá trị không phải một."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "import subprocess\nimport sys\ncompleted = subprocess.run(\n    [sys.executable, \"-c\", \"print(7)\"],\n    capture_output=True, text=True, timeout=2\n)\nreport = (completed.stdout.strip(), completed.returncode)"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "stdout chứa \"7\" còn returncode thường là0 khi thành công."
+        },
+        {
+          "n": 2,
+          "body": "Bài dùng sys.executable để chọn đúng Python hiện chạy."
+        },
+        {
+          "n": 3,
+          "body": "Truyền danh sách đối số, không qua shell."
+        }
+      ],
+      "predict": {
+        "question": "Vì sao phải có timeout?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Để luôn chạy nhanh hơn",
+            "detail": "Timeout giới hạn chờ, không làm thuật toán nhanh hơn.",
+            "correct": false
+          },
+          {
+            "id": "b",
+            "title": "Để kiểm soát tiến trình không kết thúc",
+            "detail": "Đúng: có giới hạn cho tình huống bị treo.",
+            "correct": true
+          },
+          {
+            "id": "c",
+            "title": "Để tự sửa cú pháp",
+            "detail": "Nó không sửa code.",
+            "correct": false
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu returncode bằng chữ READY hoặc stdout: bạn đang lấy sai trường kết quả."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "report là gì khi chạy thành công?",
+          "options": [
+            {
+              "text": "(\"7\",0)",
+              "correct": true,
+              "detail": "Đúng: dữ liệu và mã trạng thái khác nhau."
+            },
+            {
+              "text": "(0,7)",
+              "correct": false,
+              "detail": "Bạn đã đổi ý nghĩa hai trường."
+            },
+            {
+              "text": "(\"7\",7)",
+              "correct": false,
+              "detail": "Giá trị chương trình in không thành mã thoát."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: dữ liệu và mã trạng thái khác nhau."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Fixture child đổi thành sys.exit(3); stdout rỗng, returncode3; giải thích đây không phải Python in số3."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Đặt danh sách argv vào run; sơ đồ Parent tạo Child, không lẫn namespace hai phía."
+          },
+          {
+            "label": "B2",
+            "text": "Child print7: stdout buffer rỗng->\"7\\n\"; parent chưa coi7 là trạng thái."
+          },
+          {
+            "label": "B3",
+            "text": "Child exit0: completed.returncode=0, parent tạo tuple(\"7\",0); timeout là nhánh lỗi riêng."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết launch_report() chạy đúng file report_child.py do hệ thống cấp bằng sys.executable, capture_output=True, text=True, timeout=2, shell=False. Trả dict stdout đã strip và returncode. Không nhận chuỗi lệnh tùy ý. TimeoutExpired được giữ nguyên để tầng UI báo timeout.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "launch_report() → {\"stdout\": \"READY\", \"returncode\": 0}"
+          },
+          {
+            "label": "Người chấm xem 1",
+            "value": "PR22-timeout: thay child bằng fixture chờ5s, giới hạn2s phải báo TimeoutExpired và không để tiến trình mồ côi."
+          },
+          {
+            "label": "Người chấm xem 2",
+            "value": "PR22-safety: runner chặn truy cập host/network/lệnh ngoài vùng bài; yêu cầu shell=False không tự tạo sandbox."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Dữ liệu và trạng thái kết thúc là hai thuộc tính khác nhau."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Dùng sys.executable và danh sách đối số cố định."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Trả completed.stdout.strip() và completed.returncode sau subprocess.run."
+        }
+      ],
+      "solutionCode": "import subprocess\nimport sys\n\ndef launch_report():\n    completed = subprocess.run(\n        [sys.executable, \"report_child.py\"],\n        capture_output=True, text=True, timeout=2,\n        shell=False\n    )\n    return {\"stdout\": completed.stdout.strip(),\n            \"returncode\": completed.returncode}"
+    }
+  }
+}

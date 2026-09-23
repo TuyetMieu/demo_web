@@ -1,0 +1,129 @@
+{
+  "lesson_code": "C01",
+  "sort_order": 1,
+  "module": "Module 1: Môi trường, REPL và Git",
+  "title": "Chọn công cụ và dựng môi trường học",
+  "subtitle": "C01 · Lộ trình chính · 40 phút",
+  "estimated_minutes": 40,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Chọn công cụ và dựng môi trường học",
+    "subtitle": "C01 · Lộ trình chính · 40 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C01",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Bạn cần một nơi chạy bài học có thể dựng lại trên máy khác. Python chạy chương trình; editor giúp sửa mã; môi trường ảo tách thư viện của từng dự án."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "python --version\npython -m venv .venv\n.venv\\Scripts\\python -m pip --version\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Các lệnh trên minh họa Windows."
+        },
+        {
+          "n": 2,
+          "body": "Linux/macOS dùng .venv/bin/python."
+        },
+        {
+          "n": 3,
+          "body": "Luôn gọi pip qua đúng interpreter của môi trường."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Cài đè liên tục vào một Python chung\" — Dự án kia có thể bị đổi dependency."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Hai dự án cần hai phiên bản thư viện khác nhau. Cách nào phù hợp?",
+          "options": [
+            {
+              "text": "Mỗi dự án có môi trường ảo",
+              "correct": true,
+              "detail": "Đúng: mỗi môi trường giữ bộ package riêng."
+            },
+            {
+              "text": "Cài đè liên tục vào một Python chung",
+              "correct": false,
+              "detail": "Dự án kia có thể bị đổi dependency."
+            },
+            {
+              "text": "Đổi tên file .py",
+              "correct": false,
+              "detail": "Tên file không tách thư viện."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: mỗi môi trường giữ bộ package riêng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Tạo dự án thứ hai; so sánh sys.executable ở hai terminal và giải thích vì sao package không tự chia sẻ."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chọn tình huống xử lý CSV, GUI và hard real-time: gắn Python cho hai tình huống đầu; với hard real-time giải thích cần ràng buộc thời gian mà Python thông thường không bảo đảm."
+          },
+          {
+            "label": "B2",
+            "text": "Tạo .venv; chọn interpreter trong VS Code, cài Python extension. UI hiển thị đường dẫn interpreter đã chọn."
+          },
+          {
+            "label": "B3",
+            "text": "Cài matplotlib bằng python -m pip install matplotlib; đọc tên wheel/phiên bản Python/nền tảng trong log, lưu phiên bản thực cài. Không dùng tên wheel của sách 2017."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Tạo lab_env mới, script hello.py in Hello PE. Nộp version Python, sys.executable, pip --version, log chạy script, requirements khóa phiên bản thực cài và ảnh interpreter VS Code. Giải thích một việc Python phù hợp và một việc cần cân nhắc hiệu năng/triển khai."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Các lệnh trên minh họa Windows. Linux/macOS dùng .venv/bin/python. Luôn gọi pip qua đúng interpreter của môi trường."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "procedure": [
+        "python -m venv .venv",
+        ".venv\\Scripts\\python -m pip install matplotlib",
+        ".venv\\Scripts\\python -m pip freeze > requirements.txt",
+        ".venv\\Scripts\\python -c \"import sys; print(sys.executable)\"",
+        ".venv\\Scripts\\python hello.py",
+        "# hello.py: print(\"Hello PE\")"
+      ]
+    }
+  }
+}

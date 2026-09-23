@@ -1,0 +1,205 @@
+{
+  "lesson_code": "P10",
+  "sort_order": 23,
+  "module": "Module 5: Hàm, module và package",
+  "title": "Hàm trả về giá trị",
+  "subtitle": "P10 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Hàm trả về giá trị",
+    "subtitle": "P10 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P10",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Bảng điểm và biểu đồ cùng cần tính trung bình. Đưa phép tính vào một hàm để cả hai dùng lại. Hàm nhận dữ liệu qua tham số và đưa kết quả lại cho nơi gọi bằng return."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "def mean_score(scores):\n    if not scores:\n        return None\n    return sum(scores) / len(scores)\n\nanswer = mean_score([6, 8])"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "sum và len là công cụ đã có; bài tập trung vào tham số/return."
+        },
+        {
+          "n": 2,
+          "body": "List rỗng được xử lý trước phép chia."
+        },
+        {
+          "n": 3,
+          "body": "print chỉ hiển thị, không thay thế giá trị trả về."
+        }
+      ],
+      "predict": {
+        "question": "Thay return bằng print ở cuối thì nơi gọi nhận gì?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Số vừa in",
+            "detail": "In ra không chuyển số thành return.",
+            "correct": false
+          },
+          {
+            "id": "b",
+            "title": "None",
+            "detail": "Đúng: hàm kết thúc không return giá trị sẽ trả None.",
+            "correct": true
+          },
+          {
+            "id": "c",
+            "title": "List ban đầu",
+            "detail": "Tham số không tự được trả về.",
+            "correct": false
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu màn hình có số nhưng test nhận None: hãy kiểm tra return thay vì print."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "answer là gì?",
+          "options": [
+            {
+              "text": "7.0",
+              "correct": true,
+              "detail": "Đúng: hàm trả số trung bình."
+            },
+            {
+              "text": "None",
+              "correct": false,
+              "detail": "Hàm chỉ trả None với list rỗng."
+            },
+            {
+              "text": "Chuỗi \"7.0\"",
+              "correct": false,
+              "detail": "Không có bước chuyển sang chuỗi."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: hàm trả số trung bình."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Gọi hàm lần lượt với [0,10] và []; kết quả5.0, None. Hỏi vì sao gọi lần hai không dùng dữ liệu lần một."
+      },
+      "scaffold": {
+        "template": "def mean_score(scores):\n    {{slot1}}\n        {{slot2}}\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "if not scores:"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "return None"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return sum(scores) / len(scores)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "if not scores:",
+            "slot": 1
+          },
+          {
+            "label": "def mean_score(scores):",
+            "slot": 1
+          },
+          {
+            "label": "return None",
+            "slot": 2
+          },
+          {
+            "label": "print(None)",
+            "slot": 2
+          },
+          {
+            "label": "return sum(scores) / len(scores)",
+            "slot": 3
+          },
+          {
+            "label": "print(sum(scores) / len(scores))",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Đặt tham số scores trong def; gọi với [6,8]: tạo khung lời gọi có scores, không đổi list nguồn."
+          },
+          {
+            "label": "B2",
+            "text": "Đặt guard list rỗng trước phép chia; lần này False, chạy sum=14 và len=2."
+          },
+          {
+            "label": "B3",
+            "text": "Đặt return; giá trị7.0 đi về answer, khung hàm kết thúc; stdout vẫn rỗng."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết mean_score(scores) nhận list số trong [0,10], trả trung bình số học hoặc None nếu rỗng. Không sửa scores, không in. Sai số float cho phép 1e-9.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "mean_score([6,8]) → 7.0"
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Tách rõ dữ liệu vào và kết quả trả về."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Xử lý rỗng trước khi chia."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "if not scores: return None; còn lại return sum(scores)/len(scores)."
+        }
+      ],
+      "starterCode": "def mean_score(scores):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "Ca mẫu P10-a",
+          "call": "mean_score([6,8])",
+          "expect": "7.0"
+        }
+      ],
+      "solutionCode": "def mean_score(scores):\n    if not scores:\n        return None\n    return sum(scores) / len(scores)"
+    }
+  }
+}

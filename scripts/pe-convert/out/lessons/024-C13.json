@@ -1,0 +1,152 @@
+{
+  "lesson_code": "C13",
+  "sort_order": 24,
+  "module": "Module 5: Hàm, module và package",
+  "title": "Khám phá API, traceback và module chuẩn",
+  "subtitle": "C13 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Khám phá API, traceback và module chuẩn",
+    "subtitle": "C13 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C13",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Khi không nhớ tên phương thức, hãy kiểm tra kiểu, danh sách thuộc tính và trợ giúp. Traceback cho biết đường đi tới lỗi; dòng cuối mô tả loại lỗi."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "text=\"An-Boi\"\nprint(type(text))\nprint(\"split\" in dir(text))\nhelp(str.split)\n# text.append(\"x\") -> AttributeError\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "append thuộc list, không thuộc str."
+        },
+        {
+          "n": 2,
+          "body": "Đọc traceback từ dòng lỗi của mã mình và thông báo cuối, rồi chọn phương thức phù hợp."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"tkinter\" — tkinter tạo giao diện."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Muốn tính trung bình bằng thư viện chuẩn, chọn module nào?",
+          "options": [
+            {
+              "text": "statistics",
+              "correct": true,
+              "detail": "Đúng: statistics có mean."
+            },
+            {
+              "text": "tkinter",
+              "correct": false,
+              "detail": "tkinter tạo giao diện."
+            },
+            {
+              "text": "random",
+              "correct": false,
+              "detail": "random lấy mẫu ngẫu nhiên."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: statistics có mean."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Chuyển đầu vào sang list; giải thích vì sao append lúc này tồn tại nhưng không giúp tính trung bình."
+      },
+      "scaffold": {
+        "template": "import statistics\ndef mean_or_none(values):\n    {{slot1}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "return statistics.mean(values) if values else None"
+          }
+        ],
+        "bank": [
+          {
+            "label": "return statistics.mean(values) if values else None",
+            "slot": 1
+          },
+          {
+            "label": "print(statistics.mean(values) if values else None)",
+            "slot": 1
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Gõ type, dir, help theo ví dụ; UI mở kết quả từng lệnh, không hiện cùng lúc ba khối dài."
+          },
+          {
+            "label": "B2",
+            "text": "Chạy \"An\".append(\"x\") trong ô lỗi; chọn loại AttributeError và dòng gọi sai."
+          },
+          {
+            "label": "B3",
+            "text": "Tra help(statistics.mean), import đúng module rồi tính [4,6,8]."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết mean_or_none(values) dùng statistics.mean với list số hữu hạn, rỗng trả None. Nộp thêm ba câu lệnh type/dir/help đã dùng để tìm str.split và chú thích traceback của \"abc\".append(\"d\").",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Bản giải thích phải xác định AttributeError, đối tượng str và lời gọi append; có lệnh khám phá thực, không chỉ ảnh code sẵn."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "append thuộc list, không thuộc str. Đọc traceback từ dòng lỗi của mã mình và thông báo cuối, rồi chọn phương thức phù hợp."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "import statistics\ndef mean_or_none(values):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "mean (C13-K01)",
+          "call": "(exec('assert mean_or_none([4,6,8])==6\\nassert mean_or_none([0])==0\\nassert mean_or_none([]) is None\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "import statistics\ndef mean_or_none(values):\n    return statistics.mean(values) if values else None\n"
+    }
+  }
+}

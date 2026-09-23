@@ -1,0 +1,205 @@
+{
+  "lesson_code": "P18",
+  "sort_order": 39,
+  "module": "Module 8: GUI cơ bản, biểu đồ, test và capstone nhỏ",
+  "title": "Callback: nối thao tác và trạng thái",
+  "subtitle": "P18 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Callback: nối thao tác và trạng thái",
+    "subtitle": "P18 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P18",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Form chưa lưu gì chỉ vì người dùng gõ vào ô. Nút Luu phát sinh sự kiện; callback đọc dữ liệu, kiểm tra rồi cập nhật trạng thái. Tham chiếu hàm khác với gọi hàm ngay khi dựng nút."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "def on_save():\n    status.set(\"Da luu\")\n\nbutton = ttk.Button(root, text=\"Luu\", command=on_save)"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "status là StringVar đã cấp."
+        },
+        {
+          "n": 2,
+          "body": "command nhận hàm, không nhận kết quả của on_save()."
+        },
+        {
+          "n": 3,
+          "body": "Callback phải kiểm tra dữ liệu trước khi cập nhật sổ."
+        }
+      ],
+      "predict": {
+        "question": "Nhập điểm abc rồi Luu nên thế nào?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Xóa cả form",
+            "detail": "Xóa dữ liệu làm người học mất ngữ cảnh.",
+            "correct": false
+          },
+          {
+            "id": "b",
+            "title": "Lưu0",
+            "detail": "Không đổi lỗi nhập thành điểm0.",
+            "correct": false
+          },
+          {
+            "id": "c",
+            "title": "Báo lỗi, giữ dữ liệu để sửa",
+            "detail": "Đúng: phản hồi giúp sửa và chưa lưu.",
+            "correct": true
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Luôn tạo hai nút\" — Lỗi này không liên quan số nút."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "command=on_save() có vấn đề gì?",
+          "options": [
+            {
+              "text": "Luôn tạo hai nút",
+              "correct": false,
+              "detail": "Lỗi này không liên quan số nút."
+            },
+            {
+              "text": "Gọi ngay khi tạo nút",
+              "correct": true,
+              "detail": "Đúng: dấu () thực hiện lời gọi ngay."
+            },
+            {
+              "text": "Chỉ chạy sau click",
+              "correct": false,
+              "detail": "Để truyền callback dùng tên hàm chưa gọi."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: dấu () thực hiện lời gọi ngay."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Nhập0 và click; đây là giá trị hợp lệ, phải thêm0.0, không báo thiếu."
+      },
+      "scaffold": {
+        "template": "import tkinter as tk\nfrom tkinter import ttk\n\ndef build_form(root):\n    {{slot1}}\n    status = tk.StringVar(master=root, value=\"Chua luu\")\n    entry = ttk.Entry(root)\n    entry.grid(row=0, column=0)\n    def on_save():\n        try:\n            score = float(entry.get())\n        except ValueError:\n            score = None\n        if score is None or not (0 <= score <= 10):\n            status.set(\"Diem khong hop le\")\n            entry.focus_set()\n            return\n        {{slot2}}\n        status.set(\"Da luu\")\n    button = ttk.Button(root, text=\"Luu\", command=on_save)\n    button.grid(row=0, column=1)\n    ttk.Label(root, textvariable=status).grid(row=1, column=0)\n    return dict(entry=entry, button=button, status=status, saved=saved)\n\nif __name__ == \"__main__\":\n    root = tk.Tk()\n    build_form(root)\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "saved = []"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "saved.append(score)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "root.mainloop()"
+          }
+        ],
+        "bank": [
+          {
+            "label": "saved = []",
+            "slot": 1
+          },
+          {
+            "label": "button = ttk.Button(root, text=\"Luu\", command=on_save)",
+            "slot": 1
+          },
+          {
+            "label": "saved.append(score)",
+            "slot": 2
+          },
+          {
+            "label": "saved.extend(score)",
+            "slot": 2
+          },
+          {
+            "label": "root.mainloop()",
+            "slot": 3
+          },
+          {
+            "label": "def on_save():",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Đặt tên on_save vào command; tạo form: status=\"Chua luu\", saved=[]; callback chưa chạy."
+          },
+          {
+            "label": "B2",
+            "text": "Nhập \"7.5\" rồi click Luu; một event -> callback -> saved=[7.5], status=\"Da luu\"."
+          },
+          {
+            "label": "B3",
+            "text": "Nhập \"abc\" rồi click: saved không đổi, status=\"Diem khong hop le\"; focus quay ô điểm, giữ chuỗi vừa nhập."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết build_form(root) trả dict entry/button/status/saved. Form có Entry, nút Luu, Label trạng thái. Ban đầu Chua luu và saved=[]. Click với chuỗi chuyển được thành float hữu hạn [0,10] thì append đúng một điểm, status Da luu. Sai thì không thêm, status Diem khong hop le, giữ text và focus. Có thể dùng parse_score của P13.",
+        "io": [
+          {
+            "label": "Người chấm xem 1",
+            "value": "TK18-a: dựng form sạch; saved=[], status=Chua luu, chưa ghi dữ liệu trước click."
+          },
+          {
+            "label": "Người chấm xem 2",
+            "value": "TK18-b: nhập7.5, invoke button một lần: saved=[7.5], status=Da luu; nhập0, invoke: saved=[7.5,0.0]."
+          },
+          {
+            "label": "Người chấm xem 3",
+            "value": "TK18-c: lần lượt abc,11,nan,inf: không append, status lỗi, giữ text/focus; event không bị nối callback hai lần."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Việc lưu chỉ diễn ra trong sự kiện click."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Truyền tên callback và kiểm tra điểm trước khi append."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "command=on_save; trong hàm, sai thì return trước saved.append."
+        }
+      ],
+      "solutionCode": "import tkinter as tk\nfrom tkinter import ttk\n\ndef build_form(root):\n    saved = []\n    status = tk.StringVar(master=root, value=\"Chua luu\")\n    entry = ttk.Entry(root)\n    entry.grid(row=0, column=0)\n    def on_save():\n        try:\n            score = float(entry.get())\n        except ValueError:\n            score = None\n        if score is None or not (0 <= score <= 10):\n            status.set(\"Diem khong hop le\")\n            entry.focus_set()\n            return\n        saved.append(score)\n        status.set(\"Da luu\")\n    button = ttk.Button(root, text=\"Luu\", command=on_save)\n    button.grid(row=0, column=1)\n    ttk.Label(root, textvariable=status).grid(row=1, column=0)\n    return dict(entry=entry, button=button, status=status, saved=saved)\n\nif __name__ == \"__main__\":\n    root = tk.Tk()\n    build_form(root)\n    root.mainloop()"
+    }
+  }
+}

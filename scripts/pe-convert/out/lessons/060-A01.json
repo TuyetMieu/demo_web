@@ -1,0 +1,164 @@
+{
+  "lesson_code": "A01",
+  "sort_order": 60,
+  "module": "Module 10: Nâng cao — OOP, NumPy, pandas và biểu đồ",
+  "title": "Đa kế thừa, MRO và lớp trừu tượng",
+  "subtitle": "A01 · Nâng cao · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Đa kế thừa, MRO và lớp trừu tượng",
+    "subtitle": "A01 · Nâng cao · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A01",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Đa kế thừa cần quy tắc chọn phương thức rõ ràng. Lớp trừu tượng quy định thao tác lớp con phải cung cấp trước khi tạo instance."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "class A:\n    def label(self): return \"A\"\nclass B:\n    def label(self): return \"B\"\nclass C(A,B): pass\nprint(C().label())\nprint([c.__name__ for c in C.__mro__])\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "C().label() tìm ở C rồi A rồi B theo MRO của ví dụ."
+        },
+        {
+          "n": 2,
+          "body": "Đổi thứ tự base có thể đổi hành vi; không coi đa kế thừa là mặc định tốt hơn composition."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Được\" — ABC theo dõi phương thức trừu tượng chưa cài."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Subclass chưa cài abstractmethod có tạo instance được không?",
+          "options": [
+            {
+              "text": "Được",
+              "correct": false,
+              "detail": "ABC theo dõi phương thức trừu tượng chưa cài."
+            },
+            {
+              "text": "Không, TypeError",
+              "correct": true,
+              "detail": "Đúng."
+            },
+            {
+              "text": "Chỉ cần đổi tên class",
+              "correct": false,
+              "detail": "Tên class không đáp ứng hợp đồng."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi thứ tự hai mixin có cùng method; dự đoán hành vi và giải thích trước khi chạy."
+      },
+      "scaffold": {
+        "template": "from abc import ABC,abstractmethod\nclass Exporter(ABC):\n    @abstractmethod\n    def export(self,rows): pass\nclass TextExporter(Exporter):\n    {{slot1}}\nclass UpperMixin:\n    {{slot2}}\nclass LoudExporter(UpperMixin,TextExporter): pass\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "def export(self,rows): return \",\".join(rows)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "def export(self,rows): return super().export(rows).upper()"
+          }
+        ],
+        "bank": [
+          {
+            "label": "def export(self,rows): return \",\".join(rows)",
+            "slot": 1
+          },
+          {
+            "label": "class A:",
+            "slot": 1
+          },
+          {
+            "label": "def export(self,rows): return super().export(rows).upper()",
+            "slot": 2
+          },
+          {
+            "label": "def label(self): return \"A\"",
+            "slot": 2
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Duyệt từng class trong __mro__ và tô nơi tìm thấy label."
+          },
+          {
+            "label": "B2",
+            "text": "Tạo abstract Exporter.export; thử instantiate và đọc TypeError."
+          },
+          {
+            "label": "B3",
+            "text": "Tạo TextExporter cài export, thêm PrefixMixin; giải thích type conformance bằng cùng cách gọi export."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết Exporter(ABC) có abstractmethod export(rows). TextExporter trả các chuỗi rows nối bằng dấu phẩy. UpperMixin.export gọi super().export(rows).upper(). LoudExporter(UpperMixin,TextExporter) trả chữ hoa. Nộp MRO và giải thích vì sao UpperMixin dùng super để phối hợp."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "C().label() tìm ở C rồi A rồi B theo MRO của ví dụ. Đổi thứ tự base có thể đổi hành vi; không coi đa kế thừa là mặc định tốt hơn composition."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "from abc import ABC, abstractmethod\nclass Exporter(ABC):\n    @abstractmethod\n    # Viết lời giải của bạn ở đây\n    pass\nclass TextExporter(Exporter):\n    # Viết lời giải của bạn ở đây\n    pass\nclass UpperMixin:\n    # Viết lời giải của bạn ở đây\n    pass\n# Viết lời giải của bạn ở đây\npass\n",
+      "tests": [
+        {
+          "name": "dispatch (A01-K01)",
+          "call": "(exec('assert LoudExporter().export([\"An\",\"Binh\"])==\"AN,BINH\"\\nassert TextExporter().export([])==\"\"\\nassert [c.__name__ for c in LoudExporter.__mro__][:3]==[\"LoudExporter\",\"UpperMixin\",\"TextExporter\"]\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "abstract (A01-K02)",
+          "call": "(exec('try: Exporter()\\nexcept TypeError: pass\\nelse: raise AssertionError(\"abstract instance\")\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "from abc import ABC,abstractmethod\nclass Exporter(ABC):\n    @abstractmethod\n    def export(self,rows): pass\nclass TextExporter(Exporter):\n    def export(self,rows): return \",\".join(rows)\nclass UpperMixin:\n    def export(self,rows): return super().export(rows).upper()\nclass LoudExporter(UpperMixin,TextExporter): pass\n"
+    }
+  }
+}

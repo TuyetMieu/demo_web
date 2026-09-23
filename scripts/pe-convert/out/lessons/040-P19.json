@@ -1,0 +1,197 @@
+{
+  "lesson_code": "P19",
+  "sort_order": 40,
+  "module": "Module 8: GUI cơ bản, biểu đồ, test và capstone nhỏ",
+  "title": "Biểu đồ phải khớp dữ liệu",
+  "subtitle": "P19 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Biểu đồ phải khớp dữ liệu",
+    "subtitle": "P19 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P19",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Biểu đồ giúp so sánh điểm giữa các môn. Mỗi cột phải tương ứng một môn và đúng chiều cao. Nhãn trục cho người xem biết số đang đo điều gì; hình đẹp không bù được dữ liệu sai."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "from matplotlib.figure import Figure\nfig = Figure()\nax = fig.subplots()\nax.bar([\"PY\", \"DB\"], [8, 6])\nax.set_ylabel(\"Diem\")\nax.set_ylim(0, 10)"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Hai cột theo thứ tự PY rồi DB, chiều cao8 và6."
+        },
+        {
+          "n": 2,
+          "body": "Figure là object để test dữ liệu, không cần mở cửa sổ trong runner headless."
+        },
+        {
+          "n": 3,
+          "body": "Backend hiển thị do dev cấp."
+        }
+      ],
+      "predict": {
+        "question": "Chấm hình biểu đồ bằng cách nào tốt hơn ở đây?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Chỉ so ảnh pixel",
+            "detail": "Font/backend có thể làm khác pixel dù cùng dữ liệu.",
+            "correct": false
+          },
+          {
+            "id": "b",
+            "title": "Kiểm tra nhãn, dữ liệu cột, giới hạn trục",
+            "detail": "Đúng: chấm điều có ý nghĩa trong hợp đồng.",
+            "correct": true
+          },
+          {
+            "id": "c",
+            "title": "Chỉ thấy có hình là đạt",
+            "detail": "Có hình chưa bảo đảm thể hiện đúng dữ liệu.",
+            "correct": false
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu thứ tự cột thay đổi: bạn đã tự sort nhãn mà chưa di chuyển giá trị cùng cặp?"
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Cột DB cao bao nhiêu?",
+          "options": [
+            {
+              "text": "6",
+              "correct": true,
+              "detail": "Đúng: dữ liệu của DB là6."
+            },
+            {
+              "text": "10",
+              "correct": false,
+              "detail": "10 là giới hạn trục, không phải điểm DB."
+            },
+            {
+              "text": "8",
+              "correct": false,
+              "detail": "8 thuộc PY."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: dữ liệu của DB là6."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi DB=0; cột có chiều cao0 vẫn có nhãn DB, không bỏ môn."
+      },
+      "scaffold": {
+        "template": "from matplotlib.figure import Figure\n\ndef build_chart(labels, values):\n    {{slot1}}\n    ax = fig.subplots()\n    positions = list(range(len(labels)))\n    ax.bar(positions, values)\n    {{slot2}}\n    ax.set_ylabel(\"Diem\")\n    ax.set_ylim(0, 10)\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "fig = Figure()"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "ax.set_xticks(positions, labels)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return fig"
+          }
+        ],
+        "bank": [
+          {
+            "label": "fig = Figure()",
+            "slot": 1
+          },
+          {
+            "label": "ax = fig.subplots()",
+            "slot": 1
+          },
+          {
+            "label": "ax.set_xticks(positions, labels)",
+            "slot": 2
+          },
+          {
+            "label": "from matplotlib.figure import Figure",
+            "slot": 2
+          },
+          {
+            "label": "return fig",
+            "slot": 3
+          },
+          {
+            "label": "print(fig)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chọn hai cặp môn/điểm; đặt labels và values vào ax.bar; chạy: hai cột8/6."
+          },
+          {
+            "label": "B2",
+            "text": "Thêm ylabel Diem; chạy: nhãn trục xuất hiện, dữ liệu cột không đổi."
+          },
+          {
+            "label": "B3",
+            "text": "Thêm ylim(0,10); chạy: thang cố định0-10, không co trục để khuếch đại chênh lệch."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết build_chart(labels, values) trả matplotlib.figure.Figure. Hai list cùng độ dài, nhãn str duy nhất, điểm hữu hạn0-10; có thể rỗng. Một axes, bar đúng thứ tự, ylabel Diem, ylim0-10. Không gọi show, không sửa đầu vào.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "chart_info(build_chart([\"PY\",\"DB\"],[8,6])) → {\"heights\": [8, 6], \"labels\": [\"PY\", \"DB\"], \"ylabel\": \"Diem\", \"ylim\": [0.0, 10.0]}"
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Mỗi nhãn phải đi cùng đúng một giá trị."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Tạo Figure rồi axes; kiểm tra dữ liệu trước phần trang trí."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "ax.bar(labels, values); ax.set_ylabel(\"Diem\"); ax.set_ylim(0,10)."
+        }
+      ],
+      "solutionCode": "from matplotlib.figure import Figure\n\ndef build_chart(labels, values):\n    fig = Figure()\n    ax = fig.subplots()\n    positions = list(range(len(labels)))\n    ax.bar(positions, values)\n    ax.set_xticks(positions, labels)\n    ax.set_ylabel(\"Diem\")\n    ax.set_ylim(0, 10)\n    return fig"
+    }
+  }
+}

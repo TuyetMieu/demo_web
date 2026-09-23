@@ -1,0 +1,162 @@
+{
+  "lesson_code": "X02",
+  "sort_order": 88,
+  "module": "Module 13: Capstone PW2–PW9",
+  "title": "PW2-PW4: domain objects, GPA và chia package",
+  "subtitle": "X02 · Nâng cao · 120 phút",
+  "estimated_minutes": 120,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "PW2-PW4: domain objects, GPA và chia package",
+    "subtitle": "X02 · Nâng cao · 120 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#X02",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Sau khi dữ liệu và hành vi đã rõ, chuyển hệ thống sang object để giữ quy tắc ở domain. Chia module theo input, output và domain giúp UI thay đổi mà không viết lại tính điểm."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "pw4/\n  main.py\n  input.py\n  output.py\n  domains/\n    __init__.py\n    student.py\n    course.py\n    registry.py\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Student giữ id/name/dob, Course giữ id/name/credits, Registry liên kết điểm."
+        },
+        {
+          "n": 2,
+          "body": "Các hàm nhập/list có cùng ý nghĩa ở hai loại bản ghi là cơ hội dùng đa hình."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Sẽ trộn trách nhiệm và khó đổi UI."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Cần chuyển cả thuật toán GPA vào callback curses không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Sẽ trộn trách nhiệm và khó đổi UI."
+            },
+            {
+              "text": "Không, giữ trong domain/service",
+              "correct": true,
+              "detail": "Đúng."
+            },
+            {
+              "text": "Curses tự tính GPA",
+              "correct": false,
+              "detail": "Curses chỉ hiển thị."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thay output curses bằng print để test; Registry phải không phụ thuộc curses."
+      },
+      "scaffold": {
+        "template": "from dataclasses import dataclass\nfrom datetime import date\nimport math,numpy as np\n@dataclass(frozen=True)\nclass Student:\n    sid:str; name:str; dob:str\n    def __post_init__(self):\n        if not self.sid.strip() or not self.name.strip(): raise ValueError(\"student\")\n        {{slot1}}\n    @classmethod\n    def input(cls,ask): return cls(ask(\"ID: \"),ask(\"Ten: \"),ask(\"DoB: \"))\n    def list(self): return (self.sid,self.name,self.dob)\n@dataclass(frozen=True)\nclass Course:\n    cid:str; name:str; credits:int\n    def __post_init__(self):\n        if not self.cid.strip() or not self.name.strip() or type(self.credits) is not int or self.credits<=0: raise ValueError(\"course\")\n    @classmethod\n    def input(cls,ask): return cls(ask(\"Ma: \"),ask(\"Ten: \"),int(ask(\"Tin chi: \")))\n    def list(self): return (self.cid,self.name,self.credits)\nclass Registry:\n    def __init__(self): self.students={}; self.courses={}; self.marks={}\n    def add_student(self,student):\n        if student.sid in self.students: raise ValueError(\"duplicate\")\n        {{slot2}}\n    def add_course(self,course):\n        if course.cid in self.courses: raise ValueError(\"duplicate\")\n        self.courses[course.cid]=course\n    def set_mark(self,sid,cid,score):\n        if sid not in self.students or cid not in self.courses: raise ValueError(\"id\")\n        if type(score) not in (int,float) or not math.isfinite(score) or not 0<=score<=10: raise ValueError(\"score\")\n        self.marks[sid,cid]=math.floor(score*10)/10\n    def gpa(self,sid):\n        if sid not in self.students: raise ValueError(\"id\")\n        rows=[(score,self.courses[cid].credits) for (student,cid),score in self.marks.items() if student==sid]\n        if not rows: return None\n        a=np.asarray(rows,dtype=float); return float(np.dot(a[:,0],a[:,1])/a[:,1].sum())\n    def ranking(self):\n        {{slot3}}\n        return sorted(rows,key=lambda r:(r[1] is None,-r[1] if r[1] is not None else 0,r[0]))\n    def course_marks(self,cid):\n        if cid not in self.courses: raise ValueError(\"id\")\n        return [(sid,s.name,self.marks.get((sid,cid))) for sid,s in self.students.items()]\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "date.fromisoformat(self.dob)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "self.students[student.sid]=student"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "rows=[(sid,self.gpa(sid)) for sid in self.students]"
+          }
+        ],
+        "bank": [
+          {
+            "label": "date.fromisoformat(self.dob)",
+            "slot": 1
+          },
+          {
+            "label": "pw4/",
+            "slot": 1
+          },
+          {
+            "label": "self.students[student.sid]=student",
+            "slot": 2
+          },
+          {
+            "label": "rows=[(sid,self.gpa(sid)) for sid in self.students]",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chuyển collection X01 thành Student/Course, giữ toàn bộ input/list/marks; so output trước/sau."
+          },
+          {
+            "label": "B2",
+            "text": "Áp dụng floor(score*10)/10 khi nhập điểm; dùng NumPy cho GPA và xếp giảm dần."
+          },
+          {
+            "label": "B3",
+            "text": "Tách package đúng cây, output.py hiển thị qua curses; main phối hợp, không có công thức GPA trong UI."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Hoàn thành PW2/3/4: Student và Course có input/list theo giao diện chung; Registry quản lý domain objects, điểm đã floor1chữ số, GPA bằng NumPy, ranking giảm dần. Môn có credits int>0; chỉ tính GPA trên các môn đã có điểm, chưa có điểm trả None (quy ước bổ sung). File input.py đọc số lượng và trường như X01; output.py curses liệt kê; main.py menu. Nộp package và commit/push từng checkpoint.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Ba checkpoint40phút: domain; math/ranking; package+curses. Nghiệm thu không chỉ chạy domain tests: main nhập đủ số lượng, output curses chọn môn/xem điểm, cây file đúng và import không mở UI."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Student giữ id/name/dob, Course giữ id/name/credits, Registry liên kết điểm. Các hàm nhập/list có cùng ý nghĩa ở hai loại bản ghi là cơ hội dùng đa hình."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "from dataclasses import dataclass\nfrom datetime import date\nimport math,numpy as np\n@dataclass(frozen=True)\nclass Student:\n    sid:str; name:str; dob:str\n    def __post_init__(self):\n        if not self.sid.strip() or not self.name.strip(): raise ValueError(\"student\")\n        date.fromisoformat(self.dob)\n    @classmethod\n    def input(cls,ask): return cls(ask(\"ID: \"),ask(\"Ten: \"),ask(\"DoB: \"))\n    def list(self): return (self.sid,self.name,self.dob)\n@dataclass(frozen=True)\nclass Course:\n    cid:str; name:str; credits:int\n    def __post_init__(self):\n        if not self.cid.strip() or not self.name.strip() or type(self.credits) is not int or self.credits<=0: raise ValueError(\"course\")\n    @classmethod\n    def input(cls,ask): return cls(ask(\"Ma: \"),ask(\"Ten: \"),int(ask(\"Tin chi: \")))\n    def list(self): return (self.cid,self.name,self.credits)\nclass Registry:\n    def __init__(self): self.students={}; self.courses={}; self.marks={}\n    def add_student(self,student):\n        if student.sid in self.students: raise ValueError(\"duplicate\")\n        self.students[student.sid]=student\n    def add_course(self,course):\n        if course.cid in self.courses: raise ValueError(\"duplicate\")\n        self.courses[course.cid]=course\n    def set_mark(self,sid,cid,score):\n        if sid not in self.students or cid not in self.courses: raise ValueError(\"id\")\n        if type(score) not in (int,float) or not math.isfinite(score) or not 0<=score<=10: raise ValueError(\"score\")\n        self.marks[sid,cid]=math.floor(score*10)/10\n    def gpa(self,sid):\n        if sid not in self.students: raise ValueError(\"id\")\n        rows=[(score,self.courses[cid].credits) for (student,cid),score in self.marks.items() if student==sid]\n        if not rows: return None\n        a=np.asarray(rows,dtype=float); return float(np.dot(a[:,0],a[:,1])/a[:,1].sum())\n    def ranking(self):\n        rows=[(sid,self.gpa(sid)) for sid in self.students]\n        return sorted(rows,key=lambda r:(r[1] is None,-r[1] if r[1] is not None else 0,r[0]))\n    def course_marks(self,cid):\n        if cid not in self.courses: raise ValueError(\"id\")\n        return [(sid,s.name,self.marks.get((sid,cid))) for sid,s in self.students.items()]\n"
+    }
+  }
+}

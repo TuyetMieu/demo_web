@@ -1,0 +1,159 @@
+{
+  "lesson_code": "A24",
+  "sort_order": 74,
+  "module": "Module 11: MySQL, wxPython và đồ họa 3D",
+  "title": "OpenGL trong wx: cube và phép biến đổi 3D",
+  "subtitle": "A24 · Nâng cao · 60 phút",
+  "estimated_minutes": 60,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "OpenGL trong wx: cube và phép biến đổi 3D",
+    "subtitle": "A24 · Nâng cao · 60 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A24",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "OpenGL cần context gắn với vùng vẽ. Dữ liệu đỉnh mô tả hình; phép chiếu và phép biến đổi quyết định hình xuất hiện ở đâu trên màn hình."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "canvas.SetCurrent(context)\nglViewport(0,0,width,height)\nglMatrixMode(GL_PROJECTION); glLoadIdentity(); gluPerspective(45,width/height,.1,100)\nglMatrixMode(GL_MODELVIEW); glLoadIdentity(); glTranslatef(0,0,-6); glRotatef(angle,0,1,0)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Bài dùng fixed-function OpenGL compatibility context để giải thích mã cùng thế hệ với sách."
+        },
+        {
+          "n": 2,
+          "body": "Không khẳng định chạy trong core profile hiện đại; A25 dùng shader."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — GL state gắn với context."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Có thể gọi GL trước khi SetCurrent context phù hợp không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "GL state gắn với context."
+            },
+            {
+              "text": "Không bảo đảm đúng",
+              "correct": true,
+              "detail": "Đúng: cần context hiện hành trên thread vẽ."
+            },
+            {
+              "text": "Chỉ cần import OpenGL",
+              "correct": false,
+              "detail": "Import không tạo context."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: cần context hiện hành trên thread vẽ."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Tắt depth test rồi xoay, giải thích mặt sau có thể che sai; bật lại để đối chiếu."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tạo wx.GLCanvas và GLContext, SetCurrent trong paint; ghi glGetString(GL_VERSION)."
+          },
+          {
+            "label": "B2",
+            "text": "Vẽ sáu mặt cube, bật depth test; kéo chuột làm angle đổi."
+          },
+          {
+            "label": "B3",
+            "text": "Resize cập nhật viewport và aspect; nhấn Reset đưa angle về0; nếu context không hỗ trợ, báo environment unsupported."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết CubeCanvas với cube8đỉnh/6mặt, mỗi mặt màu riêng, projection perspective45°, camera dịch-6 theo z; kéo chuột ngang/dọc đổi hai góc. SetCurrent trước GL, clear color/depth, SwapBuffers mỗi frame. Resize cập nhật aspect; không chia0 khi height0. Ghi compatibility requirement và phiên bản GL thực."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Bài dùng fixed-function OpenGL compatibility context để giải thích mã cùng thế hệ với sách. Không khẳng định chạy trong core profile hiện đại; A25 dùng shader."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import wx\nfrom wx import glcanvas\nfrom OpenGL.GL import *\nfrom OpenGL.GLU import gluPerspective\nV=[(-1,-1,-1),(1,-1,-1),(1,1,-1),(-1,1,-1),(-1,-1,1),(1,-1,1),(1,1,1),(-1,1,1)]\nF=[(0,1,2,3),(4,5,6,7),(0,1,5,4),(2,3,7,6),(1,2,6,5),(0,3,7,4)]\nC=[(1,0,0),(0,1,0),(0,0,1),(1,1,0),(1,0,1),(0,1,1)]\nclass CubeCanvas(glcanvas.GLCanvas):\n    def __init__(self,parent):\n        super().__init__(parent,attribList=[glcanvas.WX_GL_RGBA,glcanvas.WX_GL_DOUBLEBUFFER,glcanvas.WX_GL_DEPTH_SIZE,24,0])\n        self.context=glcanvas.GLContext(self); self.ax=20; self.ay=30; self.last=None\n        self.Bind(wx.EVT_PAINT,self.paint); self.Bind(wx.EVT_SIZE,self.resize)\n        self.Bind(wx.EVT_LEFT_DOWN,self.down); self.Bind(wx.EVT_MOTION,self.motion)\n        self.Bind(wx.EVT_KEY_DOWN,self.key)\n    def resize(self,event): self.Refresh(False); event.Skip()\n    def down(self,event): self.SetFocus(); self.last=event.GetPosition()\n    def key(self,event):\n        if event.GetKeyCode() in (ord(\"R\"),ord(\"r\")):\n            self.ax=0; self.ay=0; self.Refresh(False)\n        else: event.Skip()\n    def motion(self,event):\n        if event.Dragging() and event.LeftIsDown() and self.last is not None:\n            p=event.GetPosition(); self.ay+=p.x-self.last.x; self.ax+=p.y-self.last.y; self.last=p; self.Refresh(False)\n    def paint(self,event):\n        dc=wx.PaintDC(self); self.SetCurrent(self.context)\n        w,h=self.GetClientSize()\n        if w<=0 or h<=0: return\n        glViewport(0,0,w,h); glEnable(GL_DEPTH_TEST); glClearColor(.08,.12,.16,1)\n        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)\n        glMatrixMode(GL_PROJECTION); glLoadIdentity(); gluPerspective(45,w/h,.1,100)\n        glMatrixMode(GL_MODELVIEW); glLoadIdentity(); glTranslatef(0,0,-6)\n        glRotatef(self.ax,1,0,0); glRotatef(self.ay,0,1,0)\n        glBegin(GL_QUADS)\n        for face,color in zip(F,C):\n            glColor3f(*color)\n            for i in face: glVertex3f(*V[i])\n        glEnd(); self.SwapBuffers()\nif __name__==\"__main__\":\n    app=wx.App(False); frame=wx.Frame(None,title=\"OpenGL cube\",size=(600,450)); CubeCanvas(frame); frame.Show(); app.MainLoop()\n",
+      "procedure": [
+        "import wx",
+        "from wx import glcanvas",
+        "from OpenGL.GL import *",
+        "from OpenGL.GLU import gluPerspective",
+        "V=[(-1,-1,-1),(1,-1,-1),(1,1,-1),(-1,1,-1),(-1,-1,1),(1,-1,1),(1,1,1),(-1,1,1)]",
+        "F=[(0,1,2,3),(4,5,6,7),(0,1,5,4),(2,3,7,6),(1,2,6,5),(0,3,7,4)]",
+        "C=[(1,0,0),(0,1,0),(0,0,1),(1,1,0),(1,0,1),(0,1,1)]",
+        "class CubeCanvas(glcanvas.GLCanvas):",
+        "    def __init__(self,parent):",
+        "        super().__init__(parent,attribList=[glcanvas.WX_GL_RGBA,glcanvas.WX_GL_DOUBLEBUFFER,glcanvas.WX_GL_DEPTH_SIZE,24,0])",
+        "        self.context=glcanvas.GLContext(self); self.ax=20; self.ay=30; self.last=None",
+        "        self.Bind(wx.EVT_PAINT,self.paint); self.Bind(wx.EVT_SIZE,self.resize)",
+        "        self.Bind(wx.EVT_LEFT_DOWN,self.down); self.Bind(wx.EVT_MOTION,self.motion)",
+        "        self.Bind(wx.EVT_KEY_DOWN,self.key)",
+        "    def resize(self,event): self.Refresh(False); event.Skip()",
+        "    def down(self,event): self.SetFocus(); self.last=event.GetPosition()",
+        "    def key(self,event):",
+        "        if event.GetKeyCode() in (ord(\"R\"),ord(\"r\")):",
+        "            self.ax=0; self.ay=0; self.Refresh(False)",
+        "        else: event.Skip()",
+        "    def motion(self,event):",
+        "        if event.Dragging() and event.LeftIsDown() and self.last is not None:",
+        "            p=event.GetPosition(); self.ay+=p.x-self.last.x; self.ax+=p.y-self.last.y; self.last=p; self.Refresh(False)",
+        "    def paint(self,event):",
+        "        dc=wx.PaintDC(self); self.SetCurrent(self.context)",
+        "        w,h=self.GetClientSize()",
+        "        if w<=0 or h<=0: return",
+        "        glViewport(0,0,w,h); glEnable(GL_DEPTH_TEST); glClearColor(.08,.12,.16,1)",
+        "        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)",
+        "        glMatrixMode(GL_PROJECTION); glLoadIdentity(); gluPerspective(45,w/h,.1,100)",
+        "        glMatrixMode(GL_MODELVIEW); glLoadIdentity(); glTranslatef(0,0,-6)",
+        "        glRotatef(self.ax,1,0,0); glRotatef(self.ay,0,1,0)",
+        "        glBegin(GL_QUADS)",
+        "        for face,color in zip(F,C):",
+        "            glColor3f(*color)",
+        "            for i in face: glVertex3f(*V[i])",
+        "        glEnd(); self.SwapBuffers()",
+        "if __name__==\"__main__\":",
+        "    app=wx.App(False); frame=wx.Frame(None,title=\"OpenGL cube\",size=(600,450)); CubeCanvas(frame); frame.Show(); app.MainLoop()"
+      ]
+    }
+  }
+}

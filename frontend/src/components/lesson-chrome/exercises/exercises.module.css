@@ -55,6 +55,9 @@
 
 .codeBody {
   padding: 14px 16px;
+  /* Dòng dài (nhất là khối mã trong ô lắp ghép, vốn không xuống dòng được)
+     thì cuộn ngang thay vì tràn ra ngoài thẻ. */
+  overflow-x: auto;
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   line-height: 1.9;

@@ -1,0 +1,166 @@
+{
+  "lesson_code": "T03",
+  "sort_order": 47,
+  "module": "Module 9: Tkinter chuyên sâu",
+  "title": "Bố cục: Frame, padding và co giãn",
+  "subtitle": "T03 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Bố cục: Frame, padding và co giãn",
+    "subtitle": "T03 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#T03",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Container chia form thành vùng có trách nhiệm riêng. grid xếp theo hàng/cột; pack xếp theo cạnh; place đặt tọa độ hoặc tỷ lệ."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "frame=ttk.LabelFrame(root,text=\"Ho so\",padding=12)\nframe.pack(fill=\"both\",expand=True)\nframe.columnconfigure(1,weight=1)\nentry.grid(row=0,column=1,sticky=\"ew\",padx=6,pady=6)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "pack quản lý frame trong root, grid quản lý widget trong frame nên không xung đột."
+        },
+        {
+          "n": 2,
+          "body": "Không dùng pack và grid quản lý con trong cùng parent."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — sticky chỉ lấp ô đã được cấp."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Entry sticky=\"ew\" nhưng cột weight=0 có chắc giãn hết khi cửa sổ lớn lên không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "sticky chỉ lấp ô đã được cấp."
+            },
+            {
+              "text": "Không, cột cần được phân chia phần dư",
+              "correct": true,
+              "detail": "Đúng: weight quyết định phân chia phần dư cho cột."
+            },
+            {
+              "text": "Entry tự đổi parent",
+              "correct": false,
+              "detail": "Parent không đổi."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: weight quyết định phân chia phần dư cho cột."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Tắt weight rồi bật lại để dự đoán Entry có nhận phần chiều rộng mới không."
+      },
+      "scaffold": {
+        "template": "import tkinter as tk\nfrom tkinter import ttk\ndef build(root):\n    {{slot1}}\n    outer.columnconfigure(0,weight=1); outer.rowconfigure(0,weight=1)\n    group=ttk.LabelFrame(outer,text=\"Ho so\",padding=12); group.grid(row=0,column=0,sticky=\"nsew\")\n    group.columnconfigure(1,weight=1)\n    ttk.Label(group,text=\"Ten\").grid(row=0,column=0,padx=6,pady=6)\n    {{slot2}}\n    area=ttk.Frame(outer,height=40); area.grid(row=1,column=0,sticky=\"ew\")\n    badge=ttk.Label(area,text=\"PE\"); badge.place(relx=1,x=-8,y=8,anchor=\"ne\")\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "outer=ttk.Frame(root,padding=12); outer.pack(fill=\"both\",expand=True)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "entry=ttk.Entry(group); entry.grid(row=0,column=1,sticky=\"ew\",padx=6,pady=6)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return dict(outer=outer,group=group,entry=entry,badge=badge)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "outer=ttk.Frame(root,padding=12); outer.pack(fill=\"both\",expand=True)",
+            "slot": 1
+          },
+          {
+            "label": "frame=ttk.LabelFrame(root,text=\"Ho so\",padding=12)",
+            "slot": 1
+          },
+          {
+            "label": "entry=ttk.Entry(group); entry.grid(row=0,column=1,sticky=\"ew\",padx=6,pady=6)",
+            "slot": 2
+          },
+          {
+            "label": "return dict(outer=outer,group=group,entry=entry,badge=badge)",
+            "slot": 3
+          },
+          {
+            "label": "print(dict(outer=outer,group=group,entry=entry,badge=badge))",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tạo root -> outer Frame -> LabelFrame; tô đường biên từng container khi chọn trong cây."
+          },
+          {
+            "label": "B2",
+            "text": "Tăng padding 0 thành 12; khoảng trống quanh widget tăng, không đổi dữ liệu."
+          },
+          {
+            "label": "B3",
+            "text": "So ba panel: pack theo cạnh, grid theo bảng, place relx/rely; kéo resize và quan sát panel nào giữ được nội dung."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết build(root) tạo outer pack expand/fill both, LabelFrame Ho so dùng grid trong outer, Label Ten và Entry trong group bằng grid. Cột Entry weight=1 sticky ew, padding 12. Thêm badge Label trong container riêng bằng place(relx=1,x=-8,y=8,anchor=ne). Trả outer/group/entry/badge.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Ở 480x240 và 800x400, Entry giãn theo chiều ngang, label vẫn đọc được; badge cách góc phải 8px; không chồng widget."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "pack quản lý frame trong root, grid quản lý widget trong frame nên không xung đột. Không dùng pack và grid quản lý con trong cùng parent."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import tkinter as tk\nfrom tkinter import ttk\ndef build(root):\n    outer=ttk.Frame(root,padding=12); outer.pack(fill=\"both\",expand=True)\n    outer.columnconfigure(0,weight=1); outer.rowconfigure(0,weight=1)\n    group=ttk.LabelFrame(outer,text=\"Ho so\",padding=12); group.grid(row=0,column=0,sticky=\"nsew\")\n    group.columnconfigure(1,weight=1)\n    ttk.Label(group,text=\"Ten\").grid(row=0,column=0,padx=6,pady=6)\n    entry=ttk.Entry(group); entry.grid(row=0,column=1,sticky=\"ew\",padx=6,pady=6)\n    area=ttk.Frame(outer,height=40); area.grid(row=1,column=0,sticky=\"ew\")\n    badge=ttk.Label(area,text=\"PE\"); badge.place(relx=1,x=-8,y=8,anchor=\"ne\")\n    return dict(outer=outer,group=group,entry=entry,badge=badge)\n"
+    }
+  }
+}

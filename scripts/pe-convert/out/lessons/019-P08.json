@@ -1,0 +1,223 @@
+{
+  "lesson_code": "P08",
+  "sort_order": 19,
+  "module": "Module 4: Vòng lặp và biến tích lũy",
+  "title": "Vòng for và biến tích lũy",
+  "subtitle": "P08 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Vòng for và biến tích lũy",
+    "subtitle": "P08 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P08",
+      "parser": "pe-convert/override",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Một lớp có nhiều điểm. Bạn cần biết có bao nhiêu điểm từ 5 trở lên theo quy ước bài tập. Bộ đếm bắt đầu từ 0 và chỉ tăng khi phần tử hiện tại đạt điều kiện."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "scores = [4, 5, 8]\ncount = 0\nfor score in scores:\n    if score >= 5:\n        count += 1"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Ba lượt score lần lượt là 4,5,8."
+        },
+        {
+          "n": 2,
+          "body": "count qua từng lượt là 0,1,2."
+        },
+        {
+          "n": 3,
+          "body": "Không đặt count=0 trong vòng lặp vì sẽ xóa kết quả tích lũy."
+        }
+      ],
+      "predict": {
+        "question": "Đặt count=0 bên trong for gây gì?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Xóa kết quả trước mỗi lượt",
+            "detail": "Đúng: bộ đếm không còn cộng dồn.",
+            "correct": true
+          },
+          {
+            "id": "b",
+            "title": "Không ảnh hưởng",
+            "detail": "Vị trí khởi tạo ảnh hưởng kết quả.",
+            "correct": false
+          },
+          {
+            "id": "c",
+            "title": "Luôn nhanh hơn",
+            "detail": "Tốc độ không sửa được lỗi logic.",
+            "correct": false
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu kết quả chỉ còn 0 hoặc 1: kiểm tra bạn có khởi tạo lại bộ đếm trong for không."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "count cuối bằng bao nhiêu?",
+          "options": [
+            {
+              "text": "1",
+              "correct": false,
+              "detail": "Bạn có thể đã quên tính đúng bằng 5."
+            },
+            {
+              "text": "3",
+              "correct": false,
+              "detail": "3 là số phần tử, không phải số điểm đạt."
+            },
+            {
+              "text": "2",
+              "correct": true,
+              "detail": "Đúng: 5 và 8 đạt."
+            }
+          ],
+          "correct": 2,
+          "explanation": "Đúng: 5 và 8 đạt."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu. Nhật ký thao tác bên dưới mô tả bản script gốc của PE; cách nghĩ giữ nguyên, chỉ khác phần vỏ hàm.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi danh sách thành [5,5,0]; dự đoán count=2 và giải thích vì sao điểm lặp vẫn được đếm hai lần."
+      },
+      "scaffold": {
+        "template": "def count_big_stocks(stocks):\n    \"\"\"Đếm kho có ít nhất 10 món bằng vòng for.\"\"\"\n    {{slot1}}\n    for stock in stocks:\n        {{slot2}}\n            result += 1\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "result = 0"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "if stock >= 10:"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return result"
+          }
+        ],
+        "bank": [
+          {
+            "label": "result = 0",
+            "slot": 1
+          },
+          {
+            "label": "scores = [4, 5, 8]",
+            "slot": 1
+          },
+          {
+            "label": "if stock >= 10:",
+            "slot": 2
+          },
+          {
+            "label": "if stock > 10:",
+            "slot": 2
+          },
+          {
+            "label": "return result",
+            "slot": 3
+          },
+          {
+            "label": "print(result)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Đặt count=0 trước for; chạy: count chưa có -> 0, bảng trace chưa có lượt."
+          },
+          {
+            "label": "B2",
+            "text": "Đặt if score>=5 trong for; chạy lượt score=4: False, count 0->0; thêm dòng trace [4,False,0]."
+          },
+          {
+            "label": "B3",
+            "text": "Đặt count += 1 vào if; chạy tiếp: trace [5,True,1], [8,True,2]; dòng đang chạy nối với phần tử tương ứng."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết hàm count_big_stocks(stocks): stocks là list số nguyên không âm. Dùng vòng for đếm số kho có ít nhất 10 món và trả về số đếm. Danh sách rỗng cho 0. Mục tiêu học công khai là dùng vòng for, nên bài chặn sum().",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "result → 2"
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Tạo bộ đếm trước khi duyệt."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Mỗi kho đạt điều kiện chỉ tăng một lần."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Trong for stock in stocks, nếu stock >= 10 thì result += 1."
+        }
+      ],
+      "starterCode": "def count_big_stocks(stocks):\n    \"\"\"Đếm kho có ít nhất 10 món bằng vòng for.\"\"\"\n    # Viết lời giải của bạn ở đây\n",
+      "tests": [
+        {
+          "name": "Ca mẫu PE: 9, 10, 14",
+          "call": "count_big_stocks([9, 10, 14])",
+          "expect": "2"
+        },
+        {
+          "name": "Ranh giới: đúng 10 được tính",
+          "call": "count_big_stocks([10])",
+          "expect": "1"
+        },
+        {
+          "name": "Bộ đếm không bị reset trong vòng lặp",
+          "call": "count_big_stocks([10, 11, 12, 13])",
+          "expect": "4"
+        },
+        {
+          "name": "Danh sách rỗng",
+          "call": "count_big_stocks([])",
+          "expect": "0"
+        }
+      ],
+      "solutionCode": "def count_big_stocks(stocks):\n    \"\"\"Đếm kho có ít nhất 10 món bằng vòng for.\"\"\"\n    result = 0\n    for stock in stocks:\n        if stock >= 10:\n            result += 1\n    return result\n",
+      "forbid": [
+        "sum("
+      ]
+    }
+  }
+}

@@ -1,0 +1,189 @@
+{
+  "lesson_code": "P03",
+  "sort_order": 8,
+  "module": "Module 2: Biến, kiểu dữ liệu và điều kiện",
+  "title": "Tách dữ liệu từ tên tệp",
+  "subtitle": "P03 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Tách dữ liệu từ tên tệp",
+    "subtitle": "P03 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P03",
+      "parser": "pe-convert/override",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Tên tệp của câu lạc bộ chứa tên và môn tập, ví dụ An-swim.txt. Ta cần lấy hai phần để hiển thị. Hãy bỏ đúng phần đuôi trước, rồi tách tại dấu phân cách."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "filename = \"An-swim.txt\"\nstem = filename.removesuffix(\".txt\")\nparts = stem.split(\"-\")"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "removesuffix trả chuỗi mới; filename không tự bị sửa."
+        },
+        {
+          "n": 2,
+          "body": "split trả list hai phần; phần đầu có chỉ số 0."
+        },
+        {
+          "n": 3,
+          "body": "Không gọi split tiếp trên cả list."
+        }
+      ],
+      "predict": {
+        "question": "Để bỏ đúng .txt, chọn gì?",
+        "options": [
+          {
+            "id": "a",
+            "title": "split(\".\") luôn chỉ có hai phần",
+            "detail": "Tên có thể có thêm dấu chấm; không giả định chỉ một.",
+            "correct": false
+          },
+          {
+            "id": "b",
+            "title": "rstrip(\".txt\")",
+            "detail": "rstrip xử lý tập ký tự, có thể bỏ nhiều hơn hậu tố.",
+            "correct": false
+          },
+          {
+            "id": "c",
+            "title": "removesuffix(\".txt\")",
+            "detail": "Đúng: ý định là bỏ hậu tố nguyên vẹn.",
+            "correct": true
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu mất các chữ t/x cuối activity, bạn có thể đã dùng rstrip như lệnh xóa hậu tố."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "parts có giá trị nào?",
+          "options": [
+            {
+              "text": "[\"An-swim.txt\"]",
+              "correct": false,
+              "detail": "Khi chỉ định -, chuỗi này được chia."
+            },
+            {
+              "text": "[\"An\", \"swim\"]",
+              "correct": true,
+              "detail": "Đúng: hậu tố đã bỏ và dấu - chia hai phần."
+            },
+            {
+              "text": "\"An-swim\"",
+              "correct": false,
+              "detail": "Đó là stem, trước khi split."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: hậu tố đã bỏ và dấu - chia hai phần."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu. Nhật ký thao tác bên dưới mô tả bản script gốc của PE; cách nghĩ giữ nguyên, chỉ khác phần vỏ hàm.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thử \"text-run.txt\"; đối chiếu rstrip với removesuffix và tự giải thích ý nghĩa hậu tố, không bắt học thuộc hai đáp án."
+      },
+      "scaffold": {
+        "template": "def split_filename(filename):\n    \"\"\"Trả về [name, activity] tách từ <name>-<activity>.txt.\"\"\"\n    {{slot1}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "return filename.removesuffix(\".txt\").split(\"-\")"
+          }
+        ],
+        "bank": [
+          {
+            "label": "return filename.removesuffix(\".txt\").split(\"-\")",
+            "slot": 1
+          },
+          {
+            "label": "print(filename.removesuffix(\".txt\").split(\"-\"))",
+            "slot": 1
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Đặt removesuffix vào sau filename; chạy: stem chưa có -> \"An-swim\"; đánh dấu phần .txt được loại ở bản kết quả, giữ nguyên đầu vào."
+          },
+          {
+            "label": "B2",
+            "text": "Đặt split(\"-\") sau stem; chạy: parts -> [\"An\",\"swim\"]; hai ô có chỉ số 0 và 1."
+          },
+          {
+            "label": "B3",
+            "text": "Chọn ô parts[0]; vùng khám phá hiện \"An\" và kiểu str; chọn cả parts hiện list."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết hàm split_filename(filename): tên tệp luôn có dạng <name>-<activity>.txt, trong đó name/activity không chứa dấu -. Trả về list [name, activity]. Tên có thể chứa dấu chấm.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "result → [\"Mai\", \"run\"]"
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Làm hai phép biến đổi theo thứ tự."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Bỏ hậu tố chính xác trước khi chia theo -."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "filename.removesuffix(\".txt\").split(\"-\")"
+        }
+      ],
+      "starterCode": "def split_filename(filename):\n    \"\"\"Trả về [name, activity] tách từ <name>-<activity>.txt.\"\"\"\n    # Viết lời giải của bạn ở đây\n",
+      "tests": [
+        {
+          "name": "Ca mẫu PE: Mai-run.txt",
+          "call": "split_filename(\"Mai-run.txt\")",
+          "expect": "[\"Mai\", \"run\"]"
+        },
+        {
+          "name": "Không cắt nhầm chữ cuối (bẫy rstrip)",
+          "call": "split_filename(\"An-text.txt\")",
+          "expect": "[\"An\", \"text\"]"
+        },
+        {
+          "name": "Tên có dấu chấm",
+          "call": "split_filename(\"Mai.A-swim.txt\")",
+          "expect": "[\"Mai.A\", \"swim\"]"
+        }
+      ],
+      "solutionCode": "def split_filename(filename):\n    \"\"\"Trả về [name, activity] tách từ <name>-<activity>.txt.\"\"\"\n    return filename.removesuffix(\".txt\").split(\"-\")\n"
+    }
+  }
+}

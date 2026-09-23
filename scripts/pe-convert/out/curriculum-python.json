@@ -1,0 +1,167 @@
+{
+  "modules": [
+    {
+      "title": "Module 1: Môi trường, REPL và Git",
+      "lessons": [
+        "Chọn công cụ và dựng môi trường học",
+        "REPL, script và notebook: trạng thái đến từ đâu?",
+        "Git: lưu một thay đổi và gửi vào fork"
+      ]
+    },
+    {
+      "title": "Module 2: Biến, kiểu dữ liệu và điều kiện",
+      "lessons": [
+        "Tên biến và kết quả chương trình",
+        "Chuỗi nhập vào và phép tính số",
+        "Tên biến, kiểu động và ghi chú có ích",
+        "Toán tử, thứ tự tính và làm tròn xuống",
+        "Tách dữ liệu từ tên tệp",
+        "Chuỗi: chuẩn hóa, định dạng và không sửa tại chỗ",
+        "Điều kiện và giá trị ở ranh giới"
+      ]
+    },
+    {
+      "title": "Module 3: List, dict, tuple và set",
+      "lessons": [
+        "List và việc hai tên dùng chung dữ liệu",
+        "Index và slice: chọn đúng phần dữ liệu",
+        "Thêm, xóa và đảo list",
+        "Dictionary và tra cứu theo khóa",
+        "Dictionary: duyệt, xóa và tìm cực trị",
+        "Chọn tuple và set đúng mục đích",
+        "Tuple, unpacking và lựa chọn collection",
+        "Tên file thành hồ sơ người bơi"
+      ]
+    },
+    {
+      "title": "Module 4: Vòng lặp và biến tích lũy",
+      "lessons": [
+        "Vòng for và biến tích lũy",
+        "Comprehension, enumerate, zip và Counter",
+        "While, sentinel và điều kiện dừng",
+        "range, break và continue"
+      ]
+    },
+    {
+      "title": "Module 5: Hàm, module và package",
+      "lessons": [
+        "Hàm trả về giá trị",
+        "Khám phá API, traceback và module chuẩn",
+        "Ngẫu nhiên có thể kiểm thử",
+        "Module và trung bình có trọng số",
+        "Module, alias và package lồng nhau"
+      ]
+    },
+    {
+      "title": "Module 6: File, ngoại lệ và dữ liệu lâu dài",
+      "lessons": [
+        "Đọc file với with và UTF-8",
+        "Ngoại lệ và dữ liệu nhập không hợp lệ",
+        "Nhánh elif và input trong chương trình CLI",
+        "Ngày giờ và tìm mẫu bằng regex",
+        "Lưu cấu trúc dữ liệu bằng JSON",
+        "File modes, buffering và lỗi I/O",
+        "Duyệt thư mục và thao tác file trong vùng bài tập"
+      ]
+    },
+    {
+      "title": "Module 7: Lập trình hướng đối tượng",
+      "lessons": [
+        "Class và trạng thái riêng từng đối tượng",
+        "Kế thừa và ghi đè hành vi",
+        "So sánh đối tượng, biểu diễn và đóng gói"
+      ]
+    },
+    {
+      "title": "Module 8: GUI cơ bản, biểu đồ, test và capstone nhỏ",
+      "lessons": [
+        "Tkinter: cửa sổ, widget và grid",
+        "Callback: nối thao tác và trạng thái",
+        "Biểu đồ phải khớp dữ liệu",
+        "Test trường hợp thường và trường hợp biên",
+        "Chuyển giao: báo cáo thời gian bơi",
+        "Báo cáo bơi từ file đến kết quả",
+        "Capstone: Sổ học tập USTH"
+      ]
+    },
+    {
+      "title": "Module 9: Tkinter chuyên sâu",
+      "lessons": [
+        "Cửa sổ, focus và trạng thái nút",
+        "Lựa chọn dữ liệu: combo, radio, check và list",
+        "Bố cục: Frame, padding và co giãn",
+        "Menu và nhiều Notebook",
+        "Hộp thoại và lựa chọn file",
+        "Tooltip, relief và Canvas",
+        "Event loop, after và thanh tiến độ",
+        "StringVar, scope và component tái sử dụng",
+        "Biểu đồ trong Tk và thay đổi thang đo",
+        "Người học tự viết unit test cho GUI",
+        "Debug watch và mức log",
+        "Quốc tế hóa và định dạng theo ngôn ngữ",
+        "Slideshow GIF/JPEG và vòng đời ảnh",
+        "Thiết kế lặp và factory cho thành phần GUI"
+      ]
+    },
+    {
+      "title": "Module 10: Nâng cao — OOP, NumPy, pandas và biểu đồ",
+      "lessons": [
+        "PW1: quản lý lớp bằng collection và CLI",
+        "Đa kế thừa, MRO và lớp trừu tượng",
+        "NumPy và xếp hạng GPA có trọng số",
+        "Curses: menu bàn phím cho quản lý điểm",
+        "Nén bytes và đóng gói nhiều file",
+        "Pickle, JSON và dữ liệu có kiểu",
+        "Đọc bảng số bằng NumPy",
+        "DataFrame từ CSV, Excel và database",
+        "SAS, Stata, HDF5 và MATLAB",
+        "Chọn loại biểu đồ và quản lý Figure"
+      ]
+    },
+    {
+      "title": "Module 11: MySQL, wxPython và đồ họa 3D",
+      "lessons": [
+        "Dựng MySQL và thiết kế schema bằng Workbench",
+        "MySQL INSERT, UPDATE, DELETE và transaction",
+        "Nối CRUD MySQL vào giao diện",
+        "wxPython: cửa sổ và các nhóm control",
+        "Bitmap lát nền trong wxPython",
+        "OpenGL trong wx: cube và phép biến đổi 3D",
+        "Pyglet, shader và cube nhiều màu",
+        "Hoạt ảnh OpenGL: chuyển động theo thời gian"
+      ]
+    },
+    {
+      "title": "Module 12: Thread, tiến trình, đồng thời và mạng",
+      "lessons": [
+        "Thread và queue: nhận kết quả việc nền",
+        "Tiến trình con và mã kết thúc",
+        "Tiến trình, trạng thái và PCB",
+        "Mô phỏng FCFS, SJF, priority và round-robin",
+        "Tạo tiến trình trên Windows và fork/exec trên UNIX",
+        "Luồng chuẩn, pipe và vòng đời process",
+        "Bộ nhớ dùng chung, GIL và chọn concurrency",
+        "Race condition và Lock",
+        "Nhiều worker, dừng hợp tác và queue qua module",
+        "TCP và HTTP qua dịch vụ lab cục bộ",
+        "Hai toolkit: chẩn đoán mainloop và trao đổi dữ liệu"
+      ]
+    },
+    {
+      "title": "Module 13: Capstone PW2–PW9",
+      "lessons": [
+        "PW2-PW4: domain objects, GPA và chia package",
+        "PW5-PW6: ba file, archive và pickle có nén",
+        "PW7: shell có chuyển hướng và pipeline",
+        "PW8: lưu pickle có nén trong background",
+        "PW9: ứng dụng quản lý điểm hoàn chỉnh bằng Tkinter"
+      ]
+    },
+    {
+      "title": "Module 14: Bài dựng tay theo thiết kế Figma",
+      "lessons": [
+        "Danh sách (List) & Mutability"
+      ]
+    }
+  ]
+}

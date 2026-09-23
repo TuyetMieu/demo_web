@@ -1,0 +1,201 @@
+{
+  "lesson_code": "P13",
+  "sort_order": 29,
+  "module": "Module 6: File, ngoại lệ và dữ liệu lâu dài",
+  "title": "Ngoại lệ và dữ liệu nhập không hợp lệ",
+  "subtitle": "P13 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Ngoại lệ và dữ liệu nhập không hợp lệ",
+    "subtitle": "P13 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P13",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Người dùng có thể gõ tám thay vì 8. Chương trình không nên đóng đột ngột. Ta thử chuyển số, xử lý ValueError và kiểm tra khoảng điểm riêng."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "def parse_score(text):\n    try:\n        score = float(text)\n    except ValueError:\n        return None\n    if 0 <= score <= 10:\n        return score\n    return None"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Sai định dạng khác số ngoài khoảng."
+        },
+        {
+          "n": 2,
+          "body": "Không bắt mọi lỗi rồi im lặng."
+        },
+        {
+          "n": 3,
+          "body": "Điều kiện khoảng cũng loại NaN/Infinity trong hợp đồng bài này."
+        }
+      ],
+      "predict": {
+        "question": "parse_score(\"11\") đi qua nhánh nào?",
+        "options": [
+          {
+            "id": "a",
+            "title": "except ValueError",
+            "detail": "11 chuyển sang float được.",
+            "correct": false
+          },
+          {
+            "id": "b",
+            "title": "Chuyển số thành công rồi bị loại ngoài khoảng",
+            "detail": "Đúng: lỗi quy tắc khác lỗi chuyển kiểu.",
+            "correct": true
+          },
+          {
+            "id": "c",
+            "title": "Trả11",
+            "detail": "Đề chỉ nhận từ0 đến10.",
+            "correct": false
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu mọi lỗi đều bị che: thu hẹp except về lỗi dự kiến để lỗi lập trình vẫn được nhận ra."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "parse_score(\"abc\") trả gì?",
+          "options": [
+            {
+              "text": "None",
+              "correct": true,
+              "detail": "Đúng: ValueError được xử lý."
+            },
+            {
+              "text": "Chương trình luôn dừng",
+              "correct": false,
+              "detail": "except xử lý lỗi chuyển số này."
+            },
+            {
+              "text": "0",
+              "correct": false,
+              "detail": "Sai nhập không có nghĩa điểm0."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: ValueError được xử lý."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: So sánh \" 7.5 \" và \"\"; dự đoán7.5 vàNone, giải thích hai đường đi."
+      },
+      "scaffold": {
+        "template": "def parse_score(text):\n    try:\n        {{slot1}}\n    except ValueError:\n        return None\n    {{slot2}}\n        return score\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "score = float(text)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "if 0 <= score <= 10:"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return None"
+          }
+        ],
+        "bank": [
+          {
+            "label": "score = float(text)",
+            "slot": 1
+          },
+          {
+            "label": "if 0 <= score <= 10:",
+            "slot": 2
+          },
+          {
+            "label": "if 0 < score <= 10:",
+            "slot": 2
+          },
+          {
+            "label": "return None",
+            "slot": 3
+          },
+          {
+            "label": "print(None)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Nhập \"abc\" vào ô mô phỏng; chạy float -> ValueError; con trỏ nhảy except, result None."
+          },
+          {
+            "label": "B2",
+            "text": "Đổi \"11\"; float ->11.0, điều kiện khoảng False; không highlight except."
+          },
+          {
+            "label": "B3",
+            "text": "Đổi \"0\"; float ->0.0, điều kiện True; return0.0 có nhãn hợp lệ."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết parse_score(text), text luôn là str. Trả float hữu hạn trong [0,10], hoặc None với chuỗi không chuyển được/ngoài khoảng/nan/inf. Khoảng trắng ngoài chuỗi được phép. Không in thông báo trong hàm.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "parse_score(\" 7.5 \") → 7.5"
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Tách bước đổi số và kiểm tra khoảng."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Chỉ bắt ValueError khi float không đọc được chuỗi."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "try float(text); except ValueError: return None; rồi kiểm tra 0 <= score <= 10."
+        }
+      ],
+      "starterCode": "def parse_score(text):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "Ca mẫu P13-a",
+          "call": "parse_score(\" 7.5 \")",
+          "expect": "7.5"
+        }
+      ],
+      "solutionCode": "def parse_score(text):\n    try:\n        score = float(text)\n    except ValueError:\n        return None\n    if 0 <= score <= 10:\n        return score\n    return None"
+    }
+  }
+}

@@ -1,0 +1,205 @@
+{
+  "lesson_code": "P17",
+  "sort_order": 38,
+  "module": "Module 8: GUI cơ bản, biểu đồ, test và capstone nhỏ",
+  "title": "Tkinter: cửa sổ, widget và grid",
+  "subtitle": "P17 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Tkinter: cửa sổ, widget và grid",
+    "subtitle": "P17 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P17",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Người dùng cần nhập tên qua form. Widget là thành phần như nhãn và ô nhập; grid đặt chúng vào hàng và cột. Event loop chờ và xử lý sự kiện để cửa sổ hoạt động."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "import tkinter as tk\nfrom tkinter import ttk\nroot = tk.Tk()\nttk.Label(root, text=\"Ten\").grid(row=0, column=0)\nttk.Entry(root).grid(row=0, column=1)\nroot.mainloop()"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Hai widget cùng row0 nên đứng cạnh nhau."
+        },
+        {
+          "n": 2,
+          "body": "mainloop giữ vòng xử lý sự kiện."
+        },
+        {
+          "n": 3,
+          "body": "Import/root/mainloop là scaffold được cấp; người học sửa vị trí widget."
+        }
+      ],
+      "predict": {
+        "question": "Muốn nhãn mới ở hàng tiếp theo dùng gì?",
+        "options": [
+          {
+            "id": "a",
+            "title": "row=1",
+            "detail": "Đúng: hàng đếm từ0.",
+            "correct": true
+          },
+          {
+            "id": "b",
+            "title": "row=0",
+            "detail": "row0 là hàng đang có.",
+            "correct": false
+          },
+          {
+            "id": "c",
+            "title": "column=-1",
+            "detail": "Đây không phải cách chọn hàng tiếp theo.",
+            "correct": false
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Bên dưới\" — Muốn bên dưới cần đổi row."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Ô nhập ở đâu so với nhãn?",
+          "options": [
+            {
+              "text": "Bên dưới",
+              "correct": false,
+              "detail": "Muốn bên dưới cần đổi row."
+            },
+            {
+              "text": "Không xác định vì column",
+              "correct": false,
+              "detail": "grid dùng row/column để đặt widget."
+            },
+            {
+              "text": "Cùng hàng, bên phải",
+              "correct": true,
+              "detail": "Đúng: row bằng nhau, column1 sau column0."
+            }
+          ],
+          "correct": 2,
+          "explanation": "Đúng: row bằng nhau, column1 sau column0."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi Entry sang row1,column0; dự đoán nó nằm dưới nhãn rồi chạy."
+      },
+      "scaffold": {
+        "template": "import tkinter as tk\nfrom tkinter import ttk\n\ndef build_form(root):\n    {{slot1}}\n    ttk.Label(root, text=\"Ma SV\").grid(row=0, column=0)\n    sid_entry = ttk.Entry(root)\n    sid_entry.grid(row=0, column=1)\n    ttk.Label(root, text=\"Diem\").grid(row=1, column=0)\n    score_entry = ttk.Entry(root)\n    {{slot2}}\n    return {\"sid_entry\": sid_entry, \"score_entry\": score_entry}\n\nif __name__ == \"__main__\":\n    root = tk.Tk()\n    build_form(root)\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "root.title(\"So hoc tap\")"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "score_entry.grid(row=1, column=1)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "root.mainloop()"
+          }
+        ],
+        "bank": [
+          {
+            "label": "root.title(\"So hoc tap\")",
+            "slot": 1
+          },
+          {
+            "label": "import tkinter as tk",
+            "slot": 1
+          },
+          {
+            "label": "score_entry.grid(row=1, column=1)",
+            "slot": 2
+          },
+          {
+            "label": "from tkinter import ttk",
+            "slot": 2
+          },
+          {
+            "label": "root.mainloop()",
+            "slot": 3
+          },
+          {
+            "label": "ttk.Label(root, text=\"Ten\").grid(row=0, column=0)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chọn Label Ten đặt ô(row0,col0); mã thêm .grid(...); ở simulator chỉ layout đổi sau Chạy."
+          },
+          {
+            "label": "B2",
+            "text": "Chọn Entry đặt ô(row0,col1); chạy: form có hai widget cùng hàng; highlight tọa độ bằng nhãn chữ."
+          },
+          {
+            "label": "B3",
+            "text": "Bấm mở rộng cửa sổ trong desktop lab; không chấm pixel tuyệt đối, chỉ quan hệ vị trí và nội dung."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Trong khung Tkinter được cấp, tạo form title=\"So hoc tap\" với Label \"Ma SV\" ở(0,0), Entry ở(0,1), Label \"Diem\" ở(1,0), Entry ở(1,1). Cấp khóa định danh sid_entry/score_entry để QA lấy widget. Chưa có nút lưu. Chạy profile DESKTOP_TK hoặc simulator được ghi nhãn.",
+        "io": [
+          {
+            "label": "Người chấm xem 1",
+            "value": "TK17-a: tạo root sạch, build_form(root), kiểm tra title và đúng hai Entry; sid_entry.grid_info() row0/column1, score_entry row1/column1."
+          },
+          {
+            "label": "Người chấm xem 2",
+            "value": "TK17-b: Label Ma SV ở(0,0), Diem ở(1,0), các widget cùng vùng form; không chồng nhau khi phóng to chữ."
+          },
+          {
+            "label": "Người chấm xem 3",
+            "value": "TK17-c: dùng Tab nhập S01 rồi8; hai ô giữ dữ liệu riêng; đóng cửa sổ không còn tiến trình treo."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Vẽ hai hàng và hai cột trước."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Mã sinh viên ở hàng0, điểm ở hàng1; nhãn cột0, ô nhập cột1."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Gọi .grid(row=..., column=...) riêng trên từng widget để giữ biến widget."
+        }
+      ],
+      "solutionCode": "import tkinter as tk\nfrom tkinter import ttk\n\ndef build_form(root):\n    root.title(\"So hoc tap\")\n    ttk.Label(root, text=\"Ma SV\").grid(row=0, column=0)\n    sid_entry = ttk.Entry(root)\n    sid_entry.grid(row=0, column=1)\n    ttk.Label(root, text=\"Diem\").grid(row=1, column=0)\n    score_entry = ttk.Entry(root)\n    score_entry.grid(row=1, column=1)\n    return {\"sid_entry\": sid_entry, \"score_entry\": score_entry}\n\nif __name__ == \"__main__\":\n    root = tk.Tk()\n    build_form(root)\n    root.mainloop()"
+    }
+  }
+}

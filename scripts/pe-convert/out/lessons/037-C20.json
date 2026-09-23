@@ -1,0 +1,183 @@
+{
+  "lesson_code": "C20",
+  "sort_order": 37,
+  "module": "Module 7: Lập trình hướng đối tượng",
+  "title": "So sánh đối tượng, biểu diễn và đóng gói",
+  "subtitle": "C20 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "So sánh đối tượng, biểu diễn và đóng gói",
+    "subtitle": "C20 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C20",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Object có thể định nghĩa cách hiển thị và so sánh. Dấu underscore thể hiện ý định nội bộ; name mangling không phải hàng rào bảo mật."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "class Grade:\n    def __init__(self,value): self._value=value\n    def __str__(self): return f\"Grade({self._value})\"\n    def __lt__(self,other): return self._value<other._value\nprint(str(Grade(8)))\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "str gọi __str__."
+        },
+        {
+          "n": 2,
+          "body": "sorted có thể dùng __lt__."
+        },
+        {
+          "n": 3,
+          "body": "Accessor kiểm soát quy tắc cập nhật thay vì để trạng thái tùy ý."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Đối số đầu có vai trò khác nhau."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "isinstance(x,Grade) và issubclass(Child,Grade) nhận cùng loại đối số không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Đối số đầu có vai trò khác nhau."
+            },
+            {
+              "text": "Không: object so với class",
+              "correct": true,
+              "detail": "Đúng: một cái xét instance, một cái xét quan hệ lớp."
+            },
+            {
+              "text": "Cả hai chỉ nhận chuỗi",
+              "correct": false,
+              "detail": "Chúng không nhận tên class dưới dạng chuỗi."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: một cái xét instance, một cái xét quan hệ lớp."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thêm subclass HonorsGrade và dự đoán isinstance(instance,Grade), issubclass(HonorsGrade,Grade)."
+      },
+      "scaffold": {
+        "template": "import math\nclass Grade:\n    def __init__(self,value):\n        {{slot1}}\n    @property\n    def value(self):\n        return self._value\n    @value.setter\n    def value(self,value):\n        if type(value) not in (int,float) or not math.isfinite(value) or not 0<=value<=10:\n            raise ValueError(\"score\")\n        self._value=value\n    def __str__(self):\n        {{slot2}}\n    def __lt__(self,other):\n        if not isinstance(other,Grade):\n            return NotImplemented\n        {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "self.value=value"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "return f\"Grade({self.value})\""
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return self.value<other.value"
+          }
+        ],
+        "bank": [
+          {
+            "label": "self.value=value",
+            "slot": 1
+          },
+          {
+            "label": "return f\"Grade({self.value})\"",
+            "slot": 2
+          },
+          {
+            "label": "print(f\"Grade({self.value})\")",
+            "slot": 2
+          },
+          {
+            "label": "return self.value<other.value",
+            "slot": 3
+          },
+          {
+            "label": "print(self.value<other.value)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tạo hai Grade 8 và 5; sorted đổi thứ tự theo giá trị, không theo địa chỉ object."
+          },
+          {
+            "label": "B2",
+            "text": "Thêm property value; thử cập nhật 11, giữ giá trị trước và hiện ValueError."
+          },
+          {
+            "label": "B3",
+            "text": "So _value với __value và quan sát tên mangle trong vars; giải thích vẫn có thể truy cập nếu biết tên."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết Grade(value) cho số hữu hạn trong 0..10 (không bool), property value có setter kiểm tra, __str__ dạng Grade(8) nếu value được cấp int 8, __lt__ so theo value với Grade, khác kiểu trả NotImplemented. Không cập nhật khi dữ liệu sai.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Học viên phải tự viết và giải thích hai phép isinstance/issubclass với subclass; nêu underscore không bảo vệ bí mật."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "str gọi __str__. sorted có thể dùng __lt__. Accessor kiểm soát quy tắc cập nhật thay vì để trạng thái tùy ý."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "import math\nclass Grade:\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "sort (C20-K01)",
+          "call": "(exec('assert [g.value for g in sorted([Grade(8),Grade(5)])]==[5,8]\\nassert str(Grade(8))==\"Grade(8)\"\\nassert Grade(8).__lt__(3) is NotImplemented\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "validation (C20-K02)",
+          "call": "(exec('g=Grade(7)\\nfor bad in [11,-1,True,float(\"nan\")]:\\n    try: g.value=bad\\n    except ValueError: pass\\n    else: raise AssertionError(bad)\\n    assert g.value==7\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "import math\nclass Grade:\n    def __init__(self,value):\n        self.value=value\n    @property\n    def value(self):\n        return self._value\n    @value.setter\n    def value(self,value):\n        if type(value) not in (int,float) or not math.isfinite(value) or not 0<=value<=10:\n            raise ValueError(\"score\")\n        self._value=value\n    def __str__(self):\n        return f\"Grade({self.value})\"\n    def __lt__(self,other):\n        if not isinstance(other,Grade):\n            return NotImplemented\n        return self.value<other.value\n"
+    }
+  }
+}

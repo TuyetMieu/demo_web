@@ -1,0 +1,188 @@
+{
+  "lesson_code": "P16",
+  "sort_order": 36,
+  "module": "Module 7: Lập trình hướng đối tượng",
+  "title": "Kế thừa và ghi đè hành vi",
+  "subtitle": "P16 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Kế thừa và ghi đè hành vi",
+    "subtitle": "P16 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P16",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Sổ học tập có báo cáo thông thường và báo cáo học bổng. Cả hai đều cho biết đủ điều kiện hay chưa, nhưng tiêu chí khác. Kế thừa cho phép giữ giao diện và thay hành vi cần thiết."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "class Course:\n    def passed(self, score):\n        return score >= 5\n\nclass HonorsCourse(Course):\n    def passed(self, score):\n        return score >= 8"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Cùng gọi passed(7), Course trả True còn HonorsCourse trả False."
+        },
+        {
+          "n": 2,
+          "body": "Đây là override theo loại đối tượng; không cần if phân biệt tên lớp ở nơi sử dụng."
+        }
+      ],
+      "predict": {
+        "question": "Để thay hành vi, lớp con cần gì?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Sao chép toàn bộ app",
+            "detail": "Sao chép app không phải mục tiêu kế thừa.",
+            "correct": false
+          },
+          {
+            "id": "b",
+            "title": "Phương thức cùng tên phù hợp giao diện",
+            "detail": "Đúng: override giữ nơi gọi ổn định.",
+            "correct": true
+          },
+          {
+            "id": "c",
+            "title": "Đổi mọi nơi gọi",
+            "detail": "Không cần nếu giao diện vẫn phù hợp.",
+            "correct": false
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu cả hai luôn dùng ngưỡng5: kiểm tra tên phương thức override và loại instance đang gọi."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "HonorsCourse().passed(7) là gì?",
+          "options": [
+            {
+              "text": "False",
+              "correct": true,
+              "detail": "Đúng: phương thức lớp con được dùng."
+            },
+            {
+              "text": "7",
+              "correct": false,
+              "detail": "Phương thức trả bool, không trả điểm."
+            },
+            {
+              "text": "True",
+              "correct": false,
+              "detail": "Lớp con đã đổi ngưỡng thành8."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: phương thức lớp con được dùng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi điểm thành8; cả hai True. Giải thích vì sao tên phương thức giống mà không phải lúc nào kết quả giống."
+      },
+      "scaffold": {
+        "template": "class Course:\n    def passed(self, score):\n        {{slot1}}\n\nclass HonorsCourse(Course):\n    def passed(self, score):\n        {{slot2}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "return score >= 5"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "return score >= 8"
+          }
+        ],
+        "bank": [
+          {
+            "label": "return score >= 5",
+            "slot": 1
+          },
+          {
+            "label": "return score > 5",
+            "slot": 1
+          },
+          {
+            "label": "return score >= 8",
+            "slot": 2
+          },
+          {
+            "label": "return score > 8",
+            "slot": 2
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Đặt lớp con với (Course); sơ đồ ghi HonorsCourse kế thừa Course."
+          },
+          {
+            "label": "B2",
+            "text": "Đặt phương thức passed trong lớp con; chạy với7: con trỏ vào phương thức con, result False."
+          },
+          {
+            "label": "B3",
+            "text": "Chọn đối tượng Course cùng đầu vào7; trace vào phương thức cha, result True; hai lần chạy có run_id khác."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết Course.passed(score) với ngưỡng5 và HonorsCourse(Course).passed(score) với ngưỡng8; score là số hữu hạn [0,10], trả bool. Tên gọi theo tình huống giả lập, không là quy chế USTH.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "[Course().passed(7), HonorsCourse().passed(7)] → [true, false]"
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Giữ giao diện passed cho hai loại đối tượng."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Đặt phương thức cùng tên trong lớp con."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "class HonorsCourse(Course): def passed(self, score): return score >= 8"
+        }
+      ],
+      "starterCode": "class Course:\n    # Viết lời giải của bạn ở đây\n    pass\nclass HonorsCourse(Course):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "Ca mẫu P16-a",
+          "call": "[Course().passed(7), HonorsCourse().passed(7)]",
+          "expect": "[True, False]"
+        }
+      ],
+      "solutionCode": "class Course:\n    def passed(self, score):\n        return score >= 5\n\nclass HonorsCourse(Course):\n    def passed(self, score):\n        return score >= 8"
+    }
+  }
+}

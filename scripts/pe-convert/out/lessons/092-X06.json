@@ -1,0 +1,120 @@
+{
+  "lesson_code": "X06",
+  "sort_order": 92,
+  "module": "Module 13: Capstone PW2–PW9",
+  "title": "PW9: ứng dụng quản lý điểm hoàn chỉnh bằng Tkinter",
+  "subtitle": "X06 · Nâng cao · 120 phút",
+  "estimated_minutes": 120,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "PW9: ứng dụng quản lý điểm hoàn chỉnh bằng Tkinter",
+    "subtitle": "X06 · Nâng cao · 120 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#X06",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Bài cuối nối domain, lưu trữ và giao diện thành một sản phẩm. Người học phải chứng minh một luồng công việc hoàn chỉnh sau khi khởi động lại."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "Tab Sinh vien: ID, Ten, DoB, Them, Danh sach\nTab Mon hoc: ID, Ten, Tin chi, Them\nTab Diem: Chon mon, Chon sinh vien, Diem, Luu\nTab Bao cao: GPA giam dan\nThanh trang thai: Chua luu -> Dang luu -> Da luu / Loi\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Mỗi tab gọi cùng Registry; không tạo bản sao dữ liệu nghiệp vụ riêng cho mỗi form."
+        },
+        {
+          "n": 2,
+          "body": "Persist là checkpoint sau một thay đổi hợp lệ."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có vì UI đúng\" — Ứng dụng phải giữ dữ liệu qua phiên."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "UI hiện điểm8 nhưng mở lại thành7 có được coi là hoàn thành không?",
+          "options": [
+            {
+              "text": "Có vì UI đúng",
+              "correct": false,
+              "detail": "Ứng dụng phải giữ dữ liệu qua phiên."
+            },
+            {
+              "text": "Không, luồng lưu/nạp chưa đúng",
+              "correct": true,
+              "detail": "Đúng: kiểm tra end-to-end gồm khởi động lại."
+            },
+            {
+              "text": "Chỉ cần thêm animation",
+              "correct": false,
+              "detail": "Animation không sửa persistence."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: kiểm tra end-to-end gồm khởi động lại."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thử điểm0, điểm10,11,nan; chỉ0 và10 được lưu; thay đổi điểm cập nhật GPA và vị trí ranking."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Dựng bốn tab, bind lựa chọn theo mã; dữ liệu hai sinh viên trùng tên không gán nhầm điểm."
+          },
+          {
+            "label": "B2",
+            "text": "Mọi thay đổi hợp lệ cập nhật Registry, refresh list/report rồi đánh dấu dirty; Save dùng X05."
+          },
+          {
+            "label": "B3",
+            "text": "Mở app: nạp gzip pickle tin cậy; file thiếu tạo Registry mới, file hỏng báo lỗi và không tự ghi đè. Đóng khi đang lưu đợi job xong."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Hoàn thành pw9 kế thừa toàn bộ PW1-PW8 liên quan quản lý điểm: hồ sơ DoB, môn credits, input/list/marks, floor1chữ số, NumPy GPA/ranking, package domain, lưu pickle+nén nền và Tkinter. Shell PW7 là dự án riêng. Hai học viên cùng tên phải độc lập. Nộp source package, video luồng test bên dưới và commit/push. Đáp án kiến trúc và prototype tham chiếu được đóng gói trong capstone_pw9."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Mỗi tab gọi cùng Registry; không tạo bản sao dữ liệu nghiệp vụ riêng cho mỗi form. Persist là checkpoint sau một thay đổi hợp lệ."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "procedure": [
+        "Domain: dùng Registry/Student/Course ở X02. Persistence: X03 load_pickle + X05 start_save. GUI: notebook bốn tab, Entry/Combobox readonly, callback kiểm tra đầu vào rồi gọi domain; report lấy Registry.ranking. Save chụp Registry, disable nút Save, poll Queue bằng after; ok bỏ dirty, error giữ dirty. Khi đang save khóa các thao tác sửa để trạng thái displayed và snapshot khớp; WM_DELETE_WINDOW lưu hoặc chờ. Startup load lỗi hiển thị thông báo và không cho autosave ghi đè file hỏng. Thư mục capstone_pw9 chứa reference triển khai đủ luồng."
+      ]
+    }
+  }
+}

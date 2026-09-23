@@ -1,0 +1,159 @@
+{
+  "lesson_code": "A20",
+  "sort_order": 71,
+  "module": "Module 11: MySQL, wxPython và đồ họa 3D",
+  "title": "Nối CRUD MySQL vào giao diện",
+  "subtitle": "A20 · Nâng cao · 60 phút",
+  "estimated_minutes": 60,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Nối CRUD MySQL vào giao diện",
+    "subtitle": "A20 · Nâng cao · 60 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A20",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Form và database phải cùng phản ánh một lần thao tác. Chỉ hiển thị thành công sau commit; lỗi kết nối phải giữ dữ liệu nhập để người dùng sửa hoặc thử lại."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "def on_save():\n    repository.add(id_entry.get(),name_entry.get(),dob_entry.get())\n    refresh_list()\n    status.configure(text=\"Da luu\")\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Callback gọi repository, không chép SQL rải trong từng widget."
+        },
+        {
+          "n": 2,
+          "body": "Trong ứng dụng thực với I/O lâu, áp dụng worker/queue và kết nối riêng theo worker."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Commit vẫn có thể thất bại."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Báo Da luu trước khi commit xong có đúng không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Commit vẫn có thể thất bại."
+            },
+            {
+              "text": "Không",
+              "correct": true,
+              "detail": "Đúng: phản hồi phải theo kết quả thực."
+            },
+            {
+              "text": "Đúng khi mạng nhanh",
+              "correct": false,
+              "detail": "Tốc độ không thay đổi tính đúng."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: phản hồi phải theo kết quả thực."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Mô phỏng mất kết nối: form giữ input, nút được bật lại và không hiện thành công."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tạo form id/name/dob và Listbox mã; Add gọi repository rồi refresh."
+          },
+          {
+            "label": "B2",
+            "text": "Chọn mã, sửa tên và bấm Rename; only dòng được chọn đổi."
+          },
+          {
+            "label": "B3",
+            "text": "Delete cần xác nhận; hủy giữ dữ liệu, lỗi FK hiện riêng, không giả xóa dòng trong UI."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết build(root,repository) có ba Entry id/name/dob, Listbox records, nút Add/Rename/Delete/Refresh, Label status. Dữ liệu fixture như A19. Callback validate id/name không rỗng và date.fromisoformat(dob); repository lỗi -> status lỗi và giữ Entry. Delete chỉ sau askyesno. Trả dict widget để QA invoke."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Callback gọi repository, không chép SQL rải trong từng widget. Trong ứng dụng thực với I/O lâu, áp dụng worker/queue và kết nối riêng theo worker."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import tkinter as tk\nfrom tkinter import ttk,messagebox\nfrom datetime import date\ndef build(root,repository):\n    entries={}\n    for row,key in enumerate((\"id\",\"name\",\"dob\")):\n        ttk.Label(root,text=key).grid(row=row,column=0)\n        entries[key]=ttk.Entry(root); entries[key].grid(row=row,column=1)\n    records=tk.Listbox(root); records.grid(row=3,column=0,columnspan=2)\n    current_rows=[]\n    status=ttk.Label(root,text=\"San sang\"); status.grid(row=5,column=0,columnspan=2)\n    def refresh():\n        nonlocal current_rows\n        rows=repository.all(); records.delete(0,\"end\")\n        current_rows=rows\n        for sid,name,dob in rows: records.insert(\"end\",f\"{sid} | {name} | {dob}\")\n    def select_record(event):\n        selection=records.curselection()\n        if not selection: return\n        for key,value in zip((\"id\",\"name\",\"dob\"),current_rows[selection[0]]):\n            entries[key].delete(0,\"end\"); entries[key].insert(0,str(value))\n    records.bind(\"<<ListboxSelect>>\",select_record)\n    def act(kind):\n        try:\n            sid=entries[\"id\"].get().strip(); name=entries[\"name\"].get().strip(); dob=entries[\"dob\"].get().strip()\n            if kind!=\"Refresh\" and not sid: raise ValueError(\"ID rong\")\n            if kind in (\"Add\",\"Rename\") and not name: raise ValueError(\"Ten rong\")\n            if kind==\"Add\": date.fromisoformat(dob); repository.add(sid,name,dob)\n            elif kind==\"Rename\": repository.rename(sid,name)\n            elif kind==\"Delete\":\n                if not messagebox.askyesno(\"Xoa\",f\"Xoa {sid}?\",parent=root): return\n                repository.delete(sid)\n            refresh(); status.configure(text=\"Da cap nhat\")\n        except Exception as error: status.configure(text=f\"Loi: {error}\")\n    buttons={}\n    panel=ttk.Frame(root); panel.grid(row=4,column=0,columnspan=2)\n    for kind in (\"Add\",\"Rename\",\"Delete\",\"Refresh\"):\n        buttons[kind]=ttk.Button(panel,text=kind,command=lambda k=kind:act(k)); buttons[kind].pack(side=\"left\")\n    return dict(entries=entries,records=records,status=status,buttons=buttons)\n",
+      "procedure": [
+        "import tkinter as tk",
+        "from tkinter import ttk,messagebox",
+        "from datetime import date",
+        "def build(root,repository):",
+        "    entries={}",
+        "    for row,key in enumerate((\"id\",\"name\",\"dob\")):",
+        "        ttk.Label(root,text=key).grid(row=row,column=0)",
+        "        entries[key]=ttk.Entry(root); entries[key].grid(row=row,column=1)",
+        "    records=tk.Listbox(root); records.grid(row=3,column=0,columnspan=2)",
+        "    current_rows=[]",
+        "    status=ttk.Label(root,text=\"San sang\"); status.grid(row=5,column=0,columnspan=2)",
+        "    def refresh():",
+        "        nonlocal current_rows",
+        "        rows=repository.all(); records.delete(0,\"end\")",
+        "        current_rows=rows",
+        "        for sid,name,dob in rows: records.insert(\"end\",f\"{sid} | {name} | {dob}\")",
+        "    def select_record(event):",
+        "        selection=records.curselection()",
+        "        if not selection: return",
+        "        for key,value in zip((\"id\",\"name\",\"dob\"),current_rows[selection[0]]):",
+        "            entries[key].delete(0,\"end\"); entries[key].insert(0,str(value))",
+        "    records.bind(\"<<ListboxSelect>>\",select_record)",
+        "    def act(kind):",
+        "        try:",
+        "            sid=entries[\"id\"].get().strip(); name=entries[\"name\"].get().strip(); dob=entries[\"dob\"].get().strip()",
+        "            if kind!=\"Refresh\" and not sid: raise ValueError(\"ID rong\")",
+        "            if kind in (\"Add\",\"Rename\") and not name: raise ValueError(\"Ten rong\")",
+        "            if kind==\"Add\": date.fromisoformat(dob); repository.add(sid,name,dob)",
+        "            elif kind==\"Rename\": repository.rename(sid,name)",
+        "            elif kind==\"Delete\":",
+        "                if not messagebox.askyesno(\"Xoa\",f\"Xoa {sid}?\",parent=root): return",
+        "                repository.delete(sid)",
+        "            refresh(); status.configure(text=\"Da cap nhat\")",
+        "        except Exception as error: status.configure(text=f\"Loi: {error}\")",
+        "    buttons={}",
+        "    panel=ttk.Frame(root); panel.grid(row=4,column=0,columnspan=2)",
+        "    for kind in (\"Add\",\"Rename\",\"Delete\",\"Refresh\"):",
+        "        buttons[kind]=ttk.Button(panel,text=kind,command=lambda k=kind:act(k)); buttons[kind].pack(side=\"left\")",
+        "    return dict(entries=entries,records=records,status=status,buttons=buttons)"
+      ]
+    }
+  }
+}

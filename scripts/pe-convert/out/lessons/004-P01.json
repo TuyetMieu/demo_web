@@ -1,0 +1,184 @@
+{
+  "lesson_code": "P01",
+  "sort_order": 4,
+  "module": "Module 2: Biến, kiểu dữ liệu và điều kiện",
+  "title": "Tên biến và kết quả chương trình",
+  "subtitle": "P01 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Tên biến và kết quả chương trình",
+    "subtitle": "P01 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P01",
+      "parser": "pe-convert/override",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Bạn đang làm màn hình chào cho Sổ học tập. Tên biến giúp chương trình dùng lại dữ liệu đã có; print đưa thông báo ra vùng kết quả. Đổi người đăng nhập thì thông báo phải đổi theo."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "name = \"An\"\nmessage = \"Chao \" + name\nprint(message)"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Dòng 1 gắn name với chuỗi An."
+        },
+        {
+          "n": 2,
+          "body": "Dòng 2 ghép phần cố định và tên."
+        },
+        {
+          "n": 3,
+          "body": "Dòng 3 mới đưa kết quả ra màn hình; tạo biến chưa tự in gì."
+        }
+      ],
+      "predict": {
+        "question": "Đổi name thành Binh thì cần sửa dòng nào?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Chỉ print",
+            "detail": "print không quyết định giá trị của name.",
+            "correct": false
+          },
+          {
+            "id": "b",
+            "title": "Chỉ dòng 1",
+            "detail": "Đúng: hai dòng sau dùng lại giá trị.",
+            "correct": true
+          },
+          {
+            "id": "c",
+            "title": "Cả ba dòng",
+            "detail": "Không cần chép lại dữ liệu vào mọi dòng.",
+            "correct": false
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu in ra chữ name: bạn đã đưa tên biến vào chuỗi; hãy so sánh \"name\" với name."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Chương trình in gì?",
+          "options": [
+            {
+              "text": "Chao An",
+              "correct": true,
+              "detail": "Đúng: name được đọc thành giá trị An."
+            },
+            {
+              "text": "Chao name",
+              "correct": false,
+              "detail": "name ở ngoài dấu nháy nên là tên biến."
+            },
+            {
+              "text": "Không có gì",
+              "correct": false,
+              "detail": "print ở dòng cuối tạo đầu ra."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: name được đọc thành giá trị An."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu. Nhật ký thao tác bên dưới mô tả bản script gốc của PE; cách nghĩ giữ nguyên, chỉ khác phần vỏ hàm.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi tên mẫu thành Chi, dự đoán rồi chạy lại từ đầu: stdout phải là Chao Chi. Hỏi vì sao không sửa print."
+      },
+      "scaffold": {
+        "template": "def greet(name):\n    \"\"\"In một dòng chào tên được truyền vào.\"\"\"\n    {{slot1}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "print(\"Xin chao, \" + name + \"!\")"
+          }
+        ],
+        "bank": [
+          {
+            "label": "print(\"Xin chao, \" + name + \"!\")",
+            "slot": 1
+          },
+          {
+            "label": "print(message)",
+            "slot": 1
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Bấm khối name = \"An\", đặt vào dòng 1; mã trống -> có phép gán; chạy dòng này: bảng tên có name: \"An\", stdout vẫn rỗng."
+          },
+          {
+            "label": "B2",
+            "text": "Đặt khối ghép chuỗi ở dòng 2; chạy: message chưa có -> \"Chao An\"; nối nhãn name với phần An trong kết quả."
+          },
+          {
+            "label": "B3",
+            "text": "Đặt print(message) ở dòng 3; chạy: stdout rỗng -> \"Chao An\"; highlight dòng in, không đổi name."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết hàm greet(name) in đúng một dòng \"Xin chao, <name>!\" cho tên được truyền vào. Không hard-code tên, không in thêm lời nhắc. (Bản PE gốc là script dùng biến name cấp sẵn; ở Studio đề gói lại thành hàm để chấm được trên trình duyệt.)",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "stdout → \"Xin chao, An!\\n\""
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Thông báo có phần cố định và phần thay đổi."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Tên biến không đặt trong dấu nháy."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Ghép \"Xin chao, \" + name + \"!\", rồi đưa vào print."
+        }
+      ],
+      "starterCode": "def greet(name):\n    \"\"\"In một dòng chào tên được truyền vào.\"\"\"\n    # Viết lời giải của bạn ở đây\n",
+      "tests": [
+        {
+          "name": "In đúng tên được truyền vào",
+          "call": "(exec('import io, contextlib\\n_buf = io.StringIO()\\nwith contextlib.redirect_stdout(_buf): greet(\"An\")\\nassert _buf.getvalue() == \"Xin chao, An!\\\\n\", _buf.getvalue()\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "Không hard-code: tên khác cho dòng khác",
+          "call": "(exec('import io, contextlib\\n_buf = io.StringIO()\\nwith contextlib.redirect_stdout(_buf): greet(\"Mai Anh\")\\nassert _buf.getvalue() == \"Xin chao, Mai Anh!\\\\n\", _buf.getvalue()\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "def greet(name):\n    \"\"\"In một dòng chào tên được truyền vào.\"\"\"\n    print(\"Xin chao, \" + name + \"!\")\n"
+    }
+  }
+}

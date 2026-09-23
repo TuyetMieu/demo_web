@@ -1,0 +1,178 @@
+{
+  "lesson_code": "T11",
+  "sort_order": 55,
+  "module": "Module 9: Tkinter chuyên sâu",
+  "title": "Debug watch và mức log",
+  "subtitle": "T11 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Debug watch và mức log",
+    "subtitle": "T11 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#T11",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Breakpoint dừng ở thời điểm cần quan sát; watch theo dõi biểu thức. Log giúp xem luồng chạy khi không dừng chương trình."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "import logging\nlogger=logging.getLogger(\"pe.form\")\nlogger.debug(\"parse input\")\nlogger.info(\"saved\")\nlogger.warning(\"invalid score\")\nlogger.error(\"save failed\")\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Mức log lọc theo mức độ; không dùng print rải rác thay cho chính sách log."
+        },
+        {
+          "n": 2,
+          "body": "Không ghi mật khẩu hoặc dữ liệu nhạy cảm vào log."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — INFO thấp hơn ngưỡng."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Logger ở mức WARNING có hiện INFO không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "INFO thấp hơn ngưỡng."
+            },
+            {
+              "text": "Không",
+              "correct": true,
+              "detail": "Đúng: WARNING và mức cao hơn mới qua."
+            },
+            {
+              "text": "Chỉ hiện INFO",
+              "correct": false,
+              "detail": "Ngược cơ chế lọc."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: WARNING và mức cao hơn mới qua."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Giữ UI chạy nhưng tắt log DEBUG; giải thích kết quả nghiệp vụ không được thay đổi vì mức log."
+      },
+      "scaffold": {
+        "template": "def save_message(text,logger):\n    {{slot1}}\n        {{slot2}}\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "if not text.strip():"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "logger.warning(\"empty\"); return False"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "logger.debug(\"validated\"); logger.info(\"saved\"); return True"
+          }
+        ],
+        "bank": [
+          {
+            "label": "if not text.strip():",
+            "slot": 1
+          },
+          {
+            "label": "if not text.rstrip():",
+            "slot": 1
+          },
+          {
+            "label": "logger.warning(\"empty\"); return False",
+            "slot": 2
+          },
+          {
+            "label": "import logging",
+            "slot": 2
+          },
+          {
+            "label": "logger.debug(\"validated\"); logger.info(\"saved\"); return True",
+            "slot": 3
+          },
+          {
+            "label": "logger.debug(\"parse input\")",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Đặt breakpoint trước so sánh score; watch raw,score,score>=5; nhập 5 và bước qua từng dòng."
+          },
+          {
+            "label": "B2",
+            "text": "Tạo lỗi dùng >5; watch chỉ ra biểu thức False tại ranh giới; sửa và chạy lại."
+          },
+          {
+            "label": "B3",
+            "text": "Đổi mức log DEBUG sang WARNING; vùng log còn warning/error, không mất thông báo lỗi quan trọng."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết save_message(text,logger): text strip rỗng thì warning(\"empty\") và trả False; có dữ liệu thì debug(\"validated\"), info(\"saved\") và trả True. Nộp ảnh breakpoint/watch của lỗi >5 tại score=5 và bản sửa >=5; không lấy trace mô phỏng của PE thay cho IDE watch.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Ảnh IDE có giá trị raw, score và biểu thức điều kiện ở dòng breakpoint; minh chứng WARNING lọc INFO nhưng giữ ERROR."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Mức log lọc theo mức độ; không dùng print rải rác thay cho chính sách log. Không ghi mật khẩu hoặc dữ liệu nhạy cảm vào log."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "def save_message(text,logger):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "logs (T11-K01)",
+          "call": "(exec('from unittest.mock import Mock\\nlog=Mock(); assert save_message(\" \",log) is False; log.warning.assert_called_once_with(\"empty\"); log.info.assert_not_called()\\nlog=Mock(); assert save_message(\"An\",log) is True; log.debug.assert_called_once_with(\"validated\"); log.info.assert_called_once_with(\"saved\")\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "def save_message(text,logger):\n    if not text.strip():\n        logger.warning(\"empty\"); return False\n    logger.debug(\"validated\"); logger.info(\"saved\"); return True\n"
+    }
+  }
+}

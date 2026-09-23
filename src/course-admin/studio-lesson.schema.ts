@@ -20,6 +20,7 @@ export interface Mcq {
   explanation?: string;
 }
 
+/** step_4.procedure: các bước quy trình của bài không có mã Python để chạy. */
 export interface StudioLesson {
   schema?: string;
   title?: string;

@@ -1,0 +1,157 @@
+{
+  "lesson_code": "A06",
+  "sort_order": 79,
+  "module": "Module 12: Thread, tiến trình, đồng thời và mạng",
+  "title": "Tiến trình, trạng thái và PCB",
+  "subtitle": "A06 · Nâng cao · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Tiến trình, trạng thái và PCB",
+    "subtitle": "A06 · Nâng cao · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A06",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Chương trình là mã; tiến trình là một lần chạy với trạng thái và tài nguyên. Bộ lập lịch chọn tiến trình được dùng CPU; chờ I/O khác với sẵn sàng chạy."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "new -> ready -> running -> waiting\nwaiting -> ready -> running -> terminated\n# Context switch: lưu PC/register của P1, nạp PC/register của P2\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "PCB lưu thông tin quản lý tiến trình."
+        },
+        {
+          "n": 2,
+          "body": "Cây cha/con cho biết quan hệ tạo tiến trình, không đồng nghĩa cha và con dùng chung mọi biến."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"ready\" — Ready nghĩa là chỉ còn chờ CPU."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Tiến trình chờ dữ liệu từ đĩa nằm ở ready hay waiting?",
+          "options": [
+            {
+              "text": "ready",
+              "correct": false,
+              "detail": "Ready nghĩa là chỉ còn chờ CPU."
+            },
+            {
+              "text": "waiting",
+              "correct": true,
+              "detail": "Đúng: chờ sự kiện I/O."
+            },
+            {
+              "text": "terminated",
+              "correct": false,
+              "detail": "Chờ I/O chưa phải kết thúc."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: chờ sự kiện I/O."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thêm preempt khi timer hết: running->ready, khác I/O running->waiting."
+      },
+      "scaffold": {
+        "template": "TRANSITIONS={(\"new\",\"admit\"):\"ready\",(\"ready\",\"dispatch\"):\"running\",\n             (\"running\",\"io\"):\"waiting\",(\"waiting\",\"complete\"):\"ready\",\n             (\"running\",\"preempt\"):\"ready\",(\"running\",\"exit\"):\"terminated\"}\ndef next_state(state,event):\n    {{slot1}}\n    except KeyError: raise ValueError(\"invalid transition\") from None\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "try: return TRANSITIONS[state,event]"
+          }
+        ],
+        "bank": [
+          {
+            "label": "try: return TRANSITIONS[state,event]",
+            "slot": 1
+          },
+          {
+            "label": "new -> ready -> running -> waiting",
+            "slot": 1
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Đặt các thẻ new/ready/running/waiting/terminated vào trace nạp -> dispatch -> I/O -> hoàn tất."
+          },
+          {
+            "label": "B2",
+            "text": "Chuyển CPU P1 sang P2: lưu pc=12 của P1 và khôi phục pc=7 của P2; không reset cả hai về đầu."
+          },
+          {
+            "label": "B3",
+            "text": "Vẽ cây parent 10 có child 11,12, child11 tạo13; tô vùng bộ nhớ riêng từng process."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết next_state(state,event) theo bảng: new/admit->ready, ready/dispatch->running, running/io->waiting, waiting/complete->ready, running/preempt->ready, running/exit->terminated; cặp khác ValueError. Nộp trace PCB P1(pc12)->P2(pc7)->P1(pc12) và cây 10->{11,12},11->{13}.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Rubric PCB: lưu PC/register khi rời CPU, khôi phục đúng khi chạy lại; cây có bốn process và vùng memory tách biệt."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "PCB lưu thông tin quản lý tiến trình. Cây cha/con cho biết quan hệ tạo tiến trình, không đồng nghĩa cha và con dùng chung mọi biến."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "def next_state(state,event):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "trace (A06-K01)",
+          "call": "(exec('s=\"new\"\\nfor event in [\"admit\",\"dispatch\",\"io\",\"complete\",\"dispatch\",\"exit\"]: s=next_state(s,event)\\nassert s==\"terminated\"\\nassert next_state(\"running\",\"preempt\")==\"ready\"\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "invalid (A06-K02)",
+          "call": "(exec('try: next_state(\"waiting\",\"dispatch\")\\nexcept ValueError: pass\\nelse: raise AssertionError(\"waiting cannot dispatch\")\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "TRANSITIONS={(\"new\",\"admit\"):\"ready\",(\"ready\",\"dispatch\"):\"running\",\n             (\"running\",\"io\"):\"waiting\",(\"waiting\",\"complete\"):\"ready\",\n             (\"running\",\"preempt\"):\"ready\",(\"running\",\"exit\"):\"terminated\"}\ndef next_state(state,event):\n    try: return TRANSITIONS[state,event]\n    except KeyError: raise ValueError(\"invalid transition\") from None\n"
+    }
+  }
+}

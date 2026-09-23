@@ -1,0 +1,164 @@
+{
+  "lesson_code": "T04",
+  "sort_order": 48,
+  "module": "Module 9: Tkinter chuyên sâu",
+  "title": "Menu và nhiều Notebook",
+  "subtitle": "T04 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Menu và nhiều Notebook",
+    "subtitle": "T04 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#T04",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Tab chia các công việc liên quan thành trang; menu chứa hành động dùng ở nhiều trang. Một ứng dụng có thể có notebook chính và notebook con."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "tabs=ttk.Notebook(root)\ntabs.add(student_frame,text=\"Sinh vien\")\ntabs.add(report_frame,text=\"Bao cao\")\nmenu.add_command(label=\"Moi\",command=reset_form)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Callback chỉ được gọi khi chọn menu."
+        },
+        {
+          "n": 2,
+          "body": "Notebook giữ frame mỗi trang, không phải tự tạo Tk mới."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Cần truyền hàm."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "command=reset_form() có đúng khi gắn menu không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Cần truyền hàm."
+            },
+            {
+              "text": "Không, hàm bị gọi ngay",
+              "correct": true,
+              "detail": "Đúng: dùng command=reset_form."
+            },
+            {
+              "text": "Đúng nếu tab đầu",
+              "correct": false,
+              "detail": "Tab không quyết định thời điểm gọi."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: dùng command=reset_form."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thêm menu chọn trực tiếp tab Bao cao; dự đoán notebook con có cần tạo lại không."
+      },
+      "scaffold": {
+        "template": "import tkinter as tk\nfrom tkinter import ttk\ndef build(root):\n    {{slot1}}\n    student=ttk.Frame(tabs); report=ttk.Frame(tabs)\n    tabs.add(student,text=\"Sinh vien\"); tabs.add(report,text=\"Bao cao\")\n    entry=ttk.Entry(student); entry.pack()\n    nested=ttk.Notebook(report); nested.pack(fill=\"both\",expand=True)\n    {{slot2}}\n        frame=ttk.Frame(nested); nested.add(frame,text=title)\n    menu=tk.Menu(root); root.configure(menu=menu)\n    file_menu=tk.Menu(menu,tearoff=False); menu.add_cascade(label=\"Tep\",menu=file_menu)\n    file_menu.add_command(label=\"Moi\",command=lambda:entry.delete(0,\"end\"))\n    view=tk.Menu(menu,tearoff=False); menu.add_cascade(label=\"Xem\",menu=view)\n    {{slot3}}\n    return dict(tabs=tabs,nested=nested,entry=entry,menu_file=file_menu,menu_view=view,report=report)\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "tabs=ttk.Notebook(root); tabs.pack(fill=\"both\",expand=True)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "for title in (\"Bang\",\"Bieu do\"):"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "view.add_command(label=\"Bao cao\",command=lambda:tabs.select(report))"
+          }
+        ],
+        "bank": [
+          {
+            "label": "tabs=ttk.Notebook(root); tabs.pack(fill=\"both\",expand=True)",
+            "slot": 1
+          },
+          {
+            "label": "tabs=ttk.Notebook(root)",
+            "slot": 1
+          },
+          {
+            "label": "for title in (\"Bang\",\"Bieu do\"):",
+            "slot": 2
+          },
+          {
+            "label": "tabs.add(student_frame,text=\"Sinh vien\")",
+            "slot": 2
+          },
+          {
+            "label": "view.add_command(label=\"Bao cao\",command=lambda:tabs.select(report))",
+            "slot": 3
+          },
+          {
+            "label": "tabs.add(report_frame,text=\"Bao cao\")",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tạo tab Sinh vien/Bao cao, chuyển tab và giữ nội dung Entry."
+          },
+          {
+            "label": "B2",
+            "text": "Trong Bao cao thêm tab Bang/Bieu do; hiển thị cây parent để phân biệt hai notebook."
+          },
+          {
+            "label": "B3",
+            "text": "Thêm menu Tep/Moi và Tro giup/Gioi thieu; chọn Moi xóa đúng Entry và giữ tab hiện tại."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết build(root): notebook chính Sinh vien/Bao cao; Entry tên ở Sinh vien; notebook con Bang/Bieu do ở Bao cao. Menu Tep -> Moi xóa Entry; menu Xem -> Bao cao chọn tab báo cáo. Trả tabs/nested/entry/menu_file/menu_view/report."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Callback chỉ được gọi khi chọn menu. Notebook giữ frame mỗi trang, không phải tự tạo Tk mới."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import tkinter as tk\nfrom tkinter import ttk\ndef build(root):\n    tabs=ttk.Notebook(root); tabs.pack(fill=\"both\",expand=True)\n    student=ttk.Frame(tabs); report=ttk.Frame(tabs)\n    tabs.add(student,text=\"Sinh vien\"); tabs.add(report,text=\"Bao cao\")\n    entry=ttk.Entry(student); entry.pack()\n    nested=ttk.Notebook(report); nested.pack(fill=\"both\",expand=True)\n    for title in (\"Bang\",\"Bieu do\"):\n        frame=ttk.Frame(nested); nested.add(frame,text=title)\n    menu=tk.Menu(root); root.configure(menu=menu)\n    file_menu=tk.Menu(menu,tearoff=False); menu.add_cascade(label=\"Tep\",menu=file_menu)\n    file_menu.add_command(label=\"Moi\",command=lambda:entry.delete(0,\"end\"))\n    view=tk.Menu(menu,tearoff=False); menu.add_cascade(label=\"Xem\",menu=view)\n    view.add_command(label=\"Bao cao\",command=lambda:tabs.select(report))\n    return dict(tabs=tabs,nested=nested,entry=entry,menu_file=file_menu,menu_view=view,report=report)\n"
+    }
+  }
+}

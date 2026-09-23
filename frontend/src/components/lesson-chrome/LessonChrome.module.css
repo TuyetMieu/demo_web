@@ -61,6 +61,27 @@
   border-radius: 999px;
   background: var(--edu-track-bg);
   overflow: hidden;
+  /* Đoạn có thể bấm được render thành <button> — bỏ style mặc định của nút,
+     và nới vùng chạm lên 20px bằng padding ảo để ngón tay bấm trúng. */
+  padding: 0;
+  border: 0;
+  display: block;
+}
+button.segment {
+  cursor: pointer;
+  position: relative;
+}
+button.segment::after {
+  content: '';
+  position: absolute;
+  inset: -7px 0;
+}
+/* Màn đang mở nhưng đã xong (đoạn đầy, trông y hệt các đoạn đã qua): viền nổi
+   quanh đoạn để vẫn thấy mình đang ở đâu. */
+.segmentCurrent {
+  box-shadow:
+    0 0 0 2px var(--edu-panel-bg-solid),
+    0 0 0 4px var(--edu-accent);
 }
 /* Luôn render thẻ fill (kể cả rộng 0) để width có thể transition — nếu chỉ
    gắn/gỡ thẻ theo bước thì trình duyệt không có giá trị cũ để nội suy. */

@@ -3,186 +3,179 @@
     "python": {
       "requirements": [
         "Không cần kinh nghiệm lập trình trước",
-        "Máy tính với kết nối internet",
+        "Máy tính cài được Python 3.12 và một IDE (bài lab desktop cần chạy trên máy)",
         "Tinh thần ham học hỏi và kiên nhẫn"
       ],
       "skills": [
-        "Lập trình Python từ cơ bản đến nâng cao",
-        "Xây dựng ứng dụng thực tế với Python",
-        "Phân tích dữ liệu với NumPy & Pandas",
-        "Tạo mô hình AI / Machine Learning",
-        "Tự động hóa tác vụ lặp đi lặp lại"
+        "Cú pháp Python: biến, kiểu dữ liệu, điều kiện, vòng lặp, hàm",
+        "Collection: list, dict, tuple, set và cách chọn đúng cấu trúc",
+        "File, ngoại lệ, JSON và lập trình hướng đối tượng",
+        "Giao diện desktop với Tkinter, wxPython và đồ hoạ OpenGL",
+        "Thread, tiến trình, mạng và các capstone PW1–PW9"
       ],
       "instructor": "Nguyễn Văn An",
       "modules": [
         {
-          "title": "Module 1: Giới thiệu Python",
+          "title": "Module 1: Môi trường, REPL và Git",
           "lessons": [
-            "Python là gì và tại sao cần học?",
-            "Cài đặt Python & VS Code",
-            "Chương trình đầu tiên: Hello World",
-            "Cách dùng Python REPL",
-            "Biến và quy tắc đặt tên",
-            "Kiểu dữ liệu: int, float, str, bool",
-            "Toán tử số học và so sánh",
-            "Hàm print() và input() cơ bản"
+            "Chọn công cụ và dựng môi trường học",
+            "REPL, script và notebook: trạng thái đến từ đâu?",
+            "Git: lưu một thay đổi và gửi vào fork"
           ]
         },
         {
-          "title": "Module 2: Cú pháp cơ bản",
+          "title": "Module 2: Biến, kiểu dữ liệu và điều kiện",
           "lessons": [
-            "Chuỗi (String) và các thao tác",
-            "Định dạng chuỗi với f-string",
-            "Danh sách (List)",
-            "Tuple và ứng dụng",
-            "Dictionary (dict)",
-            "Set và frozenset",
-            "Chuyển đổi kiểu dữ liệu",
-            "Toán tử logic: and, or, not",
-            "Toán tử bitwise",
-            "Ưu tiên toán tử",
-            "Biểu thức điều kiện (ternary)",
-            "None và kiểm tra None"
+            "Tên biến và kết quả chương trình",
+            "Chuỗi nhập vào và phép tính số",
+            "Tên biến, kiểu động và ghi chú có ích",
+            "Toán tử, thứ tự tính và làm tròn xuống",
+            "Tách dữ liệu từ tên tệp",
+            "Chuỗi: chuẩn hóa, định dạng và không sửa tại chỗ",
+            "Điều kiện và giá trị ở ranh giới"
           ]
         },
         {
-          "title": "Module 3: Cấu trúc điều khiển",
+          "title": "Module 3: List, dict, tuple và set",
           "lessons": [
-            "Câu lệnh if / elif / else",
-            "Vòng lặp for cơ bản",
-            "Vòng lặp while",
-            "Lệnh break và continue",
-            "Hàm range()",
-            "List comprehension",
-            "Dict comprehension",
-            "Vòng lặp lồng nhau",
-            "Pattern matching với match/case",
-            "Bài tập thực hành: FizzBuzz"
+            "List và việc hai tên dùng chung dữ liệu",
+            "Index và slice: chọn đúng phần dữ liệu",
+            "Thêm, xóa và đảo list",
+            "Dictionary và tra cứu theo khóa",
+            "Dictionary: duyệt, xóa và tìm cực trị",
+            "Chọn tuple và set đúng mục đích",
+            "Tuple, unpacking và lựa chọn collection",
+            "Tên file thành hồ sơ người bơi"
           ]
         },
         {
-          "title": "Module 4: Hàm & Module",
+          "title": "Module 4: Vòng lặp và biến tích lũy",
           "lessons": [
-            "Định nghĩa hàm với def",
-            "Tham số và đối số",
-            "Giá trị mặc định & keyword args",
-            "*args và **kwargs",
-            "Hàm lambda",
-            "Phạm vi biến (scope)",
-            "Hàm đệ quy",
-            "Decorator cơ bản",
-            "Import module",
-            "Tạo module riêng",
-            "Thư viện chuẩn: math, random, os",
-            "Virtual environment & pip"
+            "Vòng for và biến tích lũy",
+            "Comprehension, enumerate, zip và Counter",
+            "While, sentinel và điều kiện dừng",
+            "range, break và continue"
           ]
         },
         {
-          "title": "Module 5: Kiểu dữ liệu nâng cao",
+          "title": "Module 5: Hàm, module và package",
           "lessons": [
-            "List nâng cao: sort, filter, map",
-            "Stack và Queue với list",
-            "Collections: deque, Counter, defaultdict",
-            "Named tuple",
-            "Slicing nâng cao",
-            "Generator và yield",
-            "Iterator protocol",
-            "Comprehension nâng cao",
-            "Frozen set và immutable patterns",
-            "Bài tập: Xử lý dữ liệu thực tế",
-            "Kiểm tra & đánh giá module 5",
-            "Dự án nhỏ: Chương trình quản lý danh sách"
+            "Hàm trả về giá trị",
+            "Khám phá API, traceback và module chuẩn",
+            "Ngẫu nhiên có thể kiểm thử",
+            "Module và trung bình có trọng số",
+            "Module, alias và package lồng nhau"
           ]
         },
         {
-          "title": "Module 6: Lập trình hướng đối tượng",
+          "title": "Module 6: File, ngoại lệ và dữ liệu lâu dài",
           "lessons": [
-            "OOP là gì? Tại sao cần OOP?",
-            "Class và Object",
-            "Thuộc tính và phương thức",
-            "__init__ và self",
-            "Encapsulation (đóng gói)",
-            "Inheritance (kế thừa)",
-            "Polymorphism (đa hình)",
-            "Method Overriding",
-            "Abstract class",
-            "Interface với ABC",
-            "Class method và static method",
-            "Property và setter",
-            "Dunder methods: __str__, __repr__, __eq__",
-            "Dataclass",
-            "Dự án: Hệ thống quản lý ngân hàng"
+            "Đọc file với with và UTF-8",
+            "Ngoại lệ và dữ liệu nhập không hợp lệ",
+            "Nhánh elif và input trong chương trình CLI",
+            "Ngày giờ và tìm mẫu bằng regex",
+            "Lưu cấu trúc dữ liệu bằng JSON",
+            "File modes, buffering và lỗi I/O",
+            "Duyệt thư mục và thao tác file trong vùng bài tập"
           ]
         },
         {
-          "title": "Module 7: Xử lý File & Exception",
+          "title": "Module 7: Lập trình hướng đối tượng",
           "lessons": [
-            "Đọc & ghi file văn bản",
-            "Làm việc với CSV",
-            "Xử lý JSON",
-            "Context manager: with statement",
-            "Exception là gì?",
-            "try / except / finally",
-            "Custom Exception",
-            "Logging cơ bản",
-            "Pathlib: làm việc với đường dẫn",
-            "Bài tập: Parser file log"
+            "Class và trạng thái riêng từng đối tượng",
+            "Kế thừa và ghi đè hành vi",
+            "So sánh đối tượng, biểu diễn và đóng gói"
           ]
         },
         {
-          "title": "Module 8: Thư viện tiêu chuẩn",
+          "title": "Module 8: GUI cơ bản, biểu đồ, test và capstone nhỏ",
           "lessons": [
-            "datetime và xử lý thời gian",
-            "Regular expressions (re)",
-            "os & sys",
-            "subprocess",
-            "threading cơ bản",
-            "urllib & requests",
-            "json & pickle",
-            "argparse: CLI tools",
-            "unittest: kiểm thử đơn vị",
-            "Packaging: setup.py cơ bản"
+            "Tkinter: cửa sổ, widget và grid",
+            "Callback: nối thao tác và trạng thái",
+            "Biểu đồ phải khớp dữ liệu",
+            "Test trường hợp thường và trường hợp biên",
+            "Chuyển giao: báo cáo thời gian bơi",
+            "Báo cáo bơi từ file đến kết quả",
+            "Capstone: Sổ học tập USTH"
           ]
         },
         {
-          "title": "Module 9: NumPy & Pandas",
+          "title": "Module 9: Tkinter chuyên sâu",
           "lessons": [
-            "Cài đặt và giới thiệu NumPy",
-            "Array: tạo, indexing, slicing",
-            "Phép toán trên array",
-            "Broadcasting",
-            "Giới thiệu Pandas",
-            "DataFrame: tạo và đọc dữ liệu",
-            "Lọc và sắp xếp dữ liệu",
-            "Groupby và Aggregation",
-            "Xử lý dữ liệu thiếu (NaN)",
-            "Merge & Join DataFrames",
-            "Matplotlib: vẽ đồ thị cơ bản",
-            "Seaborn: visualize nâng cao"
+            "Cửa sổ, focus và trạng thái nút",
+            "Lựa chọn dữ liệu: combo, radio, check và list",
+            "Bố cục: Frame, padding và co giãn",
+            "Menu và nhiều Notebook",
+            "Hộp thoại và lựa chọn file",
+            "Tooltip, relief và Canvas",
+            "Event loop, after và thanh tiến độ",
+            "StringVar, scope và component tái sử dụng",
+            "Biểu đồ trong Tk và thay đổi thang đo",
+            "Người học tự viết unit test cho GUI",
+            "Debug watch và mức log",
+            "Quốc tế hóa và định dạng theo ngôn ngữ",
+            "Slideshow GIF/JPEG và vòng đời ảnh",
+            "Thiết kế lặp và factory cho thành phần GUI"
           ]
         },
         {
-          "title": "Module 10: AI & Machine Learning",
+          "title": "Module 10: Nâng cao — OOP, NumPy, pandas và biểu đồ",
           "lessons": [
-            "Giới thiệu Machine Learning",
-            "Scikit-learn: pipeline cơ bản",
-            "Linear Regression",
-            "Logistic Regression",
-            "Decision Tree",
-            "Random Forest",
-            "K-Nearest Neighbors",
-            "Đánh giá mô hình: accuracy, F1",
-            "Cross-validation",
-            "Feature Engineering cơ bản",
-            "Neural Network với Keras",
-            "CNN cơ bản với TensorFlow",
-            "NLP: Xử lý văn bản",
-            "Dự án cuối khóa: Phân tích cảm xúc",
-            "Triển khai model với Flask",
-            "Thi chứng chỉ Python",
-            "Tổng kết & bước tiếp theo",
-            "Cộng đồng & tài nguyên nâng cao",
-            "Career path: Data Scientist"
+            "PW1: quản lý lớp bằng collection và CLI",
+            "Đa kế thừa, MRO và lớp trừu tượng",
+            "NumPy và xếp hạng GPA có trọng số",
+            "Curses: menu bàn phím cho quản lý điểm",
+            "Nén bytes và đóng gói nhiều file",
+            "Pickle, JSON và dữ liệu có kiểu",
+            "Đọc bảng số bằng NumPy",
+            "DataFrame từ CSV, Excel và database",
+            "SAS, Stata, HDF5 và MATLAB",
+            "Chọn loại biểu đồ và quản lý Figure"
+          ]
+        },
+        {
+          "title": "Module 11: MySQL, wxPython và đồ họa 3D",
+          "lessons": [
+            "Dựng MySQL và thiết kế schema bằng Workbench",
+            "MySQL INSERT, UPDATE, DELETE và transaction",
+            "Nối CRUD MySQL vào giao diện",
+            "wxPython: cửa sổ và các nhóm control",
+            "Bitmap lát nền trong wxPython",
+            "OpenGL trong wx: cube và phép biến đổi 3D",
+            "Pyglet, shader và cube nhiều màu",
+            "Hoạt ảnh OpenGL: chuyển động theo thời gian"
+          ]
+        },
+        {
+          "title": "Module 12: Thread, tiến trình, đồng thời và mạng",
+          "lessons": [
+            "Thread và queue: nhận kết quả việc nền",
+            "Tiến trình con và mã kết thúc",
+            "Tiến trình, trạng thái và PCB",
+            "Mô phỏng FCFS, SJF, priority và round-robin",
+            "Tạo tiến trình trên Windows và fork/exec trên UNIX",
+            "Luồng chuẩn, pipe và vòng đời process",
+            "Bộ nhớ dùng chung, GIL và chọn concurrency",
+            "Race condition và Lock",
+            "Nhiều worker, dừng hợp tác và queue qua module",
+            "TCP và HTTP qua dịch vụ lab cục bộ",
+            "Hai toolkit: chẩn đoán mainloop và trao đổi dữ liệu"
+          ]
+        },
+        {
+          "title": "Module 13: Capstone PW2–PW9",
+          "lessons": [
+            "PW2-PW4: domain objects, GPA và chia package",
+            "PW5-PW6: ba file, archive và pickle có nén",
+            "PW7: shell có chuyển hướng và pipeline",
+            "PW8: lưu pickle có nén trong background",
+            "PW9: ứng dụng quản lý điểm hoàn chỉnh bằng Tkinter"
+          ]
+        },
+        {
+          "title": "Module 14: Bài dựng tay theo thiết kế Figma",
+          "lessons": [
+            "Danh sách (List) & Mutability"
           ]
         }
       ]

@@ -1,0 +1,134 @@
+{
+  "lesson_code": "A08",
+  "sort_order": 81,
+  "module": "Module 12: Thread, tiến trình, đồng thời và mạng",
+  "title": "Tạo tiến trình trên Windows và fork/exec trên UNIX",
+  "subtitle": "A08 · Nâng cao · 45 phút",
+  "estimated_minutes": 45,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Tạo tiến trình trên Windows và fork/exec trên UNIX",
+    "subtitle": "A08 · Nâng cao · 45 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A08",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Windows và UNIX cung cấp cơ chế tạo tiến trình khác nhau. Python subprocess cung cấp giao diện chung; fork/exec là kiến thức riêng của UNIX."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "pid=os.fork()\nif pid==0:\n    os.execv(sys.executable,[sys.executable,\"-c\",\"print(123)\"])\nelse:\n    os.waitpid(pid,0)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "fork trả 0 ở child và PID child ở parent; exec thay image tiến trình hiện tại, không tạo thêm một child mới."
+        },
+        {
+          "n": 2,
+          "body": "os.fork không có trên Windows."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Image cũ đã được thay."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "exec thành công có quay lại dòng ngay sau exec trong chương trình cũ không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Image cũ đã được thay."
+            },
+            {
+              "text": "Không",
+              "correct": true,
+              "detail": "Đúng."
+            },
+            {
+              "text": "Chỉ ở parent",
+              "correct": false,
+              "detail": "Nhánh nào gọi exec thành công đều bị thay."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Cho exec đường dẫn không tồn tại: child phải báo lỗi rồi exit khác0, parent thu mã kết thúc."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Vẽ fork thành hai luồng điều khiển với hai giá trị trả về; gán biến ở child không sửa biến parent."
+          },
+          {
+            "label": "B2",
+            "text": "Trong Linux lab chạy fork rồi exec Python in123, parent waitpid; đếm đúng hai process."
+          },
+          {
+            "label": "B3",
+            "text": "Trong Windows lab chạy subprocess.Popen; đối chiếu khái niệm CreateProcess gồm image mới và process/thread handles; phân biệt WinExec API cũ với CreateProcess."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Nộp hai script: unix_spawn.py dùng fork/execv/waitpid và windows_spawn.py dùng Popen(...,shell=False). Child in123 và exit0, parent báo mã0. Nộp sơ đồ fork/exec so với CreateProcess; giải thích WinExec là API lịch sử trong slide, không dùng làm mẫu API Python mới. Chỉ chạy script đúng OS."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "fork trả 0 ở child và PID child ở parent; exec thay image tiến trình hiện tại, không tạo thêm một child mới. os.fork không có trên Windows."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "# unix_spawn.py (POSIX)\nimport os,sys\ndef unix_spawn():\n    pid=os.fork()\n    if pid==0:\n        try: os.execv(sys.executable,[sys.executable,\"-c\",\"print(123)\"])\n        except OSError: os._exit(127)\n    _,status=os.waitpid(pid,0)\n    return os.waitstatus_to_exitcode(status)\n# windows_spawn.py (cũng có thể chạy cross-platform)\nimport subprocess\ndef windows_spawn():\n    process=subprocess.Popen([sys.executable,\"-c\",\"print(123)\"],shell=False)\n    return process.wait(timeout=5)\n",
+      "procedure": [
+        "# unix_spawn.py (POSIX)",
+        "import os,sys",
+        "def unix_spawn():",
+        "    pid=os.fork()",
+        "    if pid==0:",
+        "        try: os.execv(sys.executable,[sys.executable,\"-c\",\"print(123)\"])",
+        "        except OSError: os._exit(127)",
+        "    _,status=os.waitpid(pid,0)",
+        "    return os.waitstatus_to_exitcode(status)",
+        "# windows_spawn.py (cũng có thể chạy cross-platform)",
+        "import subprocess",
+        "def windows_spawn():",
+        "    process=subprocess.Popen([sys.executable,\"-c\",\"print(123)\"],shell=False)",
+        "    return process.wait(timeout=5)"
+      ]
+    }
+  }
+}

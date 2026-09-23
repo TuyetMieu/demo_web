@@ -1,6 +1,11 @@
-// The Figma lesson is List & Mutability. In this project's curriculum it is
-// Module 2, lesson 11 (not lesson 5 as in the design's example breadcrumb).
-export const PYTHON_LESSON_NUMBER = 11;
+// The Figma lesson is List & Mutability — the one studio screen built by hand
+// instead of read from `lessons.content_json`.
+//
+// Nó nằm CUỐI giáo trình (bài 93) chứ không phải bài 11 như trước: 92 bài của
+// gói PE_Python_v2 đã chiếm bài 1..92, và bài nào rơi đúng số này thì
+// content_json bị bỏ qua. Số ở đây phải khớp HAND_BUILT_SORT_ORDER trong
+// scripts/pe-convert/convert.py và vị trí trong curricula.json.
+export const PYTHON_LESSON_NUMBER = 93;
 export const STARTER_CODE = `def clean_and_boost_scores(raw_scores: list[float], bonus: float) -> list[float]:
     """Lọc điểm âm, cộng thưởng và giữ nguyên danh sách gốc."""
     result = []

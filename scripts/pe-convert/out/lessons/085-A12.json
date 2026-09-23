@@ -1,0 +1,170 @@
+{
+  "lesson_code": "A12",
+  "sort_order": 85,
+  "module": "Module 12: Thread, tiến trình, đồng thời và mạng",
+  "title": "Nhiều worker, dừng hợp tác và queue qua module",
+  "subtitle": "A12 · Nâng cao · 45 phút",
+  "estimated_minutes": 45,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Nhiều worker, dừng hợp tác và queue qua module",
+    "subtitle": "A12 · Nâng cao · 45 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A12",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Thread không có nút kill an toàn cho mọi tác vụ. Worker cần kiểm tra tín hiệu dừng, gửi kết quả hoặc lỗi qua queue và thoát có kiểm soát."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "class Worker(Thread):\n    def run(self):\n        if not self.stop_event.is_set():\n            self.output.put((self.job_id,self.value**2))\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "start chạy run ở thread mới; gọi run trực tiếp vẫn chạy trong caller."
+        },
+        {
+          "n": 2,
+          "body": "Event là tín hiệu phối hợp; Queue truyền dữ liệu giữa module được cấp chung instance."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Tạo queue riêng không trả ra\" — Controller không đọc được queue riêng."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Muốn worker nhận queue của controller, nên làm gì?",
+          "options": [
+            {
+              "text": "Tạo queue riêng không trả ra",
+              "correct": false,
+              "detail": "Controller không đọc được queue riêng."
+            },
+            {
+              "text": "Truyền cùng queue qua constructor",
+              "correct": true,
+              "detail": "Đúng: dependency được truyền tường minh."
+            },
+            {
+              "text": "Dùng sleep để đọc biến global",
+              "correct": false,
+              "detail": "Sleep không là giao thức kết quả."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: dependency được truyền tường minh."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Cho hai worker hoàn thành đảo thứ tự, báo cáo vẫn giữ thứ tự input bằng job_id."
+      },
+      "scaffold": {
+        "template": "from threading import Thread,Event\nfrom queue import Queue\nclass SquareWorker(Thread):\n    def __init__(self,job_id,value,output,stop_event):\n        super().__init__(); self.job_id=job_id; self.value=value; self.output=output; self.stop_event=stop_event\n    def run(self):\n        {{slot1}}\ndef run_many(values):\n    output=Queue(); stop=Event()\n    workers=[SquareWorker(i,value,output,stop) for i,value in enumerate(values)]\n    for worker in workers: worker.start()\n    {{slot2}}\n    result={}\n    while not output.empty():\n        i,value=output.get(); result[i]=value\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "if not self.stop_event.is_set(): self.output.put((self.job_id,self.value**2))"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "for worker in workers: worker.join()"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return [result[i] for i in range(len(values))]"
+          }
+        ],
+        "bank": [
+          {
+            "label": "if not self.stop_event.is_set(): self.output.put((self.job_id,self.value**2))",
+            "slot": 1
+          },
+          {
+            "label": "class Worker(Thread):",
+            "slot": 1
+          },
+          {
+            "label": "for worker in workers: worker.join()",
+            "slot": 2
+          },
+          {
+            "label": "def run(self):",
+            "slot": 2
+          },
+          {
+            "label": "return [result[i] for i in range(len(values))]",
+            "slot": 3
+          },
+          {
+            "label": "return [result[i] for i in range((values))]",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tạo workers.py chứa subclass, controller.py tạo Queue/Event và truyền vào hai worker."
+          },
+          {
+            "label": "B2",
+            "text": "Start cả hai, thu kết quả theo job_id thay vì thứ tự hoàn tất."
+          },
+          {
+            "label": "B3",
+            "text": "Set stop_event trước start: worker không làm việc; join rồi kiểm tra queue rỗng."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết SquareWorker(Thread) constructor(job_id,value,output,stop_event); run kiểm tra event trước khi tính, nếu chưa dừng put (id,value**2). Viết run_many(values) tạo một worker/mục, start tất cả rồi join, đọc queue và trả list theo id. Tách class vào workers.py khi nộp dự án. Đây là job ngắn; job nhiều bước phải kiểm tra Event mỗi bước.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Nộp workers.py/controller.py không circular import; đúng một Queue được tạo ở controller và truyền vào mọi worker. Thêm job vòng lặp10bước: set Event sau bước2, worker xác nhận dừng trước bước10, không dùng terminate giả."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "start chạy run ở thread mới; gọi run trực tiếp vẫn chạy trong caller. Event là tín hiệu phối hợp; Queue truyền dữ liệu giữa module được cấp chung instance."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "from threading import Thread,Event\nfrom queue import Queue\nclass SquareWorker(Thread):\n    def __init__(self,job_id,value,output,stop_event):\n        super().__init__(); self.job_id=job_id; self.value=value; self.output=output; self.stop_event=stop_event\n    def run(self):\n        if not self.stop_event.is_set(): self.output.put((self.job_id,self.value**2))\ndef run_many(values):\n    output=Queue(); stop=Event()\n    workers=[SquareWorker(i,value,output,stop) for i,value in enumerate(values)]\n    for worker in workers: worker.start()\n    for worker in workers: worker.join()\n    result={}\n    while not output.empty():\n        i,value=output.get(); result[i]=value\n    return [result[i] for i in range(len(values))]\n"
+    }
+  }
+}

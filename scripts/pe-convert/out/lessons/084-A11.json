@@ -1,0 +1,158 @@
+{
+  "lesson_code": "A11",
+  "sort_order": 84,
+  "module": "Module 12: Thread, tiến trình, đồng thời và mạng",
+  "title": "Race condition và Lock",
+  "subtitle": "A11 · Nâng cao · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Race condition và Lock",
+    "subtitle": "A11 · Nâng cao · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A11",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Hai worker cùng đọc rồi ghi một bộ đếm có thể làm mất cập nhật. Lock bảo vệ cả chuỗi read-modify-write, không chỉ riêng lệnh ghi."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "A read0; B read0; A write1; B write1\n# Muốn tổng2 nhưng nhận1\nwith lock:\n    counter += 1\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Trace phân rã minh họa lỗi; không dựa vào việc một lần chạy ngẫu nhiên có tình cờ xuất hiện race hay không."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Đủ\" — Hai worker vẫn có thể đọc cùng giá trị cũ."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Chỉ khóa bước write nhưng read nằm ngoài lock có đủ không?",
+          "options": [
+            {
+              "text": "Đủ",
+              "correct": false,
+              "detail": "Hai worker vẫn có thể đọc cùng giá trị cũ."
+            },
+            {
+              "text": "Không",
+              "correct": true,
+              "detail": "Đúng: bảo vệ toàn bộ thao tác logic."
+            },
+            {
+              "text": "GIL luôn giải quyết",
+              "correct": false,
+              "detail": "GIL không thay thế hợp đồng đồng bộ."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: bảo vệ toàn bộ thao tác logic."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Giữ lock trong khi sleep mô phỏng I/O; quan sát các worker bị tuần tự hóa và rút ngắn critical section."
+      },
+      "scaffold": {
+        "template": "from threading import Thread,Lock\ndef count_parallel(workers,iterations):\n    {{slot1}}\n    def work():\n        nonlocal count\n        for _ in range(iterations):\n            with lock: count+=1\n    {{slot2}}\n    for thread in threads: thread.start()\n    for thread in threads: thread.join()\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "count=0; lock=Lock()"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "threads=[Thread(target=work) for _ in range(workers)]"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return count"
+          }
+        ],
+        "bank": [
+          {
+            "label": "count=0; lock=Lock()",
+            "slot": 1
+          },
+          {
+            "label": "threads=[Thread(target=work) for _ in range(workers)]",
+            "slot": 2
+          },
+          {
+            "label": "return count",
+            "slot": 3
+          },
+          {
+            "label": "print(count)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Kéo bốn thẻ read/write tạo trace lost update như ví dụ; counter hiển thị1."
+          },
+          {
+            "label": "B2",
+            "text": "Gộp read+increment+write vào critical section; worker B chờ A nhả khóa."
+          },
+          {
+            "label": "B3",
+            "text": "Chạy nhiều worker tăng counter; join hết trước khi kiểm tra tổng."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết count_parallel(workers,iterations), hai int>=0, dùng threading.Thread và Lock để tổng cuối đúng workers*iterations. Không dùng sleep làm cơ chế đồng bộ. Nộp thêm trace hai worker giải thích lost update và bản sửa khóa cả read-modify-write.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Không chấm hiểu race chỉ từ stress test PASS: trace phải có hai read0 trước hai write1 và giải thích phạm vi Lock."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Trace phân rã minh họa lỗi; không dựa vào việc một lần chạy ngẫu nhiên có tình cờ xuất hiện race hay không."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "from threading import Thread,Lock\ndef count_parallel(workers,iterations):\n    count=0; lock=Lock()\n    def work():\n        nonlocal count\n        for _ in range(iterations):\n            with lock: count+=1\n    threads=[Thread(target=work) for _ in range(workers)]\n    for thread in threads: thread.start()\n    for thread in threads: thread.join()\n    return count\n"
+    }
+  }
+}

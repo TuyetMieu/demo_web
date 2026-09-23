@@ -1,0 +1,170 @@
+{
+  "lesson_code": "T05",
+  "sort_order": 49,
+  "module": "Module 9: Tkinter chuyên sâu",
+  "title": "Hộp thoại và lựa chọn file",
+  "subtitle": "T05 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Hộp thoại và lựa chọn file",
+    "subtitle": "T05 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#T05",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Hộp thoại thông tin, cảnh báo và lỗi cần đúng mục đích. Khi người dùng hủy chọn file, ứng dụng phải giữ dữ liệu hiện có."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "path=filedialog.askopenfilename(parent=root)\nif path:\n    messagebox.showinfo(\"Da chon\",path,parent=root)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Hủy trả chuỗi rỗng."
+        },
+        {
+          "n": 2,
+          "body": "parent gắn hộp thoại với cửa sổ chủ; ứng dụng một hộp thoại độc lập có thể tạo root rồi withdraw."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Hủy là một hành động bình thường."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Hủy file dialog nên được báo là lỗi đọc file không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Hủy là một hành động bình thường."
+            },
+            {
+              "text": "Không, người dùng chưa yêu cầu đọc file",
+              "correct": true,
+              "detail": "Đúng: không đọc và không ghi gì."
+            },
+            {
+              "text": "Luôn đóng app",
+              "correct": false,
+              "detail": "Không có yêu cầu thoát app."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: không đọc và không ghi gì."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Ngắt truy cập thư mục chia sẻ trong lab hoặc mock PermissionError; không báo Da sao chep khi copy thất bại."
+      },
+      "scaffold": {
+        "template": "from pathlib import Path\nimport shutil\nfrom tkinter import filedialog,messagebox\ndef copy_file(source,destination_dir):\n    {{slot1}}\n    shutil.copy2(source,target)\n    return str(target)\ndef choose_and_copy(root):\n    source=filedialog.askopenfilename(parent=root)\n    if not source: return None\n    folder=filedialog.askdirectory(parent=root)\n    {{slot2}}\n    try:\n        result=copy_file(source,folder)\n    except OSError as error:\n        messagebox.showerror(\"Khong sao chep\",str(error),parent=root)\n        return None\n    messagebox.showinfo(\"Da sao chep\",result,parent=root)\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "target=Path(destination_dir)/Path(source).name"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "if not folder: return None"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return result"
+          }
+        ],
+        "bank": [
+          {
+            "label": "target=Path(destination_dir)/Path(source).name",
+            "slot": 1
+          },
+          {
+            "label": "path=filedialog.askopenfilename(parent=root)",
+            "slot": 1
+          },
+          {
+            "label": "if not folder: return None",
+            "slot": 2
+          },
+          {
+            "label": "if path:",
+            "slot": 2
+          },
+          {
+            "label": "return result",
+            "slot": 3
+          },
+          {
+            "label": "print(result)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Lần lượt gọi showinfo/showwarning/showerror với cùng parent; quan sát biểu tượng và nội dung tương ứng."
+          },
+          {
+            "label": "B2",
+            "text": "Tạo root ẩn cho hộp thoại độc lập; đóng hộp thoại rồi destroy root, không để cửa sổ trắng."
+          },
+          {
+            "label": "B3",
+            "text": "Chọn file nguồn và thư mục đích chia sẻ đã mount; copy bằng shutil.copy2, báo lỗi riêng khi đường dẫn mất quyền."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết copy_file(source,destination_dir) trả đường dẫn file đích sau copy2. Viết choose_and_copy(root): chọn file rồi folder; hủy ở bất kỳ bước nào trả None; thành công showinfo, lỗi OSError showerror và trả None. Đích có thể là share mạng do lab cấp; không tự cấu hình mạng.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Lab native: thực hiện ba loại messagebox; independent dialog không để root trắng; copy sang share mạng và đối chiếu byte. Local copy PASS không chứng minh mạng đã được kiểm thử."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Hủy trả chuỗi rỗng. parent gắn hộp thoại với cửa sổ chủ; ứng dụng một hộp thoại độc lập có thể tạo root rồi withdraw."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "from pathlib import Path\nimport shutil\nfrom tkinter import filedialog,messagebox\ndef copy_file(source,destination_dir):\n    target=Path(destination_dir)/Path(source).name\n    shutil.copy2(source,target)\n    return str(target)\ndef choose_and_copy(root):\n    source=filedialog.askopenfilename(parent=root)\n    if not source: return None\n    folder=filedialog.askdirectory(parent=root)\n    if not folder: return None\n    try:\n        result=copy_file(source,folder)\n    except OSError as error:\n        messagebox.showerror(\"Khong sao chep\",str(error),parent=root)\n        return None\n    messagebox.showinfo(\"Da sao chep\",result,parent=root)\n    return result\n"
+    }
+  }
+}

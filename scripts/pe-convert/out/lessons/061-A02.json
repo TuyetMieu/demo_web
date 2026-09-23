@@ -1,0 +1,164 @@
+{
+  "lesson_code": "A02",
+  "sort_order": 61,
+  "module": "Module 10: Nâng cao — OOP, NumPy, pandas và biểu đồ",
+  "title": "NumPy và xếp hạng GPA có trọng số",
+  "subtitle": "A02 · Nâng cao · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "NumPy và xếp hạng GPA có trọng số",
+    "subtitle": "A02 · Nâng cao · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A02",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Điểm môn nhiều tín chỉ đóng góp nhiều hơn vào GPA. NumPy biểu diễn vector điểm và tín chỉ để tính tích vô hướng, rồi xếp sinh viên theo GPA giảm dần."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "import numpy as np\nmarks=np.array([8,6],dtype=float)\ncredits=np.array([3,1],dtype=float)\nprint(np.dot(marks,credits)/credits.sum())\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Kết quả 7.5, khác trung bình không trọng số 7.0."
+        },
+        {
+          "n": 2,
+          "body": "Làm tròn điểm lúc nhập theo C05; không làm tròn từng tích."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Sẽ sai khi tín chỉ khác nhau."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Có nên chia tổng điểm có trọng số cho số môn không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Sẽ sai khi tín chỉ khác nhau."
+            },
+            {
+              "text": "Không, chia tổng tín chỉ",
+              "correct": true,
+              "detail": "Đúng."
+            },
+            {
+              "text": "Chia số sinh viên",
+              "correct": false,
+              "detail": "Số sinh viên không tham gia công thức GPA."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi tín chỉ [3,1] thành [1,3], dự đoán GPA=6.5."
+      },
+      "scaffold": {
+        "template": "import numpy as np\ndef gpa(marks,credits):\n    {{slot1}}\n    if m.ndim!=1 or c.ndim!=1 or m.shape!=c.shape:\n        raise ValueError(\"shape\")\n    if not (np.isfinite(m).all() and np.isfinite(c).all()) or (m<0).any() or (m>10).any() or (c<=0).any():\n        raise ValueError(\"values\")\n    {{slot2}}\ndef ranking(records):\n    {{slot3}}\n    return sorted(rows,key=lambda row:(row[1] is None,-row[1] if row[1] is not None else 0,row[0]))\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "m=np.asarray(marks,dtype=float); c=np.asarray(credits,dtype=float)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "return float(np.dot(m,c)/c.sum()) if len(m) else None"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "rows=[(sid,gpa(*pair)) for sid,pair in records.items()]"
+          }
+        ],
+        "bank": [
+          {
+            "label": "m=np.asarray(marks,dtype=float); c=np.asarray(credits,dtype=float)",
+            "slot": 1
+          },
+          {
+            "label": "marks=np.array([8,6],dtype=float)",
+            "slot": 1
+          },
+          {
+            "label": "return float(np.dot(m,c)/c.sum()) if len(m) else None",
+            "slot": 2
+          },
+          {
+            "label": "print(float(np.dot(m,c)/c.sum()) if len(m) else None)",
+            "slot": 2
+          },
+          {
+            "label": "rows=[(sid,gpa(*pair)) for sid,pair in records.items()]",
+            "slot": 3
+          },
+          {
+            "label": "rows=[(sid,gpa(*pair)) for sid,pair in records.keys()]",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tạo hai array và quan sát shape,dtype; mismatch độ dài hiện lỗi hợp đồng."
+          },
+          {
+            "label": "B2",
+            "text": "Hiện từng tích 8*3 và 6*1, tổng 30 chia 4."
+          },
+          {
+            "label": "B3",
+            "text": "Thêm A GPA7.5,B GPA8,C GPA8; xếp B,C,A với mã tăng dần khi hòa."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết gpa(marks,credits) dùng NumPy: cùng độ dài, credits>0, điểm hữu hạn0..10; rỗng trả None, sai raise ValueError. Viết ranking(records) nhận dict id -> (marks,credits), trả list (id,gpa) giảm dần GPA; None cuối, hòa chọn id tăng."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Kết quả 7.5, khác trung bình không trọng số 7.0. Làm tròn điểm lúc nhập theo C05; không làm tròn từng tích."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import numpy as np\ndef gpa(marks,credits):\n    m=np.asarray(marks,dtype=float); c=np.asarray(credits,dtype=float)\n    if m.ndim!=1 or c.ndim!=1 or m.shape!=c.shape:\n        raise ValueError(\"shape\")\n    if not (np.isfinite(m).all() and np.isfinite(c).all()) or (m<0).any() or (m>10).any() or (c<=0).any():\n        raise ValueError(\"values\")\n    return float(np.dot(m,c)/c.sum()) if len(m) else None\ndef ranking(records):\n    rows=[(sid,gpa(*pair)) for sid,pair in records.items()]\n    return sorted(rows,key=lambda row:(row[1] is None,-row[1] if row[1] is not None else 0,row[0]))\n"
+    }
+  }
+}

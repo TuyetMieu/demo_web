@@ -1,0 +1,136 @@
+{
+  "lesson_code": "A03",
+  "sort_order": 62,
+  "module": "Module 10: Nâng cao — OOP, NumPy, pandas và biểu đồ",
+  "title": "Curses: menu bàn phím cho quản lý điểm",
+  "subtitle": "A03 · Nâng cao · 40 phút",
+  "estimated_minutes": 40,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Curses: menu bàn phím cho quản lý điểm",
+    "subtitle": "A03 · Nâng cao · 40 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A03",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Curses vẽ giao diện trong terminal và đọc phím. Nó cần terminal tương tác; phần mô phỏng trên web chỉ giúp học luồng điều khiển."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "def main(screen):\n    screen.addstr(0,0,\"So hoc tap - q de thoat\")\n    screen.refresh()\n    while screen.getkey()!=\"q\": pass\ncurses.wrapper(main)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "wrapper khởi tạo và khôi phục terminal kể cả khi lỗi."
+        },
+        {
+          "n": 2,
+          "body": "addstr cần tọa độ nằm trong kích thước terminal."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Để chạy nhanh hơn mọi GUI\" — Không có bảo đảm tốc độ đó."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Vì sao dùng wrapper thay tự gọi main(None)?",
+          "options": [
+            {
+              "text": "Để quản lý môi trường terminal",
+              "correct": true,
+              "detail": "Đúng: screen và chế độ terminal phải được chuẩn bị và dọn."
+            },
+            {
+              "text": "Để chạy nhanh hơn mọi GUI",
+              "correct": false,
+              "detail": "Không có bảo đảm tốc độ đó."
+            },
+            {
+              "text": "Để tự tạo database",
+              "correct": false,
+              "detail": "Curses chỉ lo UI terminal."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: screen và chế độ terminal phải được chuẩn bị và dọn."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi dữ liệu danh sách và độ rộng terminal; UI phải cắt phần hiển thị nhưng không sửa bản ghi."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chạy trong terminal Linux/macOS hoặc Windows có windows-curses; đọc getmaxyx."
+          },
+          {
+            "label": "B2",
+            "text": "Vẽ ba lựa chọn List students/List courses/Exit; phím lên xuống đổi hàng highlight."
+          },
+          {
+            "label": "B3",
+            "text": "Enter chọn mục, q thoát; resize terminal nhỏ thì rút ngắn dòng, không crash."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết menu curses với lựa chọn Students/Courses/Exit, mũi tên cuộn vòng, Enter chọn hiển thị An,Binh hoặc Python, q thoát. Dùng wrapper và clipping theo getmaxyx. Nộp ghi hình cả điều hướng, resize và khôi phục terminal sau thoát."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "wrapper khởi tạo và khôi phục terminal kể cả khi lỗi. addstr cần tọa độ nằm trong kích thước terminal."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import curses\ndef main(screen):\n    selected=0; message=\"\"; choices=[\"Students\",\"Courses\",\"Exit\"]\n    while True:\n        screen.erase(); height,width=screen.getmaxyx()\n        for row,text in enumerate(choices+[message]):\n            if row<height-1 and width>1:\n                screen.addnstr(row,0,text,width-1,curses.A_REVERSE if row==selected else curses.A_NORMAL)\n        screen.refresh(); key=screen.getch()\n        if key==ord(\"q\"): break\n        if key==curses.KEY_UP: selected=(selected-1)%3\n        elif key==curses.KEY_DOWN: selected=(selected+1)%3\n        elif key in (10,13,curses.KEY_ENTER):\n            if selected==2: break\n            message=\"An, Binh\" if selected==0 else \"Python\"\nif __name__==\"__main__\": curses.wrapper(main)\n",
+      "procedure": [
+        "import curses",
+        "def main(screen):",
+        "    selected=0; message=\"\"; choices=[\"Students\",\"Courses\",\"Exit\"]",
+        "    while True:",
+        "        screen.erase(); height,width=screen.getmaxyx()",
+        "        for row,text in enumerate(choices+[message]):",
+        "            if row<height-1 and width>1:",
+        "                screen.addnstr(row,0,text,width-1,curses.A_REVERSE if row==selected else curses.A_NORMAL)",
+        "        screen.refresh(); key=screen.getch()",
+        "        if key==ord(\"q\"): break",
+        "        if key==curses.KEY_UP: selected=(selected-1)%3",
+        "        elif key==curses.KEY_DOWN: selected=(selected+1)%3",
+        "        elif key in (10,13,curses.KEY_ENTER):",
+        "            if selected==2: break",
+        "            message=\"An, Binh\" if selected==0 else \"Python\"",
+        "if __name__==\"__main__\": curses.wrapper(main)"
+      ]
+    }
+  }
+}

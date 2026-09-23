@@ -1,0 +1,183 @@
+{
+  "lesson_code": "A07",
+  "sort_order": 80,
+  "module": "Module 12: Thread, tiến trình, đồng thời và mạng",
+  "title": "Mô phỏng FCFS, SJF, priority và round-robin",
+  "subtitle": "A07 · Nâng cao · 45 phút",
+  "estimated_minutes": 45,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Mô phỏng FCFS, SJF, priority và round-robin",
+    "subtitle": "A07 · Nâng cao · 45 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A07",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Các cách lập lịch đánh đổi thời gian chờ, phản hồi và công bằng. Mô phỏng giúp thấy khác biệt trước khi đo một hệ điều hành thật."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "P1: burst=5, priority=2\nP2: burst=2, priority=1\nFCFS: P1[0,5], P2[5,7]\nSJF: P2[0,2], P1[2,7]\nRR q=2: P1[0,2], P2[2,4], P1[4,6], P1[6,7]\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Mọi process tới lúc 0; priority số nhỏ là ưu tiên cao."
+        },
+        {
+          "n": 2,
+          "body": "Trace là mô hình đơn giản, không dự báo chính xác scheduler thật."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Luôn chạy job ngắn nhất\" — Đó là ý tưởng SJF."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "RR khác FCFS ở điểm nào trong mô hình này?",
+          "options": [
+            {
+              "text": "Có thể thu hồi CPU khi hết quantum",
+              "correct": true,
+              "detail": "Đúng: job chưa xong về cuối ready queue."
+            },
+            {
+              "text": "Luôn chạy job ngắn nhất",
+              "correct": false,
+              "detail": "Đó là ý tưởng SJF."
+            },
+            {
+              "text": "Không có hàng đợi",
+              "correct": false,
+              "detail": "RR dùng hàng đợi."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: job chưa xong về cuối ready queue."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi quantum từ2 thành10; dự đoán RR giống FCFS cho fixture này. Nêu nguy cơ starvation của ưu tiên cố định."
+      },
+      "scaffold": {
+        "template": "from collections import deque\ndef schedule(jobs,policy,quantum=2):\n    {{slot1}}\n        raise ValueError(\"policy/quantum\")\n    ordered=list(jobs)\n    if policy==\"sjf\": ordered.sort(key=lambda row:row[1])\n    if policy==\"priority\": ordered.sort(key=lambda row:row[2])\n    queue=deque((sid,burst) for sid,burst,_ in ordered)\n    time=0; trace=[]\n    {{slot2}}\n        sid,remaining=queue.popleft()\n        duration=min(quantum,remaining) if policy==\"rr\" else remaining\n        trace.append((sid,time,time+duration)); time+=duration\n        if remaining>duration: queue.append((sid,remaining-duration))\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "if policy not in (\"fcfs\",\"sjf\",\"priority\",\"rr\") or quantum<=0:"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "while queue:"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return trace"
+          }
+        ],
+        "bank": [
+          {
+            "label": "if policy not in (\"fcfs\",\"sjf\",\"priority\",\"rr\") or quantum<=0:",
+            "slot": 1
+          },
+          {
+            "label": "if policy not in (\"fcfs\",\"sjf\",\"priority\",\"rr\") or quantum<0:",
+            "slot": 1
+          },
+          {
+            "label": "while queue:",
+            "slot": 2
+          },
+          {
+            "label": "P1: burst=5, priority=2",
+            "slot": 2
+          },
+          {
+            "label": "return trace",
+            "slot": 3
+          },
+          {
+            "label": "print(trace)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Kéo P1/P2 vào ready queue; chọn FCFS rồi SJF và tính thời gian hoàn tất."
+          },
+          {
+            "label": "B2",
+            "text": "Chọn priority, so số priority trước, thứ tự tới khi hòa."
+          },
+          {
+            "label": "B3",
+            "text": "Chạy RR từng quantum; job còn thời gian được đưa về cuối hàng đợi."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết schedule(jobs,policy,quantum=2), jobs list (id,burst,priority), burst int>0, tất cả arrival=0. policy fcfs/sjf/priority/rr; SJF và priority không preempt; hòa giữ thứ tự input. Trả list (id,start,end), mô hình context switch cost=0. Policy lạ hoặc quantum<=0 raise ValueError.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Tính waiting: FCFS P1=0,P2=5; SJF P2=0,P1=2; RR P1=2,P2=2. Giải thích quantum nhỏ tăng số lần chuyển và priority có thể gây starvation."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Mọi process tới lúc 0; priority số nhỏ là ưu tiên cao. Trace là mô hình đơn giản, không dự báo chính xác scheduler thật."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "from collections import deque\ndef schedule(jobs,policy,quantum=2):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "policies (A07-K01)",
+          "call": "(exec('jobs=[(\"P1\",5,2),(\"P2\",2,1)]\\nassert schedule(jobs,\"fcfs\")==[(\"P1\",0,5),(\"P2\",5,7)]\\nassert schedule(jobs,\"sjf\")==schedule(jobs,\"priority\")==[(\"P2\",0,2),(\"P1\",2,7)]\\nassert schedule(jobs,\"rr\")==[(\"P1\",0,2),(\"P2\",2,4),(\"P1\",4,6),(\"P1\",6,7)]\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "empty_tie (A07-K02)",
+          "call": "(exec('assert schedule([],\"rr\")==[]\\nassert schedule([(\"B\",1,1),(\"A\",1,1)],\"priority\")==[(\"B\",0,1),(\"A\",1,2)]\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "from collections import deque\ndef schedule(jobs,policy,quantum=2):\n    if policy not in (\"fcfs\",\"sjf\",\"priority\",\"rr\") or quantum<=0:\n        raise ValueError(\"policy/quantum\")\n    ordered=list(jobs)\n    if policy==\"sjf\": ordered.sort(key=lambda row:row[1])\n    if policy==\"priority\": ordered.sort(key=lambda row:row[2])\n    queue=deque((sid,burst) for sid,burst,_ in ordered)\n    time=0; trace=[]\n    while queue:\n        sid,remaining=queue.popleft()\n        duration=min(quantum,remaining) if policy==\"rr\" else remaining\n        trace.append((sid,time,time+duration)); time+=duration\n        if remaining>duration: queue.append((sid,remaining-duration))\n    return trace\n"
+    }
+  }
+}

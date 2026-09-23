@@ -1,0 +1,170 @@
+{
+  "lesson_code": "T09",
+  "sort_order": 53,
+  "module": "Module 9: Tkinter chuyên sâu",
+  "title": "Biểu đồ trong Tk và thay đổi thang đo",
+  "subtitle": "T09 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Biểu đồ trong Tk và thay đổi thang đo",
+    "subtitle": "T09 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#T09",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Biểu đồ trong app phải cập nhật theo dữ liệu và giữ nhãn dễ hiểu. FigureCanvasTkAgg đưa Figure vào widget Tk; đổi giới hạn trục cần redraw."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "figure=Figure(figsize=(4,3))\naxes=figure.add_subplot()\naxes.plot([1,2],[4,8],label=\"Diem\")\naxes.legend()\ncanvas=FigureCanvasTkAgg(figure,master=root)\ncanvas.draw()\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Figure chứa Axes; Tk canvas là adapter hiển thị."
+        },
+        {
+          "n": 2,
+          "body": "legend cần label trên đường dữ liệu."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Chắc rồi\" — Model thay đổi chưa bảo đảm ảnh được vẽ lại."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Đổi ylim nhưng không redraw thì màn hình chắc đã cập nhật chưa?",
+          "options": [
+            {
+              "text": "Chắc rồi",
+              "correct": false,
+              "detail": "Model thay đổi chưa bảo đảm ảnh được vẽ lại."
+            },
+            {
+              "text": "Chưa, cần draw/draw_idle",
+              "correct": true,
+              "detail": "Đúng."
+            },
+            {
+              "text": "Phải mở Tk mới",
+              "correct": false,
+              "detail": "Chỉ cần redraw canvas hiện có."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Dùng dữ liệu toàn 0 và rỗng: quy định ylim tối thiểu 0..1 để không có khoảng bằng 0."
+      },
+      "scaffold": {
+        "template": "from tkinter import ttk\nfrom matplotlib.figure import Figure\nfrom matplotlib.backends.backend_tkagg import FigureCanvasTkAgg\nclass Chart(ttk.Frame):\n    def __init__(self,parent):\n        {{slot1}}\n        self.figure=Figure(figsize=(4,3)); self.axes=self.figure.add_subplot()\n        self.line,=self.axes.plot([],[],label=\"Diem\")\n        self.axes.set(xlabel=\"Luot\",ylabel=\"Diem\"); self.axes.legend()\n        self.canvas=FigureCanvasTkAgg(self.figure,master=self)\n        {{slot2}}\n        self.update_values([])\n    def update_values(self,values):\n        self.line.set_data(list(range(1,len(values)+1)),values)\n        self.axes.set_xlim(0,max(1,len(values)+1))\n        self.axes.set_ylim(0,max(1,max(values,default=0)+1))\n        {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "super().__init__(parent)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "self.canvas.get_tk_widget().pack(fill=\"both\",expand=True)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "self.canvas.draw_idle()"
+          }
+        ],
+        "bank": [
+          {
+            "label": "super().__init__(parent)",
+            "slot": 1
+          },
+          {
+            "label": "axes.plot([1,2],[4,8],label=\"Diem\")",
+            "slot": 1
+          },
+          {
+            "label": "self.canvas.get_tk_widget().pack(fill=\"both\",expand=True)",
+            "slot": 2
+          },
+          {
+            "label": "axes.legend()",
+            "slot": 2
+          },
+          {
+            "label": "self.canvas.draw_idle()",
+            "slot": 3
+          },
+          {
+            "label": "canvas.draw()",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Nhúng Figure vào frame; tô ranh giới giữa widget Tk và Axes."
+          },
+          {
+            "label": "B2",
+            "text": "Thêm đường điểm và legend; đổi từ giới hạn cố định 0..10 sang 0..max+1."
+          },
+          {
+            "label": "B3",
+            "text": "Thay dữ liệu [4,8] thành [2,12]; gọi set_data, đổi limits, draw_idle; không thêm line thừa."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết Chart(ttk.Frame) có FigureCanvasTkAgg, một line label Diem, legend, xlabel Luot, ylabel Diem. update_values(values) nhận list số không âm, x=1..n, ylim 0..max(1,max(values)+1), xlim 0..max(1,n+1), gọi draw_idle. Không tạo thêm axes/line sau cập nhật.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Native resize và thay dữ liệu: legend/nhãn không cắt, thanh trục và line đổi đúng; không tích lũy canvas mới."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Figure chứa Axes; Tk canvas là adapter hiển thị. legend cần label trên đường dữ liệu."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "from tkinter import ttk\nfrom matplotlib.figure import Figure\nfrom matplotlib.backends.backend_tkagg import FigureCanvasTkAgg\nclass Chart(ttk.Frame):\n    def __init__(self,parent):\n        super().__init__(parent)\n        self.figure=Figure(figsize=(4,3)); self.axes=self.figure.add_subplot()\n        self.line,=self.axes.plot([],[],label=\"Diem\")\n        self.axes.set(xlabel=\"Luot\",ylabel=\"Diem\"); self.axes.legend()\n        self.canvas=FigureCanvasTkAgg(self.figure,master=self)\n        self.canvas.get_tk_widget().pack(fill=\"both\",expand=True)\n        self.update_values([])\n    def update_values(self,values):\n        self.line.set_data(list(range(1,len(values)+1)),values)\n        self.axes.set_xlim(0,max(1,len(values)+1))\n        self.axes.set_ylim(0,max(1,max(values,default=0)+1))\n        self.canvas.draw_idle()\n"
+    }
+  }
+}

@@ -1,0 +1,179 @@
+{
+  "lesson_code": "A04",
+  "sort_order": 63,
+  "module": "Module 10: Nâng cao — OOP, NumPy, pandas và biểu đồ",
+  "title": "Nén bytes và đóng gói nhiều file",
+  "subtitle": "A04 · Nâng cao · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Nén bytes và đóng gói nhiều file",
+    "subtitle": "A04 · Nâng cao · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A04",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Nén làm thay đổi biểu diễn bytes; giải nén phải khôi phục đúng dữ liệu ban đầu. Archive còn giữ nhiều tên file trong một gói."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "import gzip,bz2,zlib\npayload=b\"PE \"*100\nprint(gzip.decompress(gzip.compress(payload))==payload)\nprint(bz2.decompress(bz2.compress(payload))==payload)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Kích thước không phải luôn nhỏ hơn, nhất là dữ liệu ngắn."
+        },
+        {
+          "n": 2,
+          "body": "zip/tar giữ cấu trúc archive, gzip thường nén một luồng."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Không được kết luận chỉ theo kích thước."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Nén chuỗi ngắn xong file lớn hơn có chứng minh thuật toán hỏng không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Không được kết luận chỉ theo kích thước."
+            },
+            {
+              "text": "Không, còn header và overhead",
+              "correct": true,
+              "detail": "Đúng: kiểm tra round-trip là tiêu chí chính."
+            },
+            {
+              "text": "Chỉ đúng khi file rỗng",
+              "correct": false,
+              "detail": "Cả chuỗi ngắn không rỗng cũng có thể lớn hơn."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: kiểm tra round-trip là tiêu chí chính."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thử payload rỗng và bytes ngẫu nhiên; đừng đặt test bắt buộc luôn giảm kích thước."
+      },
+      "scaffold": {
+        "template": "import gzip,bz2,zlib,io,zipfile\n{{slot1}}\ndef codec(method):\n    if method not in CODECS: raise ValueError(\"method\")\n    return CODECS[method]\ndef compress_bytes(data,method): return codec(method).compress(data)\ndef decompress_bytes(blob,method): return codec(method).decompress(blob)\ndef pack_files(files):\n    {{slot2}}\n    with zipfile.ZipFile(buffer,\"w\",compression=zipfile.ZIP_DEFLATED) as archive:\n        for name,data in files.items():\n            if \"/\" in name or \"\\\\\" in name or name in (\".\",\"..\"): raise ValueError(\"basename\")\n            archive.writestr(name,data)\n    return buffer.getvalue()\ndef unpack_files(blob):\n    with zipfile.ZipFile(io.BytesIO(blob)) as archive:\n        {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "CODECS={\"gzip\":gzip,\"bz2\":bz2,\"zlib\":zlib}"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "buffer=io.BytesIO()"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return {name:archive.read(name) for name in archive.namelist()}"
+          }
+        ],
+        "bank": [
+          {
+            "label": "CODECS={\"gzip\":gzip,\"bz2\":bz2,\"zlib\":zlib}",
+            "slot": 1
+          },
+          {
+            "label": "payload=b\"PE \"*100",
+            "slot": 1
+          },
+          {
+            "label": "buffer=io.BytesIO()",
+            "slot": 2
+          },
+          {
+            "label": "return {name:archive.read(name) for name in archive.namelist()}",
+            "slot": 3
+          },
+          {
+            "label": "print({name:archive.read(name) for name in archive.namelist()})",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Đổi text thành UTF-8 bytes, nén bằng zlib/gzip/bz2 và đo len."
+          },
+          {
+            "label": "B2",
+            "text": "Giải nén với đúng codec và so từng byte; thử sai codec để thấy lỗi."
+          },
+          {
+            "label": "B3",
+            "text": "Đóng students.txt,courses.txt,marks.txt bằng ZipFile writestr; đọc theo tên không extract ra đường dẫn tùy ý."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết compress_bytes(data,method), decompress_bytes(blob,method) cho zlib/gzip/bz2, method lạ ValueError. Viết pack_files(files) nhận dict tên -> bytes tạo ZIP trong memory, unpack_files(blob) trả dict bytes; bài chỉ cho tên basename, không folder.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Thêm lab tarfile: tạo tar.gz từ ba fixture bằng add(...,arcname=basename), đọc getnames/extractfile và so bytes; không extractall dữ liệu không tin cậy."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Kích thước không phải luôn nhỏ hơn, nhất là dữ liệu ngắn. zip/tar giữ cấu trúc archive, gzip thường nén một luồng."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "import gzip, bz2, zlib, io, zipfile\ndef codec(method):\n    # Viết lời giải của bạn ở đây\n    pass\n# Viết lời giải của bạn ở đây\npass\n# Viết lời giải của bạn ở đây\npass\ndef pack_files(files):\n    # Viết lời giải của bạn ở đây\n    pass\ndef unpack_files(blob):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "codecs (A04-K01)",
+          "call": "(exec('for method in CODECS:\\n    for data in [b\"\",b\"PE \"*100]:\\n        assert decompress_bytes(compress_bytes(data,method),method)==data\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "archive (A04-K02)",
+          "call": "(exec('files={\"students.txt\":b\"An\",\"courses.txt\":b\"PY\",\"marks.txt\":b\"8\"}\\nassert unpack_files(pack_files(files))==files\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "import gzip,bz2,zlib,io,zipfile\nCODECS={\"gzip\":gzip,\"bz2\":bz2,\"zlib\":zlib}\ndef codec(method):\n    if method not in CODECS: raise ValueError(\"method\")\n    return CODECS[method]\ndef compress_bytes(data,method): return codec(method).compress(data)\ndef decompress_bytes(blob,method): return codec(method).decompress(blob)\ndef pack_files(files):\n    buffer=io.BytesIO()\n    with zipfile.ZipFile(buffer,\"w\",compression=zipfile.ZIP_DEFLATED) as archive:\n        for name,data in files.items():\n            if \"/\" in name or \"\\\\\" in name or name in (\".\",\"..\"): raise ValueError(\"basename\")\n            archive.writestr(name,data)\n    return buffer.getvalue()\ndef unpack_files(blob):\n    with zipfile.ZipFile(io.BytesIO(blob)) as archive:\n        return {name:archive.read(name) for name in archive.namelist()}\n"
+    }
+  }
+}

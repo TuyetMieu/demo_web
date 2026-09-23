@@ -1,0 +1,177 @@
+{
+  "lesson_code": "C16",
+  "sort_order": 31,
+  "module": "Module 6: File, ngoại lệ và dữ liệu lâu dài",
+  "title": "Ngày giờ và tìm mẫu bằng regex",
+  "subtitle": "C16 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Ngày giờ và tìm mẫu bằng regex",
+    "subtitle": "C16 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C16",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Chuỗi ngày tháng cần được phân tích theo định dạng đã biết. Regex tìm cấu trúc văn bản; không thay thế việc kiểm tra ngày có tồn tại."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "from datetime import datetime,timedelta\nimport re\nday=datetime.strptime(\"2024-02-28\",\"%Y-%m-%d\")\nprint((day+timedelta(days=2)).strftime(\"%Y-%m-%d\"))\nprint(re.sub(r\"\\s+\",\" \",\"An   Binh\"))\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Hai ngày sau 28/02/2024 là 01/03/2024 vì năm nhuận."
+        },
+        {
+          "n": 2,
+          "body": "sub thay mọi dãy khoảng trắng bằng một dấu cách."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Rồi\" — Regex cấu trúc không xác nhận lịch."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Regex khớp 2024-02-31 chứng minh ngày đó hợp lệ chưa?",
+          "options": [
+            {
+              "text": "Rồi",
+              "correct": false,
+              "detail": "Regex cấu trúc không xác nhận lịch."
+            },
+            {
+              "text": "Chưa",
+              "correct": true,
+              "detail": "Đúng: strptime sẽ bác ngày không tồn tại."
+            },
+            {
+              "text": "Chỉ cần đúng 10 ký tự",
+              "correct": false,
+              "detail": "Độ dài không đủ."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: strptime sẽ bác ngày không tồn tại."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thử ngày 2023-02-29 rồi 2024-02-29; so kết quả. Nêu datetime.now phụ thuộc thời điểm chạy nên không dùng làm expected cố định."
+      },
+      "scaffold": {
+        "template": "from datetime import datetime,timedelta\nimport re\ndef due_date(text,days):\n    return (datetime.strptime(text,\"%Y-%m-%d\")+timedelta(days=days)).strftime(\"%Y-%m-%d\")\ndef extract_id(text):\n    {{slot1}}\n    {{slot2}}\ndef clean_spaces(text):\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "match=re.search(r\"\\bS\\d{3}\\b\",text)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "return match.group(0) if match else None"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return re.sub(r\"\\s+\",\" \",text).strip()"
+          }
+        ],
+        "bank": [
+          {
+            "label": "match=re.search(r\"\\bS\\d{3}\\b\",text)",
+            "slot": 1
+          },
+          {
+            "label": "day=datetime.strptime(\"2024-02-28\",\"%Y-%m-%d\")",
+            "slot": 1
+          },
+          {
+            "label": "return match.group(0) if match else None",
+            "slot": 2
+          },
+          {
+            "label": "print(match.group(0) if match else None)",
+            "slot": 2
+          },
+          {
+            "label": "return re.sub(r\"\\s+\",\" \",text).strip()",
+            "slot": 3
+          },
+          {
+            "label": "return re.sub(r\"\\s+\",\" \",text).rstrip()",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tách năm/tháng/ngày theo format; ngày sai chuyển ô lỗi ValueError."
+          },
+          {
+            "label": "B2",
+            "text": "Cộng timedelta qua ranh giới tháng; trục lịch nhảy đúng số ngày."
+          },
+          {
+            "label": "B3",
+            "text": "Dùng re.search tìm mã SV gồm S và ba chữ số; dùng re.sub chuẩn hóa khoảng trắng."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết due_date(text,days) nhận ngày YYYY-MM-DD hợp lệ, trả ngày sau days (int, có thể âm) cùng định dạng. Viết extract_id(text) trả mã đầu tiên khớp r\"\\bS\\d{3}\\b\" hoặc None; clean_spaces(text) gộp khoảng trắng rồi strip."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Hai ngày sau 28/02/2024 là 01/03/2024 vì năm nhuận. sub thay mọi dãy khoảng trắng bằng một dấu cách."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "from datetime import datetime, timedelta\nimport re\ndef due_date(text,days):\n    # Viết lời giải của bạn ở đây\n    pass\ndef extract_id(text):\n    # Viết lời giải của bạn ở đây\n    pass\ndef clean_spaces(text):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "calendar (C16-K01)",
+          "call": "(exec('assert due_date(\"2024-02-28\",2)==\"2024-03-01\"\\nassert due_date(\"2025-01-01\",-1)==\"2024-12-31\"\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "regex (C16-K02)",
+          "call": "(exec('assert extract_id(\"Mã S012 và S099\")==\"S012\"\\nassert extract_id(\"S1234\") is None\\nassert clean_spaces(\" An\\\\t Binh\\\\n\")==\"An Binh\"\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "from datetime import datetime,timedelta\nimport re\ndef due_date(text,days):\n    return (datetime.strptime(text,\"%Y-%m-%d\")+timedelta(days=days)).strftime(\"%Y-%m-%d\")\ndef extract_id(text):\n    match=re.search(r\"\\bS\\d{3}\\b\",text)\n    return match.group(0) if match else None\ndef clean_spaces(text):\n    return re.sub(r\"\\s+\",\" \",text).strip()\n"
+    }
+  }
+}

@@ -1,26 +1,52 @@
 'use client';
 
-/* eslint-disable @next/next/no-html-link-for-pages, @next/next/no-page-custom-font */
-// Renders any lesson stored as studio-lesson/v1 in lessons.content_json — the
-// output of the admin PDF/Markdown import. The hand-built List & Mutability
-// lesson keeps its own component (PythonStudio.tsx); this one is data-driven and
-// hides whatever the source document did not provide.
-import { useEffect, useRef, useState } from 'react';
+// Dựng mọi bài lưu ở `lessons.content_json` theo schema studio-lesson/v1 (kết
+// quả của bộ nhập PDF/Markdown và của scripts/pe-convert) bằng khung
+// LessonChrome — vỏ dịch từ Stitch, xem trước ở /admin/lesson-chrome-demo:
+// thanh tiến độ trên đầu, MỘT thẻ nội dung mỗi màn, một nút CTA dưới đáy.
+//
+// Khác bản cũ ở chỗ chia màn: trước đây mỗi bước S1–S4 là một trang nhồi nhiều
+// thẻ; giờ mỗi phần (ngữ cảnh, giải thích, từng câu hỏi, khung lắp ghép,
+// sandbox…) là một màn riêng — buildScreens() trong @/lib/studio-lesson quyết
+// định danh sách đó và tự bỏ phần tài liệu nguồn không có.
+//
+// Bài List & Mutability dựng tay vẫn dùng PythonStudio.tsx, không đi qua đây.
+import { useEffect, useMemo, useRef, useState } from 'react';
+
 import { apiFetch, asList, findEnrollment } from '@/lib/api';
-import { Card, Choice, Code, Icon, Stepper } from './studio-ui';
+import LessonChrome from '@/components/lesson-chrome/LessonChrome';
+import ShellB from '@/components/lesson-chrome/ShellB';
+import Assemble from '@/components/lesson-chrome/exercises/Assemble';
+import Classify from '@/components/lesson-chrome/exercises/Classify';
+import CodeAnnotated from '@/components/lesson-chrome/exercises/CodeAnnotated';
+import CodeBlock from '@/components/lesson-chrome/exercises/CodeBlock';
+import { ConsoleLine } from '@/components/lesson-chrome/exercises/Console';
+import FeedbackBanner from '@/components/lesson-chrome/exercises/FeedbackBanner';
+import HintSheet from '@/components/lesson-chrome/exercises/HintSheet';
+import Mcq from '@/components/lesson-chrome/exercises/Mcq';
+import Misconception from '@/components/lesson-chrome/exercises/Misconception';
+import Recap from '@/components/lesson-chrome/exercises/Recap';
+import SandboxEditor, {
+  SandboxTestRow,
+} from '@/components/lesson-chrome/exercises/SandboxEditor';
+import SelfExplain from '@/components/lesson-chrome/exercises/SelfExplain';
+import Visual from '@/components/lesson-chrome/exercises/Visual';
+import { toCodeLines } from '@/lib/py-highlight';
+import c from './studio-chrome.module.css';
 import {
-  assembleScaffold,
-  canLeaveStep,
+  buildScreens,
   correctIndex,
   initialLessonDraft,
+  isGraded,
+  letterKey,
   optionDetail,
   optionText,
-  presentSteps,
-  rubricScore,
+  screenVerdict,
+  SELF_EXPLAIN_MIN,
   type LessonDraft,
+  type LessonScreen,
   type StudioLesson as Lesson,
 } from '@/lib/studio-lesson';
-import s from './studio.module.css';
 
 type TestResult = { name: string; passed: boolean; detail: string };
 type RunResult = {
@@ -31,6 +57,60 @@ type RunResult = {
   version: string;
 };
 
+const ICON = {
+  book: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z" /><path d="M8 3v18" />
+    </svg>
+  ),
+  code: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m9 8-4 4 4 4M15 8l4 4-4 4" />
+    </svg>
+  ),
+  help: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" /><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1.5.9-1.5 1.7v.5" /><line x1="12" y1="17" x2="12" y2="17" />
+    </svg>
+  ),
+  bulb: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2Z" />
+    </svg>
+  ),
+  swap: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 3 21 7l-4 4M21 7H9M7 21l-4-4 4-4M3 17h12" />
+    </svg>
+  ),
+  play: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="6 4 20 12 6 20 6 4" />
+    </svg>
+  ),
+};
+
+/** Nhãn nhỏ trên mỗi thẻ: "S2 · Bẫy ngộ nhận". */
+function eyebrowOf(scr: LessonScreen): { icon: React.ReactNode; label: string } {
+  const map: Record<string, { icon: React.ReactNode; label: string }> = {
+    context: { icon: ICON.book, label: 'Ngữ cảnh' },
+    explain: { icon: ICON.code, label: 'Giải thích từng dòng' },
+    memory: { icon: ICON.swap, label: 'Mô hình bộ nhớ' },
+    misconception: { icon: ICON.bulb, label: 'Ngộ nhận' },
+    predict: { icon: ICON.code, label: 'Dự đoán kết quả' },
+    mcq: { icon: ICON.help, label: 'Trắc nghiệm' },
+    classify: { icon: ICON.swap, label: 'Phân loại thao tác' },
+    selfExplain: { icon: ICON.bulb, label: 'Tự giải thích' },
+    scaffold: { icon: ICON.swap, label: 'Lắp ghép khung mã' },
+    trace: { icon: ICON.book, label: 'Nhật ký biến đổi' },
+    counter: { icon: ICON.help, label: 'Tái dự đoán' },
+    sandbox: { icon: ICON.play, label: 'Thử thách độc lập' },
+    recap: { icon: ICON.bulb, label: 'Tổng kết' },
+  };
+  const found = map[scr.kind] ?? { icon: ICON.book, label: scr.label };
+  return { icon: found.icon, label: `S${scr.origin} · ${found.label}` };
+}
+
 export default function StudioLesson({
   courseId,
   lessonNo,
@@ -39,15 +119,10 @@ export default function StudioLesson({
   lessonNo: number;
 }) {
   const [lesson, setLesson] = useState<Lesson | null>(null);
-  const [meta, setMeta] = useState<{ title: string; xpReward: number } | null>(
-    null,
-  );
-  const [user, setUser] = useState<{
-    id: number;
-    name: string;
-    xp: number;
-    role?: string;
-  } | null>(null);
+  const [meta, setMeta] = useState<{ title: string; xpReward: number } | null>(null);
+  const [user, setUser] = useState<{ id: number; name: string; xp: number; role?: string } | null>(null);
+  const [streak, setStreak] = useState(0);
+  const [totalLessons, setTotalLessons] = useState(0);
   const [enrolled, setEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -60,26 +135,25 @@ export default function StudioLesson({
   const [runtimeStatus, setRuntimeStatus] = useState('');
   const [result, setResult] = useState<RunResult | null>(null);
   const [completed, setCompleted] = useState(false);
-  const [hint, setHint] = useState(false);
-  const [openHint, setOpenHint] = useState(0);
-  const [selectedToken, setSelectedToken] = useState('');
+  const [checkedKey, setCheckedKey] = useState('');
+  const [hintOpen, setHintOpen] = useState(false);
+  const [procedureOpen, setProcedureOpen] = useState(false);
+  const [hintIndex, setHintIndex] = useState(0);
+  const [answerOpen, setAnswerOpen] = useState(false);
+  const [held, setHeld] = useState<string | null>(null);
   const worker = useRef<Worker | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const steps = lesson ? presentSteps(lesson) : [];
-  const current = steps[d.step - 1];
-  const draftKey = user
-    ? `pe-studio-lesson-v1:${user.id}:${courseId}:${lessonNo}`
-    : null;
-  const update = (changes: Partial<LessonDraft>) =>
-    setD((prev) => ({ ...prev, ...changes }));
+  const screens = useMemo(() => (lesson ? buildScreens(lesson) : []), [lesson]);
+  const scr: LessonScreen | undefined = screens[d.step - 1];
+  const draftKey = user ? `pe-studio-lesson-v1:${user.id}:${courseId}:${lessonNo}` : null;
+  const update = (changes: Partial<LessonDraft>) => setD((prev) => ({ ...prev, ...changes }));
 
   async function json(path: string, options?: RequestInit) {
     const response = await apiFetch(path, options);
     if (response.status === 401) {
       window.location.assign(
-        '/login?next=' +
-          encodeURIComponent(`/lesson/python?lesson=${lessonNo - 1}`),
+        '/login?next=' + encodeURIComponent(`/lesson/python?lesson=${lessonNo - 1}`),
       );
       throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
     }
@@ -89,7 +163,8 @@ export default function StudioLesson({
         Array.isArray(body.message)
           ? body.message.join(', ')
           : body.message ||
-              body.error ||
+              // Bộ lọc lỗi của backend gói lỗi thành { error: { status, message } }.
+              (typeof body.error === 'object' ? body.error?.message : body.error) ||
               `Không thể kết nối (${response.status}).`,
       );
     return body;
@@ -104,12 +179,16 @@ export default function StudioLesson({
         json('/api/user'),
         json('/api/enrolled'),
       ]);
-      const enrollment = findEnrollment(
-        asList(enrollments, 'enrolled'),
-        courseId,
-      );
+      const enrollment = findEnrollment(asList(enrollments, 'enrolled'), courseId);
       setUser(profile);
       setEnrolled(Boolean(enrollment));
+      setTotalLessons(Number(enrollment?.totalLessons) || 0);
+      // Streak chỉ để hiện trên thanh trên cùng — hỏng thì bỏ qua, không chặn bài.
+      void apiFetch('/api/stats')
+        .then((r) => (r.ok ? r.json() : null))
+        .then((stats) => setStreak(Number(stats?.streak) || 0))
+        .catch(() => undefined);
+
       // Quản trị viên xem trước bài học mà không cần ghi danh; backend cũng cho
       // đọc content nhưng vẫn chặn nộp bài.
       if (!enrollment && profile.role !== 'admin') {
@@ -129,7 +208,8 @@ export default function StudioLesson({
 
       // A lesson row can exist with no studio content yet (or only the legacy
       // {text} wrapper). Say so plainly instead of rendering an empty shell.
-      if (!content || !presentSteps(content).length) {
+      const list = content ? buildScreens(content) : [];
+      if (!content || !list.length) {
         setEmpty(true);
         setLoading(false);
         return;
@@ -139,18 +219,17 @@ export default function StudioLesson({
       let restored = initialLessonDraft(content);
       try {
         const stored = JSON.parse(
-          localStorage.getItem(
-            `pe-studio-lesson-v1:${profile.id}:${courseId}:${lessonNo}`,
-          ) || 'null',
+          localStorage.getItem(`pe-studio-lesson-v1:${profile.id}:${courseId}:${lessonNo}`) ||
+            'null',
         );
         if (stored && typeof stored.code === 'string') {
           restored = {
             ...restored,
             ...stored,
-            step: Math.min(
-              presentSteps(content).length,
-              Math.max(1, Number(stored.step) || 1),
-            ),
+            // Bản nháp cũ đánh số theo 4 bước S; giờ danh sách màn dài hơn nên
+            // phải kẹp lại cho khỏi rơi ra ngoài mảng.
+            step: Math.min(list.length, Math.max(1, Number(stored.step) || 1)),
+            done: stored.done && typeof stored.done === 'object' ? stored.done : {},
             code: String(stored.code).slice(0, 15000),
           };
         }
@@ -159,9 +238,7 @@ export default function StudioLesson({
       }
       setD(restored);
     } catch (error) {
-      setLoadError(
-        error instanceof Error ? error.message : 'Không kết nối được backend.',
-      );
+      setLoadError(error instanceof Error ? error.message : 'Không kết nối được backend.');
     } finally {
       setLoading(false);
     }
@@ -231,9 +308,7 @@ export default function StudioLesson({
           : 'Đã lưu hoàn thành bài học.',
       );
     } catch (error) {
-      setMessage(
-        `Code đã đạt, nhưng chưa lưu được tiến độ: ${(error as Error).message}`,
-      );
+      setMessage(`Chưa lưu được tiến độ: ${(error as Error).message}`);
     } finally {
       setBusy(false);
     }
@@ -250,11 +325,12 @@ export default function StudioLesson({
     if (running || busy) return;
     const four = lesson?.step_4;
     if (!four || !lesson) return;
-    const blocked = steps
-      .slice(0, -1)
-      .some((_, i) => !canLeaveStep(lesson, steps, { ...d, step: i + 1 }));
+    const sandboxAt = screens.findIndex((x) => x.kind === 'sandbox');
+    const blocked = screens
+      .slice(0, sandboxAt < 0 ? 0 : sandboxAt)
+      .some((x) => isGraded(x.kind) && !d.done[x.key]);
     if (submit && blocked) {
-      setMessage('Hãy hoàn thành các bước học trước khi nộp bài.');
+      setMessage('Hãy hoàn thành các màn học phía trước trước khi nộp bài.');
       return;
     }
     setMessage('');
@@ -266,13 +342,7 @@ export default function StudioLesson({
     const expire = (text: string) => {
       cancelRun();
       setRuntimeStatus('');
-      setResult({
-        tests: [],
-        output: '',
-        error: text,
-        duration: 0,
-        version: '',
-      });
+      setResult({ tests: [], output: '', error: text, duration: 0, version: '' });
     };
     timer.current = setTimeout(
       () => expire('Tải Python quá lâu. Kiểm tra kết nối mạng rồi thử lại.'),
@@ -284,10 +354,7 @@ export default function StudioLesson({
       if (data.type === 'ready') {
         if (timer.current) clearTimeout(timer.current);
         timer.current = setTimeout(
-          () =>
-            expire(
-              'Chương trình vượt giới hạn 5 giây. Kiểm tra vòng lặp vô hạn.',
-            ),
+          () => expire('Chương trình vượt giới hạn 5 giây. Kiểm tra vòng lặp vô hạn.'),
           5000,
         );
         setRuntimeStatus('Đang chạy và kiểm tra…');
@@ -297,14 +364,21 @@ export default function StudioLesson({
       setRuntimeStatus(data.version ? `CPython ${data.version}` : '');
       setResult(data);
       const tests = four.tests ?? [];
-      if (
-        submit &&
+      const allPassed =
         !data.error &&
         tests.length > 0 &&
         data.tests.length === tests.length &&
-        data.tests.every((t: TestResult) => t.passed)
-      )
+        data.tests.every((t: TestResult) => t.passed);
+      // Chỉ lượt NỘP mới ghi nhận: chạy thử đạt hết vẫn phải bấm nộp thì tiến
+      // độ mới được lưu, nếu không học viên tưởng xong mà backend không biết.
+      if (submit && allPassed) {
+        markDone('s4-sandbox');
         void complete();
+        // Nộp đạt là xong phần thực hành: đưa thẳng sang màn tổng kết để bấm
+        // tiếp sang bài sau, không bắt bấm thêm "Tiếp tục".
+        const recapAt = screens.findIndex((x) => x.kind === 'recap');
+        if (recapAt >= 0) goTo(recapAt + 1);
+      }
     };
     instance.postMessage({
       code: d.code,
@@ -313,863 +387,861 @@ export default function StudioLesson({
     });
   }
 
-  function changeStep(step: number) {
-    update({ step });
+  function markDone(key: string) {
+    setD((prev) => ({ ...prev, done: { ...prev.done, [key]: true } }));
+  }
+
+  function goTo(step: number) {
+    setCheckedKey('');
+    setHintOpen(false);
     setMessage('');
-    setHint(false);
+    setD((prev) => ({ ...prev, step: Math.min(screens.length, Math.max(1, step)) }));
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
 
-  function classify(bin: string, token = selectedToken) {
-    const tokens = lesson?.step_2?.classify?.tokens ?? [];
-    if (!tokens.some((t) => t.label === token)) return;
-    setD((prev) => ({
-      ...prev,
-      bins: { ...prev.bins, [token]: bin },
-      classified: false,
-    }));
-    setSelectedToken('');
+  // ---------- Trạng thái màn hiện tại ----------
+
+  const checked = Boolean(scr && checkedKey === scr.key);
+  const verdict = lesson && scr && checked ? screenVerdict(lesson, scr, d) : null;
+  const hints = lesson?.step_4?.hints ?? [];
+  const tests = lesson?.step_4?.tests ?? [];
+  const procedure = lesson?.step_4?.procedure ?? [];
+  // Chỉ dựng ô soạn mã khi thật sự có mã Python để làm: bài quy trình thuần
+  // (không code khởi tạo, không lời giải, không ca chấm) thì editor chỉ gây rối.
+  const showEditor = Boolean(
+    tests.length || lesson?.step_4?.starterCode || lesson?.step_4?.solutionCode || !procedure.length,
+  );
+
+  /** Đã có câu trả lời để bấm "Kiểm tra" chưa. */
+  function answered(): boolean {
+    if (!scr || !lesson) return false;
+    if (scr.kind === 'predict') return Boolean(d.predict);
+    if (scr.kind === 'mcq') return d.mcq[scr.index ?? 0] !== undefined;
+    if (scr.kind === 'classify')
+      return (lesson.step_2?.classify?.tokens ?? []).every((t) => d.bins[t.label]);
+    if (scr.kind === 'selfExplain') return d.explanation.trim().length > 0;
+    if (scr.kind === 'scaffold')
+      return (lesson.step_3?.scaffold?.slots ?? []).every((slot) => d.slots[slot.n]);
+    if (scr.kind === 'counter') return Boolean(d.counter);
+    return true;
   }
 
-  const stepNames = steps.map((x, i) => `S${i + 1}: ${x.label}`);
-
-  // ---------- Step bodies ----------
-
-  function renderStep1() {
-    const one = lesson?.step_1;
-    if (!one) return null;
-    const chosen = one.predict?.options.find((o) => o.id === d.predict);
-    return (
-      <div className={s.twoColumns}>
-        <div>
-          {one.context && (
-            <Card className={s.scenario}>
-              <h2>{one.context.title || 'Ngữ cảnh'}</h2>
-              <p>{one.context.body}</p>
-            </Card>
-          )}
-          {one.code && (
-            <div className={s.codeCard}>
-              <div className={s.editorHeader}>
-                <span>{one.code.filename || 'example.py'}</span>
-                <small>{one.code.version || 'Python 3.12'}</small>
-              </div>
-              <Code code={one.code.source} />
-            </div>
-          )}
-          {one.predict && (
-            <Card>
-              <h2>Cổng dự đoán</h2>
-              <p className={s.muted}>{one.predict.question}</p>
-              <div className={s.choices}>
-                {one.predict.options.map((o) => (
-                  <Choice
-                    key={o.id}
-                    name="predict"
-                    value={o.id}
-                    selected={d.predict}
-                    onChange={(v) => update({ predict: v, predicted: false })}
-                    title={o.title}
-                    detail={o.detail}
-                  />
-                ))}
-              </div>
-              <button
-                className={s.primary}
-                disabled={!d.predict}
-                onClick={() => {
-                  update({ predicted: true });
-                  setMessage(
-                    chosen?.correct
-                      ? 'Chính xác! Đọc phần giải thích bên cạnh.'
-                      : 'Chưa đúng — mở phần giải thích để xem vì sao.',
-                  );
-                }}
-              >
-                Xác nhận dự đoán để mở khóa giải thích
-              </button>
-            </Card>
-          )}
-          {one.misconception && (
-            <div className={s.warning}>
-              <strong>{one.misconception.title || 'Ngộ nhận thường gặp'}</strong>
-              <p>{one.misconception.body}</p>
-            </div>
-          )}
-        </div>
-        <div>
-          {one.memory && renderMemory()}
-          {one.explain && one.explain.length > 0 && (
-            <Card>
-              <div className={s.titleRow}>
-                <h2>Vì sao lại như vậy?</h2>
-                {!d.predicted && (
-                  <span className={s.monoBadge}>Khóa cho đến khi dự đoán</span>
-                )}
-              </div>
-              <div
-                className={d.predicted ? s.explanation : s.lockedExplanation}
-                aria-hidden={!d.predicted}
-              >
-                {one.explain.map((row, i) => (
-                  <div className={s.logEntry} key={i}>
-                    <span className={s.iconBox}>{row.n ?? i + 1}</span>
-                    <p>
-                      {row.title && <strong>{row.title}: </strong>}
-                      {row.body}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
-        </div>
-      </div>
-    );
+  /** Đáp án của màn đang mở, chỉ dựng cho tài khoản admin. `fill` là phần bản
+   *  nháp điền sẵn đáp án để admin đi nhanh qua bài khi kiểm tra nội dung.
+   *  Bài vốn chấm ở trình duyệt (content_json gửi nguyên cho học viên) nên
+   *  bảng này không lộ thêm dữ liệu nào. */
+  function answerKey(): {
+    rows: { label: string; value: string }[];
+    code?: string;
+    fill?: Partial<LessonDraft>;
+  } | null {
+    if (!lesson || !scr) return null;
+    if (scr.kind === 'predict') {
+      const options = lesson.step_1?.predict?.options ?? [];
+      const i = options.findIndex((o) => o.correct);
+      if (i < 0) return null;
+      return {
+        rows: [{ label: 'Đáp án', value: `${letterKey(i)}. ${options[i].title}` }],
+        fill: { predict: letterKey(i) },
+      };
+    }
+    if (scr.kind === 'mcq') {
+      const at = scr.index ?? 0;
+      const q = lesson.step_2?.mcq?.[at];
+      const i = q ? correctIndex(q) : -1;
+      if (!q || i < 0) return null;
+      return {
+        rows: [{ label: 'Đáp án', value: `${letterKey(i)}. ${optionText(q.options[i])}` }],
+        fill: { mcq: { ...d.mcq, [at]: letterKey(i) } },
+      };
+    }
+    if (scr.kind === 'classify') {
+      const classify = lesson.step_2?.classify;
+      if (!classify) return null;
+      return {
+        rows: classify.bins.map((bin) => ({
+          label: bin.title,
+          value:
+            classify.tokens
+              .filter((t) => t.bin === bin.key)
+              .map((t) => t.label)
+              .join(', ') || '—',
+        })),
+        fill: { bins: Object.fromEntries(classify.tokens.map((t) => [t.label, t.bin])) },
+      };
+    }
+    if (scr.kind === 'selfExplain') {
+      const selfExplain = lesson.step_2?.selfExplain;
+      const rubric = selfExplain?.rubric ?? [];
+      if (!rubric.length) {
+        // Bài PE không có đáp án mẫu cho ô này: placeholder chính là mô tả mức
+        // điểm tối đa (rubric "2") của ngân hàng đề, nên đó là thứ để đối chiếu.
+        const sample = selfExplain?.placeholder
+          ? `Bài mẫu (admin điền sẵn): ${selfExplain.placeholder}`
+          : '';
+        const passes =
+          sample.length >= SELF_EXPLAIN_MIN.chars &&
+          sample.split(/\s+/).filter(Boolean).length >= SELF_EXPLAIN_MIN.words;
+        return {
+          rows: [
+            ...(selfExplain?.placeholder ? [{ label: 'Tiêu chí đạt điểm tối đa', value: selfExplain.placeholder }] : []),
+            {
+              label: 'Cách chấm',
+              value: `Không có rubric từ khoá — chỉ yêu cầu tối thiểu ${SELF_EXPLAIN_MIN.words} từ / ${SELF_EXPLAIN_MIN.chars} ký tự.`,
+            },
+          ],
+          fill: passes ? { explanation: sample } : undefined,
+        };
+      }
+      return {
+        rows: rubric.map((r) => ({ label: r.label, value: r.keywords.join(' / ') })),
+        fill: { explanation: rubric.map((r) => r.keywords[0]).filter(Boolean).join('; ') },
+      };
+    }
+    if (scr.kind === 'scaffold') {
+      const slots = lesson.step_3?.scaffold?.slots ?? [];
+      return {
+        rows: slots.map((slot) => ({ label: `Slot ${slot.n}`, value: slot.answer })),
+        fill: { slots: Object.fromEntries(slots.map((slot) => [slot.n, slot.answer])) },
+      };
+    }
+    if (scr.kind === 'counter') {
+      const counter = lesson.step_3?.counter;
+      const i = counter ? counter.options.indexOf(counter.correct) : -1;
+      if (!counter || i < 0) return null;
+      return {
+        rows: [{ label: 'Đáp án', value: `${letterKey(i)}. ${counter.correct}` }],
+        fill: { counter: letterKey(i) },
+      };
+    }
+    if (scr.kind === 'sandbox') {
+      const solution = lesson.step_4?.solutionCode;
+      if (!solution && !tests.length) return null;
+      return {
+        // Ca kiểm tra stdout của bài PE là cả một chuỗi exec(...) — in ra chỉ
+        // gây rối, lời giải mẫu bên dưới đã đủ để đối chiếu.
+        rows: tests
+          .filter((t) => t.call.length <= 120 && !t.call.includes('exec('))
+          .map((t) => ({ label: t.name || 'Ca kiểm thử', value: `${t.call} → ${t.expect}` })),
+        code: solution,
+        fill: solution ? { code: solution } : undefined,
+      };
+    }
+    return null;
   }
 
-  function renderMemory() {
-    const m = lesson?.step_1?.memory;
-    if (!m) return null;
-    return (
-      <Card className={s.memory}>
-        <div className={s.titleRow}>
-          <h2>Mô hình thực thi bộ nhớ</h2>
-          {m.heapAddr && (
-            <span className={s.monoBadge}>Heap Addr: {m.heapAddr}</span>
-          )}
-        </div>
-        <div className={s.memoryGrid}>
-          <div className={s.stack}>
-            <h3>STACK (BIẾN TÊN)</h3>
-            {(m.stack ?? []).map((v) => (
-              <div className={s.alias} key={v.name}>
-                {v.label && <small>{v.label}</small>}
-                <strong>{v.name}</strong>
-                {v.ptr && <small>ptr: {v.ptr}</small>}
-              </div>
-            ))}
-          </div>
-          <div className={s.heap}>
-            <h3>HEAP (ĐỐI TƯỢNG)</h3>
-            {m.heap && (
-              <div className={s.heapValue}>
-                <div className={s.titleRow}>
-                  <strong>{m.heap.type || 'PyObject'}</strong>
-                  {typeof m.heap.refcount === 'number' && (
-                    <small>ob_refcnt: {m.heap.refcount}</small>
-                  )}
-                </div>
-                <div className={s.cells}>
-                  {(m.heap.cells ?? []).map((c, i) => (
-                    <div key={i}>
-                      <small>[ {i} ]</small>
-                      <strong>{c.value}</strong>
-                      {c.id && <small>id: {c.id}</small>}
-                    </div>
-                  ))}
-                </div>
-                {m.heap.note && <small>{m.heap.note}</small>}
-              </div>
-            )}
-          </div>
-        </div>
-        {m.assertion && (
-          <div className={s.console}>
-            <span className={s.consoleLine}>
-              {m.assertion}{' '}
-              {m.assertionResult && (
-                <b className={s.green}>{m.assertionResult}</b>
-              )}
-            </span>
-          </div>
+  /** Nút CTA dưới đáy: nhãn, màu và hành động của màn đang mở. */
+  type Action =
+    | 'leave'
+    | 'nextLesson'
+    | 'toSandbox'
+    | 'toBlocked'
+    | 'complete'
+    | 'submit'
+    | 'check'
+    | 'retry'
+    | 'next';
+
+  /** Màn có chấm mà học viên chưa làm đúng — chặn việc kết thúc bài. */
+  function firstUnfinished(): LessonScreen | undefined {
+    return screens.find((x) => isGraded(x.kind) && !d.done[x.key]);
+  }
+
+  const hasNextLesson = totalLessons > 0 && lessonNo < totalLessons;
+
+  /** Nút CTA dưới đáy: nhãn, màu và HÀNH ĐỘNG của màn đang mở.
+   *
+   *  Trả về tên hành động chứ không trả closure: hàm này chạy ngay trong lúc
+   *  render, mà closure lại chạm tới worker ref bên trong run() — React cấm
+   *  đọc ref khi đang render (react-hooks/refs). Bấm nút mới gọi doAction().
+   */
+  function primary(): {
+    label: string;
+    tone: 'accent' | 'ok' | 'err';
+    disabled?: boolean;
+    action: Action;
+  } {
+    if (!scr) return { label: 'Về khóa học', tone: 'accent', action: 'leave' };
+
+    if (scr.kind === 'recap') {
+      // Học xong thì đi thẳng sang bài kế tiếp, không bắt quay về danh sách.
+      if (completed)
+        return hasNextLesson
+          ? { label: `Bài ${lessonNo + 1} →`, tone: 'ok', action: 'nextLesson' }
+          : { label: 'Về khóa học →', tone: 'ok', action: 'leave' };
+      // Chưa làm xong màn nào đó thì không cho kết thúc bài — kể cả khi mở lại
+      // từ bản nháp cũ và nhảy thẳng tới đây.
+      const missing = firstUnfinished();
+      if (missing)
+        return {
+          label: `Còn phải làm: ${eyebrowOf(missing).label}`,
+          tone: 'err',
+          action: 'toBlocked',
+        };
+      if (tests.length)
+        return { label: 'Nộp bài ở màn trước', tone: 'accent', action: 'toSandbox' };
+      // Bài lab desktop / bài quy trình không có ca chấm nào chạy được trong
+      // trình duyệt, nên hoàn thành do người học tự xác nhận ở đây.
+      return {
+        label: busy ? 'Đang lưu…' : 'Đánh dấu đã hoàn thành ✓',
+        tone: 'accent',
+        disabled: busy,
+        action: 'complete',
+      };
+    }
+
+    if (scr.kind === 'sandbox') {
+      if (!tests.length) return { label: 'Tiếp tục →', tone: 'accent', action: 'next' };
+      if (d.done[scr.key]) return { label: 'Tiếp tục →', tone: 'ok', action: 'next' };
+      return {
+        label: running ? 'Đang chấm…' : 'Nộp & Chấm điểm',
+        tone: result && result.tests.some((t) => !t.passed) ? 'err' : 'accent',
+        disabled: running || busy,
+        action: 'submit',
+      };
+    }
+
+    if (isGraded(scr.kind)) {
+      if (!checked)
+        return { label: 'Kiểm tra', tone: 'accent', disabled: !answered(), action: 'check' };
+      if (verdict && !verdict.correct)
+        return { label: 'Thử lại', tone: 'err', action: 'retry' };
+      return { label: 'Tiếp tục →', tone: 'ok', action: 'next' };
+    }
+
+    return { label: 'Tiếp tục →', tone: 'accent', action: 'next' };
+  }
+
+  function doAction(action: Action) {
+    if (action === 'leave') return leave();
+    if (action === 'nextLesson')
+      return window.location.assign(`/lesson/${courseId}?lesson=${lessonNo}`);
+    if (action === 'toSandbox')
+      return goTo(screens.findIndex((x) => x.kind === 'sandbox') + 1);
+    if (action === 'toBlocked') {
+      const missing = firstUnfinished();
+      if (missing) goTo(screens.indexOf(missing) + 1);
+      return;
+    }
+    if (action === 'complete') return void complete();
+    if (action === 'submit') return run(true);
+    if (action === 'check') {
+      if (!scr || !lesson) return;
+      setCheckedKey(scr.key);
+      if (screenVerdict(lesson, scr, d)?.correct) markDone(scr.key);
+      return;
+    }
+    if (action === 'retry') return setCheckedKey('');
+    if (scr) markDone(scr.key);
+    goTo(d.step + 1);
+  }
+
+  function leave() {
+    window.location.assign(`/courses/${courseId}`);
+  }
+
+  // ---------- Nội dung từng màn ----------
+
+  function sandboxRows(): SandboxTestRow[] {
+    return tests.map((t, i) => {
+      const got = result?.tests?.[i];
+      return {
+        label: t.name || t.call,
+        detail: got?.detail,
+        status: !result || !got ? 'pending' : got.passed ? 'pass' : 'fail',
+      };
+    });
+  }
+
+  function consoleLines(): ConsoleLine[] | null {
+    if (!result) return null;
+    const lines: ConsoleLine[] = [];
+    if (result.output)
+      for (const line of result.output.replace(/\n$/, '').split('\n')) lines.push({ text: line });
+    if (result.error) lines.push({ text: result.error, tone: 'err' });
+    if (!lines.length) {
+      // Ô soạn mã trống hoặc chỉ có chú thích thì "không in ra gì" là vô nghĩa
+      // với người học — nói thẳng là chưa có lệnh nào chạy.
+      const runnable = d.code
+        .split('\n')
+        .some((line) => line.trim() && !line.trim().startsWith('#'));
+      lines.push({
+        text: runnable
+          ? 'Chương trình chạy xong, không in ra gì (thêm print() để xem kết quả).'
+          : 'Chưa có lệnh nào để chạy — ô soạn mã đang trống hoặc chỉ có dòng chú thích.',
+        tone: 'muted',
+      });
+    }
+    return lines;
+  }
+
+  function renderScreen() {
+    if (!lesson || !scr) return null;
+    const eyebrow = eyebrowOf(scr);
+    const shell = (node: React.ReactNode, extra?: Partial<React.ComponentProps<typeof ShellB>>) => (
+      <ShellB
+        eyebrowIcon={eyebrow.icon}
+        eyebrowLabel={eyebrow.label}
+        metaLabel={meta?.title}
+        title={extra?.title ?? ''}
+        description={extra?.description}
+        centered={extra?.centered}
+      >
+        {node}
+        {checked && verdict && (
+          <FeedbackBanner
+            correct={verdict.correct}
+            title={verdict.correct ? 'Chính xác!' : 'Chưa đúng — thử lại nhé'}
+            explanation={verdict.explain}
+          />
         )}
-      </Card>
+      </ShellB>
     );
-  }
 
-  function renderStep2() {
-    const two = lesson?.step_2;
-    if (!two) return null;
-    const grouping = two.classify;
-    return (
-      <div className={s.twoColumns}>
-        <div>
-          {(two.mcq ?? []).map((q, qi) => (
-            <Card key={qi}>
-              <div className={s.eyebrow}>Q{qi + 1} · Trắc nghiệm</div>
-              <h2>{q.question}</h2>
-              <div className={s.choices}>
-                {q.options.map((o, oi) => (
-                  <Choice
-                    key={oi}
-                    name={`mcq-${qi}`}
-                    value={String(oi)}
-                    selected={d.mcq[qi] ?? ''}
-                    onChange={(v) =>
-                      update({ mcq: { ...d.mcq, [qi]: v }, mcqDone: false })
-                    }
-                    title={`${String.fromCharCode(65 + oi)}. ${optionText(o)}`}
-                    detail={optionDetail(o)}
-                  />
-                ))}
-              </div>
-              {qi === (two.mcq?.length ?? 0) - 1 && (
-                <button
-                  className={s.primary}
-                  disabled={(two.mcq ?? []).some(
-                    (_, i) => d.mcq[i] === undefined,
-                  )}
-                  onClick={() => {
-                    const all = (two.mcq ?? []).every(
-                      (item, i) => Number(d.mcq[i]) === correctIndex(item),
-                    );
-                    update({ mcqDone: all });
-                    setMessage(
-                      all
-                        ? 'Đúng hết phần trắc nghiệm!'
-                        : 'Còn câu chưa đúng — xem lại rồi chọn lại.',
-                    );
-                  }}
-                >
-                  Xác nhận phân tích
-                </button>
-              )}
-              {d.mcqDone && q.explanation && (
-                <div className={s.feedback}>
-                  <p>{q.explanation}</p>
-                </div>
-              )}
-            </Card>
-          ))}
-        </div>
-        <div>
-          {grouping && (
-            <Card>
-              <h2>Phân loại thao tác</h2>
-              {grouping.instruction && (
-                <p className={s.muted}>{grouping.instruction}</p>
-              )}
-              <div className={s.tokenQueue}>
-                <div className={s.titleRow}>
-                  <small>Hàng chờ phân loại:</small>
-                  <code>
-                    {grouping.tokens.filter((t) => !d.bins[t.label]).length} thẻ
-                    còn lại
-                  </code>
-                </div>
-                <div className={s.tokens}>
-                  {grouping.tokens.every((t) => d.bins[t.label]) && (
-                    <small className={s.queueEmpty}>
-                      Đã xếp hết {grouping.tokens.length} thẻ. Bấm thẻ trong nhóm
-                      để lấy lại.
-                    </small>
-                  )}
-                  {grouping.tokens
-                    .filter((t) => !d.bins[t.label])
-                    .map((t) => (
-                      <button
-                        key={t.label}
-                        className={selectedToken === t.label ? s.selected : ''}
-                        draggable
-                        onDragStart={(e) => {
-                          e.dataTransfer.setData('text/plain', t.label);
-                          setSelectedToken(t.label);
-                        }}
-                        onClick={() => setSelectedToken(t.label)}
-                      >
-                        {t.label}
-                      </button>
-                    ))}
-                </div>
-              </div>
-              <div className={s.binGrid}>
-                {grouping.bins.map((bin) => {
-                  const placed = grouping.tokens.filter(
-                    (t) => d.bins[t.label] === bin.key,
-                  );
-                  return (
-                    <div
-                      className={s.bin}
-                      key={bin.key}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        classify(bin.key, e.dataTransfer.getData('text/plain'));
-                      }}
-                    >
-                      <h3>
-                        {bin.title}{' '}
-                        {bin.subtitle && <small>{bin.subtitle}</small>}
-                      </h3>
-                      {bin.desc && <p>{bin.desc}</p>}
-                      <div
-                        className={`${s.dropZone} ${selectedToken ? s.dropZoneReady : ''}`}
-                      >
-                        {placed.length > 0 && (
-                          <div className={s.tokens}>
-                            {placed.map((t) => (
-                              <button
-                                key={t.label}
-                                title="Trả về hàng chờ"
-                                onClick={() =>
-                                  setD((prev) => {
-                                    const bins = { ...prev.bins };
-                                    delete bins[t.label];
-                                    return { ...prev, bins, classified: false };
-                                  })
-                                }
-                              >
-                                {t.label} ×
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                        <button
-                          className={s.dropTarget}
-                          onClick={() => classify(bin.key)}
-                          aria-label={`Thả vào nhóm ${bin.title}`}
-                        >
-                          {selectedToken
-                            ? `Đặt ${selectedToken} vào đây`
-                            : placed.length
-                              ? 'Thả thêm thẻ vào đây'
-                              : `Thả vào nhóm ${bin.title}`}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className={s.titleRow}>
-                <button
-                  className={s.textButton}
-                  onClick={() => update({ bins: {}, classified: false })}
-                >
-                  Làm lại
-                </button>
-                <button
-                  className={s.darkButton}
-                  onClick={() => {
-                    const ok = grouping.tokens.every(
-                      (t) => d.bins[t.label] === t.bin,
-                    );
-                    update({ classified: ok });
-                    setMessage(
-                      ok
-                        ? `Đúng cả ${grouping.tokens.length} thao tác!`
-                        : 'Chưa đúng hết. Chạm thẻ trong nhóm để đưa về hàng chờ và sửa.',
-                    );
-                  }}
-                >
-                  Kiểm tra phân loại
-                </button>
-              </div>
-            </Card>
-          )}
-          {two.selfExplain && (
-            <Card className={s.probe}>
-              <h2>Tự giải thích</h2>
-              <p className={s.inset}>{two.selfExplain.prompt}</p>
-              <textarea
-                className={s.explanationInput}
-                value={d.explanation}
-                placeholder={
-                  two.selfExplain.placeholder || 'Nhập lời giải thích của bạn…'
-                }
-                onChange={(e) =>
-                  update({ explanation: e.target.value, explained: false })
-                }
-              />
-              <div className={s.titleRow}>
-                <small className={s.muted}>
-                  Rubric:{' '}
-                  {(two.selfExplain.rubric ?? [])
-                    .map((r) => r.label)
-                    .join(' · ')}
-                </small>
-                <button
-                  className={s.primary}
-                  disabled={!d.explanation.trim()}
-                  onClick={() => {
-                    const need = (two.selfExplain?.rubric ?? []).length;
-                    const got = rubricScore(
-                      d.explanation,
-                      two.selfExplain?.rubric,
-                    );
-                    update({ explained: need === 0 || got >= need });
-                    setMessage(
-                      need === 0 || got >= need
-                        ? 'Lời giải thích đã đủ ý theo rubric.'
-                        : `Mới đạt ${got}/${need} ý của rubric. Bổ sung rồi gửi lại.`,
-                    );
-                  }}
-                >
-                  Gửi lời giải thích
-                </button>
-              </div>
-            </Card>
-          )}
-        </div>
-      </div>
-    );
-  }
+    const one = lesson.step_1;
+    const two = lesson.step_2;
+    const three = lesson.step_3;
+    const four = lesson.step_4;
 
-  function renderStep3() {
-    const three = lesson?.step_3;
-    if (!three) return null;
-    const scaffold = three.scaffold;
-    const assembled = scaffold
-      ? assembleScaffold(scaffold.template, scaffold.slots, d.slots)
-      : '';
-    return (
-      <div className={s.twoColumns}>
-        <div>
-          {three.task && (
-            <Card>
-              <h2>{three.task.title || 'Nhiệm vụ'}</h2>
-              {three.task.body && <p>{three.task.body}</p>}
-              {three.task.rule && (
-                <div className={s.inset}>
-                  <strong>Quy tắc: </strong>
-                  {three.task.rule}
-                </div>
-              )}
-            </Card>
-          )}
-          {scaffold && (
-            <Card className={s.slotCanvas}>
-              <div className={s.titleRow}>
-                <h2>Khung lắp ghép</h2>
-                <button
-                  className={s.textButton}
-                  onClick={() => update({ slots: {}, traced: false })}
-                >
-                  Đặt lại slot
-                </button>
-              </div>
-              <div className={s.tokenBank}>
-                {scaffold.bank.map((b) => (
-                  <button
-                    key={b.label}
-                    className={
-                      d.slots[b.slot] === b.label ? s.selected : undefined
-                    }
-                    onClick={() =>
-                      update({
-                        slots: { ...d.slots, [b.slot]: b.label },
-                        traced: false,
-                      })
-                    }
-                  >
-                    <code>{b.label}</code>
-                    <small>
-                      {b.trap ? `${b.trap} · Slot ${b.slot}` : `Slot ${b.slot}`}
-                    </small>
-                  </button>
-                ))}
-              </div>
-            </Card>
-          )}
-        </div>
-        <div>
-          {scaffold && (
-            <div className={s.codeCard}>
-              <div className={s.editorHeader}>
-                <span>solution.py</span>
-                <small>Python 3.12</small>
-              </div>
-              <Code code={assembled} />
-              <div className={s.runBar}>
-                <button
-                  className={s.primary}
-                  onClick={() => {
-                    const missing = scaffold.slots.find(
-                      (slot) => !d.slots[slot.n],
-                    );
-                    if (missing) {
-                      setMessage(
-                        `Hãy chọn khối mã cho Slot ${missing.n} trước.`,
-                      );
-                      return;
-                    }
-                    const wrong = scaffold.slots.find(
-                      (slot) => d.slots[slot.n] !== slot.answer,
-                    );
-                    update({ traced: !wrong });
-                    setMessage(
-                      wrong
-                        ? `Slot ${wrong.n} chưa đúng. Đọc lại nhiệm vụ rồi thử khối khác.`
-                        : 'Khung mã đã đúng.',
-                    );
-                  }}
-                >
-                  Kiểm tra khung mã
-                </button>
-                <small className={d.traced ? s.green : s.muted}>
-                  {d.traced ? 'Khung mã đã đúng' : 'Sẵn sàng'}
-                </small>
-              </div>
-            </div>
-          )}
-          {three.trace && three.trace.steps.length > 0 && d.traced && (
-            <Card>
-              <h2>Nhật ký biến đổi</h2>
-              {three.trace.steps.map((row, i) => (
-                <div className={s.logEntry} key={i}>
-                  {row.label && <span className={s.monoBadge}>{row.label}</span>}
-                  <p>{row.text}</p>
-                </div>
-              ))}
-            </Card>
-          )}
-          {three.counter && (
-            <Card>
-              <h2>Tái dự đoán</h2>
-              <p className={s.muted}>{three.counter.question}</p>
-              <div className={s.counterChoices}>
-                {three.counter.options.map((opt) => (
-                  <Choice
-                    key={opt}
-                    name="counter"
-                    value={opt}
-                    selected={d.counter}
-                    onChange={(counter) => update({ counter })}
-                    title={opt}
-                  />
-                ))}
-              </div>
-              {d.counter && (
-                <p
-                  className={
-                    d.counter === three.counter.correct ? s.green : s.amber
-                  }
-                >
-                  {d.counter === three.counter.correct
-                    ? 'Chính xác.'
-                    : 'Chưa đúng — chạy lại khung mã và thử lại.'}
-                </p>
-              )}
-            </Card>
-          )}
-        </div>
-      </div>
-    );
-  }
+    if (scr.kind === 'context')
+      return shell(
+        one?.code?.source ? (
+          <CodeBlock
+            filename={one.code.filename || 'example.py'}
+            langTag={one.code.version || 'Python 3.12'}
+            lines={toCodeLines(one.code.source)}
+          />
+        ) : null,
+        { title: one?.context?.title || lesson.title || 'Ngữ cảnh', description: one?.context?.body },
+      );
 
-  function renderStep4() {
-    const four = lesson?.step_4;
-    if (!four) return null;
-    const tests = four.tests ?? [];
-    const passed = result?.tests.filter((t) => t.passed).length ?? 0;
-    return (
-      <div className={s.sandboxGrid}>
-        <div>
-          {four.task && (
-            <Card>
-              <div className={s.eyebrow}>Thử thách độc lập</div>
-              <h2>{four.task.title || 'Bài tập'}</h2>
-              {four.task.body && <p>{four.task.body}</p>}
-              {(four.task.io ?? []).map((row) => (
-                <div className={s.titleRow} key={row.label}>
-                  <small>{row.label}</small>
-                  <code>{row.value}</code>
-                </div>
-              ))}
-            </Card>
-          )}
-          {four.hints && four.hints.length > 0 && (
-            <Card>
-              <h2>Gợi ý theo tầng</h2>
-              {four.hints.map((h, i) => (
-                <div className={s.hintLevel} key={h.title}>
-                  <button
-                    className={s.textButton}
-                    onClick={() => setOpenHint(openHint === i + 1 ? 0 : i + 1)}
-                  >
-                    <span className={s.iconBox}>{i + 1}</span> {h.title}
-                  </button>
-                  {openHint === i + 1 && <p>{h.body}</p>}
-                </div>
-              ))}
-            </Card>
-          )}
-        </div>
-        <div>
-          <div className={s.codeCard}>
-            <div className={s.editorHeader}>
-              <span>solution.py</span>
-              <small>{runtimeStatus || 'CPython 3.12'}</small>
-            </div>
-            <textarea
-              className={s.codeInput}
-              value={d.code}
-              spellCheck={false}
-              aria-label="Trình soạn mã Python"
-              onChange={(e) => update({ code: e.target.value })}
-            />
-            <div className={s.runBar}>
-              {running ? (
-                <button className={s.secondary} onClick={cancelRun}>
-                  Dừng
-                </button>
-              ) : (
-                <button className={s.secondary} onClick={() => run(false)}>
-                  Chạy thử
-                </button>
-              )}
-              <button
-                className={s.primary}
-                disabled={running || busy || tests.length === 0}
-                onClick={() => run(true)}
-              >
-                Nộp &amp; Chấm điểm
-              </button>
-              {four.solutionCode && (
-                <button
-                  className={s.copySolution}
-                  onClick={() => {
-                    update({ code: four.solutionCode!, solutionUsed: true });
-                    setMessage(
-                      'Đã chèn lời giải mẫu. Hãy đọc hiểu trước khi nộp.',
-                    );
-                  }}
-                >
-                  Xem lời giải mẫu
-                </button>
-              )}
-            </div>
-          </div>
-          <div className={s.equalColumns}>
-            <div className={s.console}>
-              <div className={s.titleRow}>
-                <small>Console Output</small>
-                <small>{result ? `${result.duration} ms` : 'chưa chạy'}</small>
-              </div>
-              <pre className={s.consoleLine}>
-                {result?.error ||
-                  result?.output ||
-                  '> Chạy mã để xem kết quả thật tại đây.'}
-              </pre>
-            </div>
-            <Card>
-              <div className={s.titleRow}>
-                <h2>Thẩm định I/O</h2>
-                <small
-                  className={
-                    result && passed === tests.length ? s.green : s.muted
-                  }
-                >
-                  {result ? `${passed}/${result.tests.length} đạt` : 'Chưa chạy'}
-                </small>
-              </div>
-              {(result?.tests ?? []).map((t) => (
-                <div className={s.testResult} key={t.name}>
-                  <strong className={t.passed ? s.green : s.red}>
-                    {t.passed ? '✓' : '✕'} {t.name}
-                  </strong>
-                  <small>{t.detail}</small>
-                </div>
-              ))}
-              {!result && (
-                <small className={s.muted}>
-                  {tests.length} trường hợp kiểm thử sẽ chạy khi bạn nộp bài.
-                </small>
-              )}
-            </Card>
-          </div>
-        </div>
-      </div>
-    );
-  }
+    if (scr.kind === 'explain')
+      return shell(
+        <CodeAnnotated
+          filename={one?.code?.filename || 'example.py'}
+          langTag={one?.code?.version || 'Python 3.12'}
+          code={toCodeLines(one?.code?.source || '')}
+          annotations={(one?.explain ?? []).map((row, i) => ({
+            label: row.title || `Ý ${row.n ?? i + 1}`,
+            detail: row.body,
+          }))}
+        />,
+        { title: 'Đọc lại ví dụ theo từng ý' },
+      );
 
-  // ---------- Shell ----------
+    if (scr.kind === 'memory') {
+      const m = one?.memory;
+      return shell(
+        <Visual
+          stack={(m?.stack ?? []).map((row) => ({
+            name: row.name,
+            address: row.ptr || '—',
+            note: row.label || '',
+          }))}
+          heap={
+            m?.heap
+              ? [
+                  {
+                    tag: m.heap.type || 'PyObject',
+                    address: m.heapAddr || '—',
+                    refcount: m.heap.refcount ?? 1,
+                    rows: (m.heap.cells ?? []).map((cell) => ({
+                      label: cell.id || 'Giá trị',
+                      value: cell.value,
+                    })),
+                  },
+                ]
+              : []
+          }
+        />,
+        {
+          title: 'Biến trỏ tới đâu trong bộ nhớ?',
+          description: m?.assertion ? `${m.assertion} → ${m.assertionResult ?? ''}` : undefined,
+        },
+      );
+    }
 
-  const stepBody =
-    current?.key === 'step_1'
-      ? renderStep1()
-      : current?.key === 'step_2'
-        ? renderStep2()
-        : current?.key === 'step_3'
-          ? renderStep3()
-          : current?.key === 'step_4'
-            ? renderStep4()
-            : null;
+    if (scr.kind === 'misconception')
+      return (
+        <Misconception
+          myth={one?.misconception?.title || 'Ngộ nhận thường gặp'}
+          correction={one?.misconception?.body}
+          exampleLabel={one?.code?.source ? 'Ví dụ của bài' : undefined}
+          langTag={one?.code?.version}
+          code={one?.code?.source ? toCodeLines(one.code.source) : undefined}
+        />
+      );
 
-  return (
-    <div className={s.studio}>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
-      />
-      <header className={s.header}>
-        <div className={s.headerInner}>
-          <a
-            className={s.iconButton}
-            href={`/courses/${courseId}`}
-            aria-label="Đóng bài học"
+    if (scr.kind === 'predict') {
+      const predict = one?.predict;
+      return shell(
+        <Mcq
+          filename={one?.code?.filename || 'example.py'}
+          langTag={one?.code?.version || 'Python 3.12'}
+          code={one?.code?.source ? toCodeLines(one.code.source) : undefined}
+          options={(predict?.options ?? []).map((o, i) => ({
+            key: letterKey(i),
+            label: o.title,
+            sub: o.detail,
+          }))}
+          selected={d.predict || null}
+          onSelect={(key) => {
+            setCheckedKey('');
+            update({ predict: key });
+          }}
+          correctKey={letterKey((predict?.options ?? []).findIndex((o) => o.correct))}
+          checked={checked}
+        />,
+        { title: predict?.question || 'Dự đoán kết quả' },
+      );
+    }
+
+    if (scr.kind === 'mcq') {
+      const i = scr.index ?? 0;
+      const q = two?.mcq?.[i];
+      if (!q) return null;
+      return shell(
+        <Mcq
+          options={q.options.map((o, oi) => ({
+            key: letterKey(oi),
+            label: optionText(o),
+            sub: optionDetail(o),
+          }))}
+          selected={d.mcq[i] ?? null}
+          onSelect={(key) => {
+            setCheckedKey('');
+            update({ mcq: { ...d.mcq, [i]: key } });
+          }}
+          correctKey={letterKey(correctIndex(q))}
+          checked={checked}
+        />,
+        { title: q.question },
+      );
+    }
+
+    if (scr.kind === 'classify') {
+      const classify = two?.classify;
+      if (!classify) return null;
+      return shell(
+        <>
+          <Classify
+            bins={classify.bins.map((bin) => ({
+              key: bin.key,
+              label: bin.title,
+              sub: bin.subtitle || bin.desc || '',
+              items: classify.tokens.filter((t) => d.bins[t.label] === bin.key).map((t) => t.label),
+            }))}
+            pool={classify.tokens.filter((t) => !d.bins[t.label]).map((t) => t.label)}
+            heldToken={held}
+            onHold={setHeld}
+            onDrop={(binKey) => {
+              if (!held) return;
+              setCheckedKey('');
+              update({ bins: { ...d.bins, [held]: binKey } });
+              setHeld(null);
+            }}
+          />
+          <button
+            type="button"
+            className={c.resetLink}
+            onClick={() => {
+              setCheckedKey('');
+              update({ bins: {} });
+              setHeld(null);
+            }}
           >
-            <Icon step={1} n={16} />
-          </a>
-          <a className={s.brand} href="/dashboard">
-            Programming Edu
-          </a>
-          <div className={s.breadcrumb}>
-            Python Core <Icon step={1} n={17} />{' '}
-            <strong>
-              Bài {lessonNo}: {meta?.title || '…'}
-            </strong>
-          </div>
-          <div className={s.headerActions}>
-            <span className={s.xp}>
-              <Icon step={1} n={18} /> {user?.xp ?? '—'} XP
-            </span>
-            <a
-              href="/dashboard#profile"
-              className={s.avatar}
-              title={user?.name || 'Tài khoản'}
-            >
-              <Icon step={1} n={20} />
-            </a>
-          </div>
-        </div>
-      </header>
-      <main className={s.main}>
-        {loading ? (
-          <Card>
-            <p role="status">Đang tải bài học…</p>
-          </Card>
-        ) : loadError ? (
-          <Card>
-            <h1>Chưa kết nối được bài học</h1>
-            <p role="alert">{loadError}</p>
-            <button className={s.primary} onClick={() => void load()}>
-              Thử lại
-            </button>
-          </Card>
-        ) : !enrolled && user?.role !== 'admin' ? (
-          <Card>
-            <span className={s.pill}>PYTHON STUDIO</span>
-            <h1>{meta?.title || 'Bài học Python'}</h1>
-            <p>Đăng ký khóa học miễn phí để mở bài học và lưu tiến độ.</p>
-            <button
-              className={s.primary}
-              disabled={busy}
-              onClick={() => void enroll()}
-            >
-              {busy ? 'Đang đăng ký…' : 'Đăng ký khóa Python & bắt đầu'}
-            </button>
-          </Card>
-        ) : empty ? (
-          <Card>
-            <span className={s.pill}>ĐANG BIÊN SOẠN</span>
-            <h1>{meta?.title || `Bài ${lessonNo}`}</h1>
-            <p>
-              Bài học này chưa có nội dung Studio. Quản trị viên có thể nhập nội
-              dung từ file PDF hoặc Markdown trong trang quản trị.
-            </p>
-            <a className={s.primary} href={`/courses/${courseId}`}>
-              Về khóa học
-            </a>
-          </Card>
-        ) : (
-          <>
-            {user?.role === 'admin' && !enrolled && (
-              <div className={s.warning} role="status">
-                <strong>Chế độ xem trước của quản trị viên</strong>
+            Xếp lại từ đầu
+          </button>
+        </>,
+        { title: classify.instruction || 'Xếp mỗi thẻ vào đúng nhóm' },
+      );
+    }
+
+    if (scr.kind === 'selfExplain')
+      return shell(
+        <SelfExplain
+          value={d.explanation}
+          onChange={(value) => {
+            setCheckedKey('');
+            update({ explanation: value });
+          }}
+          placeholder={two?.selfExplain?.placeholder}
+          rubricLabels={(two?.selfExplain?.rubric ?? []).map((r) => r.label)}
+          requirement={`Viết thành câu, ít nhất ${SELF_EXPLAIN_MIN.words} từ — người chấm sẽ đọc phần này.`}
+        />,
+        { title: two?.selfExplain?.prompt || 'Giải thích cách làm của bạn' },
+      );
+
+    if (scr.kind === 'scaffold') {
+      const scaffold = three?.scaffold;
+      if (!scaffold) return null;
+      const slotOf = (line: string) => /\{\{\s*slot(\d+)\s*\}\}/.exec(line);
+      const placed = new Set(Object.values(d.slots));
+      return shell(
+        <>
+          <Assemble
+            filename="solution.py"
+            langTag="Python 3.12"
+            lines={scaffold.template
+              .replace(/\s+$/, '')
+              .split('\n')
+              .map((line, i) => {
+                const hit = slotOf(line);
+                if (!hit) return { num: i + 1, before: line };
+                const n = Number(hit[1]);
+                return {
+                  num: i + 1,
+                  before: line.slice(0, hit.index),
+                  slotId: `slot${n}`,
+                  after: line.slice((hit.index ?? 0) + hit[0].length),
+                };
+              })}
+            filled={Object.fromEntries(
+              Object.entries(d.slots).map(([n, label]) => [`slot${n}`, label]),
+            )}
+            bank={scaffold.bank.filter((b) => !placed.has(b.label)).map((b) => b.label)}
+            heldToken={held}
+            onHold={setHeld}
+            onFillSlot={(slotId) => {
+              if (!held) return;
+              setCheckedKey('');
+              update({ slots: { ...d.slots, [Number(slotId.replace('slot', ''))]: held } });
+              setHeld(null);
+            }}
+          />
+          <button
+            type="button"
+            className={c.resetLink}
+            onClick={() => {
+              setCheckedKey('');
+              update({ slots: {} });
+              setHeld(null);
+            }}
+          >
+            Đặt lại các slot
+          </button>
+        </>,
+        {
+          title: three?.task?.title || 'Lắp lại khung mã',
+          description: three?.task?.body,
+        },
+      );
+    }
+
+    if (scr.kind === 'trace')
+      return shell(
+        <ol className={c.trace}>
+          {(three?.trace?.steps ?? []).map((row, i) => (
+            <li key={i}>
+              {row.label && <b>{row.label}</b>}
+              <span>{row.text}</span>
+            </li>
+          ))}
+        </ol>,
+        {
+          title: 'Nhật ký biến đổi',
+          description: three?.task?.rule || three?.task?.body,
+        },
+      );
+
+    if (scr.kind === 'counter') {
+      const counter = three?.counter;
+      if (!counter) return null;
+      return shell(
+        <Mcq
+          options={counter.options.map((opt, i) => ({ key: letterKey(i), label: opt }))}
+          selected={d.counter || null}
+          onSelect={(key) => {
+            setCheckedKey('');
+            update({ counter: key });
+          }}
+          correctKey={letterKey(counter.options.indexOf(counter.correct))}
+          checked={checked}
+        />,
+        { title: counter.question },
+      );
+    }
+
+    if (scr.kind === 'sandbox') {
+      const io = four?.task?.io ?? [];
+      return (
+        <ShellB
+          eyebrowIcon={eyebrow.icon}
+          eyebrowLabel={eyebrow.label}
+          metaLabel={meta?.title}
+          title={four?.task?.title || 'Thử thách độc lập'}
+          description={four?.task?.body}
+        >
+          {io.length > 0 && (
+            <dl className={c.io}>
+              {io.map((row) => (
+                <div key={row.label}>
+                  <dt>{row.label}</dt>
+                  <dd><code>{row.value}</code></dd>
+                </div>
+              ))}
+            </dl>
+          )}
+          {/* Bài quy trình: các bước phải làm trên máy thật. Không có mã Python
+              nào để chạy nên KHÔNG hiện ô soạn mã — trước đây bài loại này đổ
+              đáp án đã chú-thích-hoá vào editor, bấm "Chạy thử" ra console
+              rỗng và người học tưởng hỏng. */}
+          {procedure.length > 0 && (
+            <div className={c.procedure}>
+              <div className={c.procedureHead}>
+                <strong>Quy trình tham chiếu</strong>
+                <button
+                  type="button"
+                  className={c.resetLink}
+                  onClick={() => setProcedureOpen((o) => !o)}
+                >
+                  {procedureOpen ? 'Ẩn đi' : 'Hiện các bước'}
+                </button>
+              </div>
+              {procedureOpen ? (
+                <CodeBlock
+                  filename="terminal"
+                  langTag="chạy trên máy của bạn"
+                  lines={procedure.map((line, i) => ({ num: i + 1, content: line }))}
+                />
+              ) : (
                 <p>
-                  Bạn chưa ghi danh khoá này nên tiến độ và XP sẽ không được lưu.
-                  Dùng tài khoản học viên nếu muốn kiểm tra phần nộp bài.
+                  Tự làm trước trên máy rồi mới mở đối chiếu — {procedure.length} bước.
                 </p>
-              </div>
-            )}
-            <div className={s.banner}>
-              <div>
-                <span className={s.pill}>
-                  ● BƯỚC {d.step}/{steps.length} ·{' '}
-                  {current?.label.toUpperCase()}
-                </span>
-                <span className={s.bannerTitle}>{meta?.title}</span>
-              </div>
-              <div className={s.badges}>
-                {steps.length > 1 && (
-                  <Stepper current={d.step} names={stepNames} />
-                )}
-              </div>
+              )}
             </div>
-            {completed && (
-              <div className={s.success} role="status">
-                ✓ Bài này đã hoàn thành và được lưu trên hệ thống. Bạn có thể
-                luyện tập lại.
-              </div>
-            )}
-            {stepBody}
-          </>
-        )}
+          )}
+          {showEditor && (
+            <SandboxEditor
+              langTag={runtimeStatus || 'CPython 3.12'}
+              code={d.code}
+              onCodeChange={(code) => update({ code })}
+              running={running}
+              onRun={() => run(false)}
+              onStop={cancelRun}
+              onShowSolution={
+                four?.solutionCode
+                  ? () => {
+                      update({ code: four.solutionCode!, solutionUsed: true });
+                      setMessage('Đã chèn lời giải mẫu. Hãy đọc hiểu trước khi nộp.');
+                    }
+                  : undefined
+              }
+              placeholder={
+                tests.length
+                  ? undefined
+                  : 'Bài này thực hành trên máy lab nên không có ca chấm tự động. Ô này dùng làm nháp: gõ thử rồi bấm "Chạy thử" (chỉ thư viện chuẩn chạy được trong trình duyệt).'
+              }
+              consoleLines={consoleLines()}
+              consoleMeta={result ? `${result.duration} ms` : runtimeStatus}
+              tests={sandboxRows()}
+              disabled={busy}
+            />
+          )}
+          {hintOpen && hints.length > 0 && (
+            <HintSheet
+              levels={hints.map((h, i) => ({
+                title: h.title,
+                body: h.body,
+                locked: i > hintIndex,
+              }))}
+              openIndex={hintIndex}
+              onUnlock={setHintIndex}
+              onBackToCode={() => setHintOpen(false)}
+              onContinueWriting={() => setHintOpen(false)}
+            />
+          )}
+        </ShellB>
+      );
+    }
+
+    // recap
+    const graded = screens.filter((x) => isGraded(x.kind));
+    const done = graded.filter((x) => d.done[x.key]).length;
+    return (
+      <Recap
+        xpLabel={completed ? `+${meta?.xpReward ?? 0} XP` : `${meta?.xpReward ?? 0} XP`}
+        title={completed ? 'Đã hoàn thành bài học!' : 'Tổng kết bài học'}
+        description={
+          completed
+            ? 'Tiến độ và XP đã được lưu. Bạn có thể quay lại luyện tập bất cứ lúc nào.'
+            : tests.length
+              ? 'Bài này chấm tự động — nộp bài ở màn sandbox để ghi nhận hoàn thành.'
+              : 'Bài này thực hành trên máy lab nên không có ca chấm tự động. Xác nhận khi bạn đã làm xong.'
+        }
+        stats={[
+          { icon: '🎯', value: `${done}/${graded.length || 0}`, label: 'Câu đã làm đúng' },
+          { icon: '🧪', value: `${result?.tests.filter((t) => t.passed).length ?? 0}/${tests.length}`, label: 'Ca kiểm thử đạt' },
+          { icon: '📚', value: `${screens.length - 1}`, label: 'Màn đã học' },
+        ]}
+        facts={[
+          lesson.step_1?.context?.body,
+          ...(lesson.step_1?.explain ?? []).map((row) => row.body),
+          lesson.step_1?.misconception?.body
+            ? `Tránh ngộ nhận: ${lesson.step_1.misconception.body}`
+            : undefined,
+        ]
+          .filter((x): x is string => Boolean(x))
+          .slice(0, 4)}
+        onFinish={() => doAction(primary().action)}
+      />
+    );
+  }
+
+  // ---------- Vỏ ----------
+
+  const cta = primary();
+  const adminKey = user?.role === 'admin' ? answerKey() : null;
+  const reached = screens.reduce(
+    (acc, x, i) => (d.done[x.key] ? Math.max(acc, i + 2) : acc),
+    1,
+  );
+
+  function frame(children: React.ReactNode, over?: Partial<React.ComponentProps<typeof LessonChrome>>) {
+    return (
+      <LessonChrome
+        step={Math.min(d.step, Math.max(1, screens.length || 1))}
+        totalSteps={Math.max(1, screens.length || 1)}
+        streak={streak}
+        onClose={leave}
+        primaryLabel={cta.label}
+        primaryTone={cta.tone}
+        primaryDisabled={cta.disabled}
+        // doAction() chỉ chạy khi người học bấm nút. Nó đụng worker/timer ref
+        // bên trong run(), nhưng ở đây mới chỉ là TRUYỀN handler — không ref nào
+        // bị đọc lúc render, nên tắt cảnh báo đúng một dòng này.
+        // eslint-disable-next-line react-hooks/refs
+        onPrimaryClick={() => doAction(cta.action)}
+        onSeek={screens.length > 1 ? goTo : undefined}
+        seekMax={Math.max(d.step, Math.min(screens.length, reached))}
+        doneSteps={screens.map((x) => completed || Boolean(d.done[x.key]))}
+        secondaryLabel={
+          hints.length && scr?.kind === 'sandbox' ? (hintOpen ? '💡 Ẩn gợi ý' : '💡 Gợi ý') : undefined
+        }
+        onSecondaryClick={() => setHintOpen((o) => !o)}
+        {...over}
+      >
+        {children}
         {message && (
-          <div className={s.feedback} role="status">
+          <div className={c.toast} role="status">
             <p>{message}</p>
-            <button
-              className={s.iconButton}
-              aria-label="Đóng thông báo"
-              onClick={() => setMessage('')}
-            >
+            <button type="button" aria-label="Đóng thông báo" onClick={() => setMessage('')}>
               ×
             </button>
           </div>
         )}
-        {hint && (
-          <aside className={s.hintPopup} role="status">
-            <strong>Gợi ý cứu trợ</strong>
-            <p>
-              {lesson?.step_4?.hints?.[0]?.body ||
-                'Đọc kỹ đề bài và phần giải thích ở các bước trước.'}
-            </p>
-            <button className={s.secondary} onClick={() => setHint(false)}>
-              Đã hiểu
-            </button>
-          </aside>
-        )}
-      </main>
-      {!loading && !loadError && enrolled && !empty && (
-        <footer className={s.footer}>
-          <div className={s.footerInner}>
-            <div className={s.footerLeft}>
-              <button
-                className={s.textButton}
-                onClick={() =>
-                  d.step > 1
-                    ? changeStep(d.step - 1)
-                    : window.location.assign(`/courses/${courseId}`)
-                }
-              >
-                Quay lại
-              </button>
-              <small className={s.green}>
-                {saveStatus || 'Đang tải tiến độ'}
-              </small>
-            </div>
-            <div className={s.footerRight}>
-              <button className={s.textButton} onClick={() => setHint(!hint)}>
-                Gợi ý cứu trợ
-              </button>
-              {d.step < steps.length ? (
-                <button
-                  className={s.primary}
-                  disabled={!lesson || !canLeaveStep(lesson, steps, d)}
-                  onClick={() => changeStep(d.step + 1)}
-                >
-                  Tiếp tục bước tiếp theo →
-                </button>
-              ) : (
-                <a className={s.primary} href={`/courses/${courseId}`}>
-                  {completed ? 'Về khóa học' : 'Xem tiến độ khóa học'} →
-                </a>
-              )}
-            </div>
-          </div>
-        </footer>
+      </LessonChrome>
+    );
+  }
+
+  const info = (title: string, body: React.ReactNode, eyebrow = 'Python Studio') => (
+    <ShellB eyebrowIcon={ICON.book} eyebrowLabel={eyebrow} title={title} description={body} centered />
+  );
+
+  if (loading)
+    return frame(info('Đang tải bài học…', 'Chờ một chút, nội dung đang được lấy từ máy chủ.'), {
+      primaryLabel: 'Đang tải…',
+      primaryDisabled: true,
+      onPrimaryClick: () => undefined,
+      onSeek: undefined,
+    });
+
+  if (loadError)
+    return frame(info('Chưa kết nối được bài học', loadError), {
+      primaryLabel: 'Thử lại',
+      onPrimaryClick: () => void load(),
+      onSeek: undefined,
+    });
+
+  if (!enrolled && user?.role !== 'admin')
+    return frame(
+      info(
+        meta?.title || 'Bài học Python',
+        'Đăng ký khóa học miễn phí để mở bài học và lưu tiến độ.',
+      ),
+      {
+        primaryLabel: busy ? 'Đang đăng ký…' : 'Đăng ký khóa Python & bắt đầu',
+        primaryDisabled: busy,
+        onPrimaryClick: () => void enroll(),
+        onSeek: undefined,
+      },
+    );
+
+  if (empty)
+    return frame(
+      info(
+        meta?.title || `Bài ${lessonNo}`,
+        'Bài học này chưa có nội dung Studio. Quản trị viên có thể nhập nội dung từ file PDF hoặc Markdown trong trang quản trị.',
+        'Đang biên soạn',
+      ),
+      { primaryLabel: 'Về khóa học →', onPrimaryClick: leave, onSeek: undefined },
+    );
+
+  return frame(
+    <>
+      {user?.role === 'admin' && !enrolled && (
+        <div className={c.note} role="status">
+          <strong>Chế độ xem trước của quản trị viên.</strong> Bạn chưa ghi danh khoá này nên
+          tiến độ và XP sẽ không được lưu.
+        </div>
       )}
-    </div>
+      {completed && scr?.kind !== 'recap' && (
+        <div className={`${c.note} ${c.noteOk}`} role="status">
+          ✓ Bài này đã hoàn thành và được lưu trên hệ thống. Bạn có thể luyện tập lại.
+        </div>
+      )}
+      {renderScreen()}
+      {adminKey && (
+        <section className={c.answerKey} aria-label="Đáp án cho quản trị viên">
+          <button
+            type="button"
+            className={c.answerKeyHead}
+            aria-expanded={answerOpen}
+            onClick={() => setAnswerOpen((o) => !o)}
+          >
+            <span className={c.adminTag}>ADMIN</span>
+            <strong>Đáp án màn này</strong>
+            <span className={c.answerKeyToggle}>{answerOpen ? 'Ẩn' : 'Hiện'}</span>
+          </button>
+          {answerOpen && (
+            <>
+              {adminKey.rows.length > 0 && (
+                <dl>
+                  {adminKey.rows.map((row, i) => (
+                    <div key={i}>
+                      <dt>{row.label}</dt>
+                      <dd>
+                        <code>{row.value}</code>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+              {adminKey.code && (
+                <CodeBlock
+                  filename="solution.py"
+                  langTag="Lời giải mẫu"
+                  lines={toCodeLines(adminKey.code)}
+                />
+              )}
+              {adminKey.fill && (
+                <button
+                  type="button"
+                  className={c.resetLink}
+                  onClick={() => {
+                    setCheckedKey('');
+                    setHeld(null);
+                    update(adminKey.fill!);
+                  }}
+                >
+                  Điền sẵn đáp án vào màn này
+                </button>
+              )}
+            </>
+          )}
+        </section>
+      )}
+      <p className={c.save}>{saveStatus || 'Đang tải tiến độ…'}</p>
+    </>,
   );
 }

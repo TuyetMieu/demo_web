@@ -23,6 +23,16 @@ export interface LessonChromeProps {
   /** Nút phụ bên trái nút chính (ví dụ "Gợi ý"). */
   secondaryLabel?: React.ReactNode;
   onSecondaryClick?: () => void;
+  /** Cho quay lại màn đã qua bằng cách bấm vào đoạn tương ứng trên thanh tiến
+   *  độ. Không truyền thì thanh chỉ để xem (đúng như bản Stitch gốc). */
+  onSeek?: (step: number) => void;
+  /** Đoạn xa nhất được phép bấm tới; mặc định là bước hiện tại. */
+  seekMax?: number;
+  /** Màn nào đã xong (theo chỉ số 0-based), để tô ĐẦY đúng những đoạn đó dù
+   *  đang xem lại một màn cũ. Màn đang mở luôn tô đầy (viền tím báo đang ở
+   *  đây) bất kể done hay chưa — không truyền thì mọi đoạn trước bước hiện
+   *  tại cũng coi như đầy. */
+  doneSteps?: boolean[];
   children: React.ReactNode;
 }
 
@@ -37,6 +47,9 @@ export default function LessonChrome({
   primaryTone = 'accent',
   secondaryLabel,
   onSecondaryClick,
+  onSeek,
+  seekMax,
+  doneSteps,
   children,
 }: LessonChromeProps) {
   const primaryClass =
@@ -64,10 +77,35 @@ export default function LessonChrome({
           <div className={styles.track} title={`Tiến độ bài học: ${step}/${totalSteps}`}>
             {Array.from({ length: totalSteps }, (_, i) => {
               const idx = i + 1;
-              const width = idx < step ? '100%' : idx === step ? '50%' : '0%';
+              const current = idx === step;
+              // Đoạn đầy khi màn đó đã xong (doneSteps), khi màn đứng trước
+              // bước hiện tại (fallback lúc không có doneSteps, hoặc phòng khi
+              // done thiếu mục), hoặc khi đó là màn đang mở — kể cả chưa làm
+              // xong: dừng ở nửa đoạn trông như treo/lỗi, animate cho đầy hẳn
+              // rồi dùng viền bên dưới để vẫn biết đang ở đoạn nào.
+              const width = doneSteps?.[i] || idx < step || current ? '100%' : '0%';
+              const className = current
+                ? `${styles.segment} ${styles.segmentCurrent}`
+                : styles.segment;
+              const fill = <div className={styles.segmentFill} style={{ width }} />;
+              // Chỉ những màn đã đi qua mới bấm được: thanh tiến độ không phải
+              // đường tắt bỏ qua phần chưa làm.
+              if (onSeek && idx <= (seekMax ?? step))
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    className={className}
+                    aria-label={`Xem lại màn ${idx}`}
+                    aria-current={current ? 'step' : undefined}
+                    onClick={() => onSeek(idx)}
+                  >
+                    {fill}
+                  </button>
+                );
               return (
-                <div key={idx} className={styles.segment}>
-                  <div className={styles.segmentFill} style={{ width }} />
+                <div key={idx} className={className} aria-current={current ? 'step' : undefined}>
+                  {fill}
                 </div>
               );
             })}

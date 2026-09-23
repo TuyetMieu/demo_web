@@ -1,0 +1,183 @@
+{
+  "lesson_code": "C08",
+  "sort_order": 13,
+  "module": "Module 3: List, dict, tuple và set",
+  "title": "Thêm, xóa và đảo list",
+  "subtitle": "C08 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Thêm, xóa và đảo list",
+    "subtitle": "C08 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C08",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "append thêm một đối tượng; extend thêm từng phần tử. Xóa theo giá trị và xóa theo vị trí là hai yêu cầu khác nhau."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "a=[1]; a.append([2,3])\nb=[1]; b.extend([2,3])\nprint(a,b)\nprint(b.pop(1))\nprint(b)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "a thành [1,[2,3]], b thành [1,2,3]."
+        },
+        {
+          "n": 2,
+          "body": "pop(1) trả 2 và đồng thời xóa phần tử đó."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"[5]\" — remove chỉ xóa lần xuất hiện đầu."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "remove(2) trên [2,5,2] để lại gì?",
+          "options": [
+            {
+              "text": "[5]",
+              "correct": false,
+              "detail": "remove chỉ xóa lần xuất hiện đầu."
+            },
+            {
+              "text": "[5,2]",
+              "correct": true,
+              "detail": "Đúng."
+            },
+            {
+              "text": "[2,5]",
+              "correct": false,
+              "detail": "Đây là kết quả pop cuối, không phải remove(2)."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thử remove với giá trị không có: dự đoán ValueError; trước thao tác cần kiểm tra membership nếu hợp đồng muốn bỏ qua."
+      },
+      "scaffold": {
+        "template": "def edit(values,extras,target):\n    {{slot1}}\n    result.extend(extras)\n    if target in result:\n        {{slot2}}\n    removed=result.pop() if result else None\n    result.reverse()\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "result=values.copy()"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "result.remove(target)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return result,removed"
+          }
+        ],
+        "bank": [
+          {
+            "label": "result=values.copy()",
+            "slot": 1
+          },
+          {
+            "label": "result=values",
+            "slot": 1
+          },
+          {
+            "label": "result.remove(target)",
+            "slot": 2
+          },
+          {
+            "label": "print(a,b)",
+            "slot": 2
+          },
+          {
+            "label": "return result,removed",
+            "slot": 3
+          },
+          {
+            "label": "print(result,removed)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Kéo list [2,3] vào append: hiện một ô list lồng; đổi sang extend: hiện hai ô số."
+          },
+          {
+            "label": "B2",
+            "text": "Đánh dấu lần xuất hiện đầu của giá trị 2 rồi remove; các ô còn lại dồn trái."
+          },
+          {
+            "label": "B3",
+            "text": "Thực hiện pop, del và reverse; ghi riêng giá trị trả về và list sau thao tác."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết edit(values,extras,target): sao chép values; extend extras; nếu target có trong list thì remove lần đầu; pop phần tử cuối nếu còn (rỗng trả None); reverse phần còn lại; trả (list_mới,phần_tử_pop).",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Trên [10,20,30], học viên thực hiện del items[1] ra [10,30] và phân biệt với remove(1) gây ValueError."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "a thành [1,[2,3]], b thành [1,2,3]. pop(1) trả 2 và đồng thời xóa phần tử đó."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "def edit(values,extras,target):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "normal (C08-K01)",
+          "call": "(exec('v=[2,5,2]; assert edit(v,[8,9],2)==([8,2,5],9); assert v==[2,5,2]\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "empty (C08-K02)",
+          "call": "(exec('assert edit([],[],7)==([],None)\\nassert edit([1],[],9)==([],1)\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "def edit(values,extras,target):\n    result=values.copy()\n    result.extend(extras)\n    if target in result:\n        result.remove(target)\n    removed=result.pop() if result else None\n    result.reverse()\n    return result,removed\n"
+    }
+  }
+}

@@ -1,0 +1,179 @@
+{
+  "lesson_code": "X03",
+  "sort_order": 89,
+  "module": "Module 13: Capstone PW2–PW9",
+  "title": "PW5-PW6: ba file, archive và pickle có nén",
+  "subtitle": "X03 · Nâng cao · 90 phút",
+  "estimated_minutes": 90,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "PW5-PW6: ba file, archive và pickle có nén",
+    "subtitle": "X03 · Nâng cao · 90 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#X03",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Dữ liệu phải sống qua lần đóng ứng dụng. Ghi ba file dễ quan sát trước, rồi thay định dạng lưu bằng pickle có nén mà giữ cùng hành vi nạp lại."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "students.txt -> thông tin sinh viên\ncourses.txt -> thông tin môn\nmarks.txt -> điểm\nstudents.dat -> archive của ba file ở PW5\nstudents.dat -> gzip pickle ở PW6, schema/version khác\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Hai phiên bản students.dat không được đọc lẫn mà không nhận diện format."
+        },
+        {
+          "n": 2,
+          "body": "Bài dùng thư mục pw5 và pw6 riêng."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Có thể ghi đè lên dữ liệu cần phục hồi."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Đọc file nén hỏng rồi coi như lớp rỗng có phù hợp không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Có thể ghi đè lên dữ liệu cần phục hồi."
+            },
+            {
+              "text": "Không, phải báo lỗi để tránh mất dữ liệu",
+              "correct": true,
+              "detail": "Đúng."
+            },
+            {
+              "text": "Chỉ khi có UI",
+              "correct": false,
+              "detail": "Nguyên tắc áp dụng cả CLI và GUI."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Chạy lại bằng process mới để phát hiện pickle class nằm sai module __main__; đặt class ở domains như X02."
+      },
+      "scaffold": {
+        "template": "from pathlib import Path\nimport json,zipfile,gzip,pickle\n{{slot1}}\ndef save_text_bundle(folder,state):\n    folder=Path(folder); folder.mkdir(parents=True,exist_ok=True)\n    for key in KEYS: (folder/(key+\".txt\")).write_text(json.dumps(state[key],ensure_ascii=False),encoding=\"utf8\")\n    with zipfile.ZipFile(folder/\"students.dat\",\"w\",zipfile.ZIP_DEFLATED) as archive:\n        for key in KEYS: archive.write(folder/(key+\".txt\"),arcname=key+\".txt\")\ndef load_text_bundle(folder):\n    path=Path(folder)/\"students.dat\"\n    {{slot2}}\n    with zipfile.ZipFile(path) as archive:\n        return {key:json.loads(archive.read(key+\".txt\").decode(\"utf8\")) for key in KEYS}\ndef save_pickle(path,registry):\n    with gzip.open(path,\"wb\") as stream: pickle.dump(registry,stream,pickle.HIGHEST_PROTOCOL)\ndef load_pickle(path):\n    if not Path(path).exists(): return None\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "KEYS=(\"students\",\"courses\",\"marks\")"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "if not path.exists(): return {key:{} for key in KEYS}"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "with gzip.open(path,\"rb\") as stream: return pickle.load(stream)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "KEYS=(\"students\",\"courses\",\"marks\")",
+            "slot": 1
+          },
+          {
+            "label": "if not path.exists(): return {key:{} for key in KEYS}",
+            "slot": 2
+          },
+          {
+            "label": "students.txt -> thông tin sinh viên",
+            "slot": 2
+          },
+          {
+            "label": "with gzip.open(path,\"rb\") as stream: return pickle.load(stream)",
+            "slot": 3
+          },
+          {
+            "label": "courses.txt -> thông tin môn",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Sau nhập sinh viên ghi students.txt, sau nhập môn ghi courses.txt, sau nhập điểm ghi marks.txt; dùng UTF-8 JSON trong từng file text."
+          },
+          {
+            "label": "B2",
+            "text": "Trước thoát ZIP ba file vào students.dat; khi khởi động có archive thì đọc/nạp, thiếu archive tạo state rỗng."
+          },
+          {
+            "label": "B3",
+            "text": "Sao chép checkpoint sang pw6, đổi sang gzip pickle object Registry và kiểm tra lại cả kiểu, DoB, credits, điểm."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết save_text_bundle(folder,state), load_text_bundle(folder): state có students/courses/marks dạng JSON, lưu đúng ba file .txt và ZIP students.dat; load thiếu archive trả ba dict rỗng, archive hỏng giữ lỗi. Viết save_pickle(path,registry), load_pickle(path): gzip pickle; file thiếu trả None, hỏng giữ lỗi. Tích hợp lưu sau mỗi nhóm nhập và nạp khi mở app. Dữ liệu pickle chỉ từ lab tin cậy.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Nạp object Registry thật từ process mới với domains import được; DoB/credits/marks và kiểu Student/Course giữ nguyên. Bản PW5 phải thấy ba file cập nhật ngay sau từng nhóm input, không chỉ lúc thoát."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Hai phiên bản students.dat không được đọc lẫn mà không nhận diện format. Bài dùng thư mục pw5 và pw6 riêng."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "from pathlib import Path\nimport json, zipfile, gzip, pickle\ndef save_text_bundle(folder,state):\n    # Viết lời giải của bạn ở đây\n    pass\ndef load_text_bundle(folder):\n    # Viết lời giải của bạn ở đây\n    pass\ndef save_pickle(path,registry):\n    # Viết lời giải của bạn ở đây\n    pass\ndef load_pickle(path):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "bundle (X03-K01)",
+          "call": "(exec('s={\"students\":{\"A\":{\"name\":\"An\",\"dob\":\"2005-01-02\"}},\"courses\":{\"PY\":{\"name\":\"Python\"}},\"marks\":{\"PY\":{\"A\":0}}}\\nsave_text_bundle(\"pw5\",s); assert load_text_bundle(\"pw5\")==s\\nassert load_text_bundle(\"absent\")=={\"students\":{},\"courses\":{},\"marks\":{}}\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "pickle (X03-K02)",
+          "call": "(exec('state={\"profile\":(\"An\",19),\"courses\":{\"PY\"}}\\nsave_pickle(\"pw6.dat\",state); assert load_pickle(\"pw6.dat\")==state\\nassert load_pickle(\"absent.dat\") is None\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "from pathlib import Path\nimport json,zipfile,gzip,pickle\nKEYS=(\"students\",\"courses\",\"marks\")\ndef save_text_bundle(folder,state):\n    folder=Path(folder); folder.mkdir(parents=True,exist_ok=True)\n    for key in KEYS: (folder/(key+\".txt\")).write_text(json.dumps(state[key],ensure_ascii=False),encoding=\"utf8\")\n    with zipfile.ZipFile(folder/\"students.dat\",\"w\",zipfile.ZIP_DEFLATED) as archive:\n        for key in KEYS: archive.write(folder/(key+\".txt\"),arcname=key+\".txt\")\ndef load_text_bundle(folder):\n    path=Path(folder)/\"students.dat\"\n    if not path.exists(): return {key:{} for key in KEYS}\n    with zipfile.ZipFile(path) as archive:\n        return {key:json.loads(archive.read(key+\".txt\").decode(\"utf8\")) for key in KEYS}\ndef save_pickle(path,registry):\n    with gzip.open(path,\"wb\") as stream: pickle.dump(registry,stream,pickle.HIGHEST_PROTOCOL)\ndef load_pickle(path):\n    if not Path(path).exists(): return None\n    with gzip.open(path,\"rb\") as stream: return pickle.load(stream)\n"
+    }
+  }
+}

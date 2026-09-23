@@ -1,0 +1,177 @@
+{
+  "lesson_code": "C15",
+  "sort_order": 25,
+  "module": "Module 5: Hàm, module và package",
+  "title": "Ngẫu nhiên có thể kiểm thử",
+  "subtitle": "C15 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Ngẫu nhiên có thể kiểm thử",
+    "subtitle": "C15 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C15",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Ngẫu nhiên hữu ích khi chọn câu hỏi ôn tập. Một bộ sinh riêng có seed giúp tái tạo lỗi mà không thay đổi trạng thái ngẫu nhiên của toàn ứng dụng."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "import random\nrng=random.Random(17)\nprint(rng.choice([\"A\",\"B\",\"C\"]))\nprint(rng.randint(0,10))\nprint(0<=rng.random()<1)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "choice chọn phần tử, randint bao gồm hai đầu, random tạo float từ 0 đến dưới 1."
+        },
+        {
+          "n": 2,
+          "body": "Seed không biến ngẫu nhiên thành dữ liệu bí mật an toàn."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Không\" — Đừng nhầm với stop của range."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "randint(0,10) có thể trả 10 không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": true,
+              "detail": "Đúng: cả hai đầu đều được bao gồm."
+            },
+            {
+              "text": "Không",
+              "correct": false,
+              "detail": "Đừng nhầm với stop của range."
+            },
+            {
+              "text": "Chỉ khi seed=10",
+              "correct": false,
+              "detail": "Seed không quy định biên như vậy."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: cả hai đầu đều được bao gồm."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi bộ bài rỗng: thiết kế hợp đồng rõ thay vì để choice lỗi không giải thích."
+      },
+      "scaffold": {
+        "template": "import random\ndef sample(deck,seed):\n    {{slot1}}\n        return None\n    {{slot2}}\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "if not deck:"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "rng=random.Random(seed)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return rng.choice(deck),rng.randint(0,10),rng.random()"
+          }
+        ],
+        "bank": [
+          {
+            "label": "if not deck:",
+            "slot": 1
+          },
+          {
+            "label": "import random",
+            "slot": 1
+          },
+          {
+            "label": "rng=random.Random(seed)",
+            "slot": 2
+          },
+          {
+            "label": "rng=random.Random(17)",
+            "slot": 2
+          },
+          {
+            "label": "return rng.choice(deck),rng.randint(0,10),rng.random()",
+            "slot": 3
+          },
+          {
+            "label": "print(rng.choice(deck),rng.randint(0,10),rng.random())",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chọn bộ bài ba mã; mỗi lần bấm Rút chỉ hiện thẻ được chọn."
+          },
+          {
+            "label": "B2",
+            "text": "Khởi tạo lại cùng seed và cùng thứ tự lời gọi; so hai chuỗi kết quả."
+          },
+          {
+            "label": "B3",
+            "text": "Thêm một lời gọi random trước choice; quan sát chuỗi sau thay đổi."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết sample(deck,seed): deck list không rỗng hoặc rỗng; nếu rỗng trả None. Nếu có, dùng random.Random(seed), theo thứ tự choice(deck), randint(0,10), random(); trả tuple ba kết quả. Không thay deck hoặc global random state."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "choice chọn phần tử, randint bao gồm hai đầu, random tạo float từ 0 đến dưới 1. Seed không biến ngẫu nhiên thành dữ liệu bí mật an toàn."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "import random\ndef sample(deck,seed):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "repeat (C15-K01)",
+          "call": "(exec('assert sample([\"A\",\"B\"],7)==sample([\"A\",\"B\"],7)\\nassert sample([],7) is None\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "bounds (C15-K02)",
+          "call": "(exec('state=random.getstate()\\nfor seed in range(30):\\n    card,number,fraction=sample([\"A\",\"B\"],seed)\\n    assert card in [\"A\",\"B\"] and 0<=number<=10 and 0<=fraction<1\\nassert random.getstate()==state\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "import random\ndef sample(deck,seed):\n    if not deck:\n        return None\n    rng=random.Random(seed)\n    return rng.choice(deck),rng.randint(0,10),rng.random()\n"
+    }
+  }
+}

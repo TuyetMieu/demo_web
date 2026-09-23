@@ -1,0 +1,170 @@
+{
+  "lesson_code": "T08",
+  "sort_order": 52,
+  "module": "Module 9: Tkinter chuyên sâu",
+  "title": "StringVar, scope và component tái sử dụng",
+  "subtitle": "T08 · Lộ trình chính · 40 phút",
+  "estimated_minutes": 40,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "StringVar, scope và component tái sử dụng",
+    "subtitle": "T08 · Lộ trình chính · 40 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#T08",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Biến gắn widget nối giao diện với trạng thái. Component giữ trạng thái riêng giúp hai form không ghi đè tên của nhau."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "name=tk.StringVar(root,value=\"An\")\nentry=ttk.Entry(root,textvariable=name)\nlabel=ttk.Label(root,textvariable=name)\nname.set(\"Binh\")\nprint(name.get())\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "set cập nhật Entry và Label cùng binding; get đọc giá trị."
+        },
+        {
+          "n": 2,
+          "body": "Biến global dùng chung dễ làm hai instance ảnh hưởng nhau."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Hoàn toàn độc lập\" — Phải có biến riêng mới độc lập."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Hai form dùng chung một StringVar, nhập một form thì sao?",
+          "options": [
+            {
+              "text": "Form kia đổi theo",
+              "correct": true,
+              "detail": "Đúng: cả hai cùng binding."
+            },
+            {
+              "text": "Hoàn toàn độc lập",
+              "correct": false,
+              "detail": "Phải có biến riêng mới độc lập."
+            },
+            {
+              "text": "Luôn lỗi",
+              "correct": false,
+              "detail": "Dùng chung hợp lệ, nhưng có thể sai thiết kế."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: cả hai cùng binding."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Tạo instance thứ ba mà không sửa component; reset một form không đổi hai form còn lại."
+      },
+      "scaffold": {
+        "template": "import tkinter as tk\nfrom tkinter import ttk\ndef normalize_name(text):\n    {{slot1}}\nclass NameForm(ttk.Frame):\n    def __init__(self,parent):\n        super().__init__(parent,padding=8)\n        self.name=tk.StringVar(self,value=\"\")\n        {{slot2}}\n        self.label=ttk.Label(self,textvariable=self.name); self.label.pack()\n        self.button=ttk.Button(self,text=\"Chuan hoa\",command=self.normalize); self.button.pack()\n    def normalize(self):\n        {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "return text.strip().title()"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "self.entry=ttk.Entry(self,textvariable=self.name); self.entry.pack()"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "self.name.set(normalize_name(self.name.get()))"
+          }
+        ],
+        "bank": [
+          {
+            "label": "return text.strip().title()",
+            "slot": 1
+          },
+          {
+            "label": "return text.rstrip().title()",
+            "slot": 1
+          },
+          {
+            "label": "self.entry=ttk.Entry(self,textvariable=self.name); self.entry.pack()",
+            "slot": 2
+          },
+          {
+            "label": "name=tk.StringVar(root,value=\"An\")",
+            "slot": 2
+          },
+          {
+            "label": "self.name.set(normalize_name(self.name.get()))",
+            "slot": 3
+          },
+          {
+            "label": "name.set(\"Binh\")",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Cho hai Entry dùng một global name, nhập An và quan sát cả hai đổi."
+          },
+          {
+            "label": "B2",
+            "text": "Refactor thành NameForm với self.name riêng; bảng trạng thái tách hai instance."
+          },
+          {
+            "label": "B3",
+            "text": "Giữ normalize_name là hàm thuần dùng chung; giải thích không cần class cho mọi phép tính nhỏ."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết normalize_name(text) strip và title. Viết NameForm(ttk.Frame) có self.name StringVar riêng, Entry và Label cùng variable, nút Chuan hoa gọi normalize_name. Đặt hai NameForm cạnh nhau bằng code client. Nộp giải thích vì sao hàm chuẩn hóa để ngoài class và vì sao bỏ global state.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Nộp before/after loại bỏ global và callback trộn I/O; chỉ ra ba trách nhiệm: chuẩn hóa, giữ state form, bố cục client. Không tạo class rỗng chỉ để bọc một hàm."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "set cập nhật Entry và Label cùng binding; get đọc giá trị. Biến global dùng chung dễ làm hai instance ảnh hưởng nhau."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import tkinter as tk\nfrom tkinter import ttk\ndef normalize_name(text):\n    return text.strip().title()\nclass NameForm(ttk.Frame):\n    def __init__(self,parent):\n        super().__init__(parent,padding=8)\n        self.name=tk.StringVar(self,value=\"\")\n        self.entry=ttk.Entry(self,textvariable=self.name); self.entry.pack()\n        self.label=ttk.Label(self,textvariable=self.name); self.label.pack()\n        self.button=ttk.Button(self,text=\"Chuan hoa\",command=self.normalize); self.button.pack()\n    def normalize(self):\n        self.name.set(normalize_name(self.name.get()))\n"
+    }
+  }
+}

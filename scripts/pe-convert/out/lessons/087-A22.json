@@ -1,0 +1,179 @@
+{
+  "lesson_code": "A22",
+  "sort_order": 87,
+  "module": "Module 12: Thread, tiến trình, đồng thời và mạng",
+  "title": "Hai toolkit: chẩn đoán mainloop và trao đổi dữ liệu",
+  "subtitle": "A22 · Nâng cao · 60 phút",
+  "estimated_minutes": 60,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Hai toolkit: chẩn đoán mainloop và trao đổi dữ liệu",
+    "subtitle": "A22 · Nâng cao · 60 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A22",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Hai toolkit đều cần điều khiển event loop. Gọi loop thứ hai trong callback có thể chặn loop thứ nhất; chạy GUI tùy tiện trong worker không phải cách sửa di động."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "# Trace thử nghiệm trong sách:\n# Tk callback -> wx.App.MainLoop -> chưa quay về Tk\n# wx callback -> Tk.mainloop -> chưa quay về wx\n# Thiết kế lab: mỗi process có một GUI loop ở main thread; JSON line nối hai process.\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Hai recipe embedding trong nguồn là thử nghiệm, có giới hạn và lỗi được tác giả nêu."
+        },
+        {
+          "n": 2,
+          "body": "Bài giữ phần phân tích đó và triển khai giải pháp tách process như một thiết kế bổ sung, không gọi là nhúng widget native."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — GUI toolkit thường yêu cầu main thread."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Chuyển cả wx GUI sang một thread nền có bảo đảm sửa được trên mọi OS không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "GUI toolkit thường yêu cầu main thread."
+            },
+            {
+              "text": "Không",
+              "correct": true,
+              "detail": "Đúng: cần tôn trọng loop/thread của từng toolkit."
+            },
+            {
+              "text": "Chỉ cần daemon=True",
+              "correct": false,
+              "detail": "Daemon chỉ ảnh hưởng vòng đời thread."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: cần tôn trọng loop/thread của từng toolkit."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi vai host từ Tk sang wx; giao thức name/quit giữ nguyên. Đóng peer trước, host phải báo peer closed thay vì treo."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Vẽ hai trace Tk gọi wx loop và wx gọi Tk loop; đánh dấu callback nào không trả về và cửa sổ nào ngừng xử lý sự kiện."
+          },
+          {
+            "label": "B2",
+            "text": "Đọc ví dụ thử nghiệm worker trong nguồn; chỉ ra lỗi lifecycle/main thread, không thực thi như mẫu production."
+          },
+          {
+            "label": "B3",
+            "text": "Chạy hai process, mỗi GUI ở main thread; reader thread chỉ put message vào Queue, Tk after hoặc wx.Timer nhận và cập nhật widget."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết dual_gui.py nhận tk/wx và --peer. Host mở toolkit còn lại bằng subprocess; hai form có Entry/TextCtrl và nút Send. Gửi JSON line type=name,value=...; form bên kia hiển thị Received: tên. Worker reader không chạm widget. Tk poll bằng after, wx poll bằng Timer. Đóng host gửi quit, chờ tối đa1giây rồi thu dọn child. Nộp trace giải thích cả hai hướng embedding thất bại và giải pháp này là phối hợp process, không embedding widget."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Hai recipe embedding trong nguồn là thử nghiệm, có giới hạn và lỗi được tác giả nêu. Bài giữ phần phân tích đó và triển khai giải pháp tách process như một thiết kế bổ sung, không gọi là nhúng widget native."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import sys,json,subprocess,threading,queue\nfrom pathlib import Path\ndef main(kind,peer=False):\n    child=None; inbox=queue.Queue()\n    if peer:\n        reader,writer=sys.stdin,sys.stdout\n    else:\n        other=\"wx\" if kind==\"tk\" else \"tk\"\n        child=subprocess.Popen([sys.executable,str(Path(__file__).resolve()),other,\"--peer\"],\n            stdin=subprocess.PIPE,stdout=subprocess.PIPE,text=True,encoding=\"utf8\",bufsize=1)\n        reader,writer=child.stdout,child.stdin\n    def read_messages():\n        for line in reader:\n            try: inbox.put(json.loads(line))\n            except ValueError: inbox.put({\"type\":\"error\",\"value\":\"Invalid JSON\"})\n        inbox.put({\"type\":\"closed\"})\n    threading.Thread(target=read_messages,daemon=True).start()\n    def send(message):\n        try: writer.write(json.dumps(message,ensure_ascii=False)+\"\\n\"); writer.flush()\n        except (BrokenPipeError,OSError): inbox.put({\"type\":\"closed\"})\n    def send_name(value): send({\"type\":\"name\",\"value\":value})\n    if kind==\"tk\":\n        import tkinter as tk\n        from tkinter import ttk\n        root=tk.Tk(); root.title(\"Tk peer\" if peer else \"Tk host\")\n        entry=ttk.Entry(root); entry.pack(); status=ttk.Label(root,text=\"Ready\"); status.pack()\n        ttk.Button(root,text=\"Send\",command=lambda:send_name(entry.get())).pack()\n        closed=False\n        def close():\n            nonlocal closed\n            if not closed: closed=True; send({\"type\":\"quit\"}); root.destroy()\n        def poll():\n            while not inbox.empty():\n                message=inbox.get()\n                if message.get(\"type\")==\"quit\": close(); return\n                status.configure(text=\"Received: \"+str(message.get(\"value\",message.get(\"type\"))))\n            if not closed: root.after(50,poll)\n        root.protocol(\"WM_DELETE_WINDOW\",close); root.after(50,poll); root.mainloop()\n    else:\n        import wx\n        app=wx.App(False); frame=wx.Frame(None,title=\"wx peer\" if peer else \"wx host\",size=(320,180))\n        panel=wx.Panel(frame); box=wx.BoxSizer(wx.VERTICAL)\n        entry=wx.TextCtrl(panel); status=wx.StaticText(panel,label=\"Ready\"); button=wx.Button(panel,label=\"Send\")\n        for widget in (entry,status,button): box.Add(widget,0,wx.EXPAND|wx.ALL,8)\n        panel.SetSizer(box); button.Bind(wx.EVT_BUTTON,lambda event:send_name(entry.GetValue()))\n        timer=wx.Timer(frame)\n        def close(event): timer.Stop(); send({\"type\":\"quit\"}); frame.Destroy()\n        def poll(event):\n            while not inbox.empty():\n                message=inbox.get()\n                if message.get(\"type\")==\"quit\": frame.Close(); return\n                status.SetLabel(\"Received: \"+str(message.get(\"value\",message.get(\"type\"))))\n        frame.Bind(wx.EVT_CLOSE,close); frame.Bind(wx.EVT_TIMER,poll,timer)\n        timer.Start(50); frame.Show(); app.MainLoop()\n    if child is not None:\n        try: child.wait(timeout=1)\n        except subprocess.TimeoutExpired: child.terminate(); child.wait(timeout=3)\n        child.stdin.close(); child.stdout.close()\nif __name__==\"__main__\": main(sys.argv[1],\"--peer\" in sys.argv)\n",
+      "procedure": [
+        "import sys,json,subprocess,threading,queue",
+        "from pathlib import Path",
+        "def main(kind,peer=False):",
+        "    child=None; inbox=queue.Queue()",
+        "    if peer:",
+        "        reader,writer=sys.stdin,sys.stdout",
+        "    else:",
+        "        other=\"wx\" if kind==\"tk\" else \"tk\"",
+        "        child=subprocess.Popen([sys.executable,str(Path(__file__).resolve()),other,\"--peer\"],",
+        "            stdin=subprocess.PIPE,stdout=subprocess.PIPE,text=True,encoding=\"utf8\",bufsize=1)",
+        "        reader,writer=child.stdout,child.stdin",
+        "    def read_messages():",
+        "        for line in reader:",
+        "            try: inbox.put(json.loads(line))",
+        "            except ValueError: inbox.put({\"type\":\"error\",\"value\":\"Invalid JSON\"})",
+        "        inbox.put({\"type\":\"closed\"})",
+        "    threading.Thread(target=read_messages,daemon=True).start()",
+        "    def send(message):",
+        "        try: writer.write(json.dumps(message,ensure_ascii=False)+\"\\n\"); writer.flush()",
+        "        except (BrokenPipeError,OSError): inbox.put({\"type\":\"closed\"})",
+        "    def send_name(value): send({\"type\":\"name\",\"value\":value})",
+        "    if kind==\"tk\":",
+        "        import tkinter as tk",
+        "        from tkinter import ttk",
+        "        root=tk.Tk(); root.title(\"Tk peer\" if peer else \"Tk host\")",
+        "        entry=ttk.Entry(root); entry.pack(); status=ttk.Label(root,text=\"Ready\"); status.pack()",
+        "        ttk.Button(root,text=\"Send\",command=lambda:send_name(entry.get())).pack()",
+        "        closed=False",
+        "        def close():",
+        "            nonlocal closed",
+        "            if not closed: closed=True; send({\"type\":\"quit\"}); root.destroy()",
+        "        def poll():",
+        "            while not inbox.empty():",
+        "                message=inbox.get()",
+        "                if message.get(\"type\")==\"quit\": close(); return",
+        "                status.configure(text=\"Received: \"+str(message.get(\"value\",message.get(\"type\"))))",
+        "            if not closed: root.after(50,poll)",
+        "        root.protocol(\"WM_DELETE_WINDOW\",close); root.after(50,poll); root.mainloop()",
+        "    else:",
+        "        import wx",
+        "        app=wx.App(False); frame=wx.Frame(None,title=\"wx peer\" if peer else \"wx host\",size=(320,180))",
+        "        panel=wx.Panel(frame); box=wx.BoxSizer(wx.VERTICAL)",
+        "        entry=wx.TextCtrl(panel); status=wx.StaticText(panel,label=\"Ready\"); button=wx.Button(panel,label=\"Send\")",
+        "        for widget in (entry,status,button): box.Add(widget,0,wx.EXPAND|wx.ALL,8)",
+        "        panel.SetSizer(box); button.Bind(wx.EVT_BUTTON,lambda event:send_name(entry.GetValue()))",
+        "        timer=wx.Timer(frame)",
+        "        def close(event): timer.Stop(); send({\"type\":\"quit\"}); frame.Destroy()",
+        "        def poll(event):",
+        "            while not inbox.empty():",
+        "                message=inbox.get()",
+        "                if message.get(\"type\")==\"quit\": frame.Close(); return",
+        "                status.SetLabel(\"Received: \"+str(message.get(\"value\",message.get(\"type\"))))",
+        "        frame.Bind(wx.EVT_CLOSE,close); frame.Bind(wx.EVT_TIMER,poll,timer)",
+        "        timer.Start(50); frame.Show(); app.MainLoop()",
+        "    if child is not None:",
+        "        try: child.wait(timeout=1)",
+        "        except subprocess.TimeoutExpired: child.terminate(); child.wait(timeout=3)",
+        "        child.stdin.close(); child.stdout.close()",
+        "if __name__==\"__main__\": main(sys.argv[1],\"--peer\" in sys.argv)"
+      ]
+    }
+  }
+}

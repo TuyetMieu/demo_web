@@ -1,0 +1,211 @@
+{
+  "lesson_code": "P04",
+  "sort_order": 10,
+  "module": "Module 2: Biến, kiểu dữ liệu và điều kiện",
+  "title": "Điều kiện và giá trị ở ranh giới",
+  "subtitle": "P04 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Điều kiện và giá trị ở ranh giới",
+    "subtitle": "P04 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P04",
+      "parser": "pe-convert/override",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Bảng điểm cần hiển thị một nhãn theo điều kiện. Trong bài giả lập, điểm từ 5 trở lên là Dat. Máy chỉ chọn một nhánh dựa trên kết quả True/False của phép so sánh."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "score = 5\nif score >= 5:\n    label = \"Dat\"\nelse:\n    label = \"Chua dat\""
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Vì 5 >= 5 là True, chỉ nhánh if gán label."
+        },
+        {
+          "n": 2,
+          "body": "Thụt lề xác định dòng thuộc nhánh nào."
+        }
+      ],
+      "predict": {
+        "question": "Muốn chỉ số lớn hơn 5, dùng gì?",
+        "options": [
+          {
+            "id": "a",
+            "title": ">= 5",
+            "detail": ">= còn nhận cả số 5.",
+            "correct": false
+          },
+          {
+            "id": "b",
+            "title": "> 5",
+            "detail": "Đúng: > loại giá trị bằng 5.",
+            "correct": true
+          },
+          {
+            "id": "c",
+            "title": "= 5",
+            "detail": "= dùng cho phép gán, không phải so sánh này.",
+            "correct": false
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu 100 bị Paid: điều kiện của bạn có bỏ mất dấu bằng không?"
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "score=5 cho nhãn gì?",
+          "options": [
+            {
+              "text": "Dat",
+              "correct": true,
+              "detail": "Đúng: >= có bao gồm dấu bằng."
+            },
+            {
+              "text": "Chua dat",
+              "correct": false,
+              "detail": "Bạn đã bỏ qua trường hợp bằng ngưỡng."
+            },
+            {
+              "text": "Cả hai",
+              "correct": false,
+              "detail": "if/else chọn một nhánh ở lần chạy này."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: >= có bao gồm dấu bằng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu. Nhật ký thao tác bên dưới mô tả bản script gốc của PE; cách nghĩ giữ nguyên, chỉ khác phần vỏ hàm.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi score thành 4.9 rồi 5.1; dự đoán nhánh mỗi lần. Hỏi vì sao test đúng 5 vẫn cần có."
+      },
+      "scaffold": {
+        "template": "def shipping_label(fee):\n    \"\"\"Trả về \"Free\" khi fee >= 100, ngược lại \"Paid\".\"\"\"\n    {{slot1}}\n        {{slot2}}\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "if fee >= 100:"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "return \"Free\""
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return \"Paid\""
+          }
+        ],
+        "bank": [
+          {
+            "label": "if fee >= 100:",
+            "slot": 1
+          },
+          {
+            "label": "if fee > 100:",
+            "slot": 1
+          },
+          {
+            "label": "return \"Free\"",
+            "slot": 2
+          },
+          {
+            "label": "print(\"Free\")",
+            "slot": 2
+          },
+          {
+            "label": "return \"Paid\"",
+            "slot": 3
+          },
+          {
+            "label": "print(\"Paid\")",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Đặt score >= 5 vào ô điều kiện; chạy: condition -> True; đường nhánh Dat có nhãn Được chọn."
+          },
+          {
+            "label": "B2",
+            "text": "Đặt label = \"Dat\" trong nhánh if với 4 dấu cách; bước chạy đổi label chưa có -> \"Dat\"."
+          },
+          {
+            "label": "B3",
+            "text": "Đặt nhánh else; khi điều kiện True, nhánh này ghi Không chạy, không tạo một lần gán thứ hai."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết hàm shipping_label(fee): fee là số không âm. Trả về \"Free\" khi fee >= 100, ngược lại \"Paid\". Kiểu trả về là str.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "result → \"Free\""
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Xác định ranh giới và nó thuộc nhóm nào."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Điều kiện cần nhận cả 100."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Dùng fee >= 100; mỗi nhánh gán result một chuỗi."
+        }
+      ],
+      "starterCode": "def shipping_label(fee):\n    \"\"\"Trả về \"Free\" khi fee >= 100, ngược lại \"Paid\".\"\"\"\n    # Viết lời giải của bạn ở đây\n",
+      "tests": [
+        {
+          "name": "Ca mẫu PE: fee 120",
+          "call": "shipping_label(120)",
+          "expect": "\"Free\""
+        },
+        {
+          "name": "Ranh giới: đúng 100 vẫn Free",
+          "call": "shipping_label(100)",
+          "expect": "\"Free\""
+        },
+        {
+          "name": "Dưới ngưỡng",
+          "call": "shipping_label(99.5)",
+          "expect": "\"Paid\""
+        }
+      ],
+      "solutionCode": "def shipping_label(fee):\n    \"\"\"Trả về \"Free\" khi fee >= 100, ngược lại \"Paid\".\"\"\"\n    if fee >= 100:\n        return \"Free\"\n    return \"Paid\"\n"
+    }
+  }
+}

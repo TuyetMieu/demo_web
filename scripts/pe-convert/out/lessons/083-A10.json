@@ -1,0 +1,120 @@
+{
+  "lesson_code": "A10",
+  "sort_order": 83,
+  "module": "Module 12: Thread, tiến trình, đồng thời và mạng",
+  "title": "Bộ nhớ dùng chung, GIL và chọn concurrency",
+  "subtitle": "A10 · Nâng cao · 40 phút",
+  "estimated_minutes": 40,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Bộ nhớ dùng chung, GIL và chọn concurrency",
+    "subtitle": "A10 · Nâng cao · 40 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A10",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Thread trong một process chia sẻ heap nhưng có luồng thực thi và stack riêng. Concurrency giúp tổ chức công việc; không bảo đảm mọi chương trình chạy nhanh hơn."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "I/O chờ mạng -> nhiều thread có thể chờ xen kẽ\nCPU tính Python thuần, CPython có GIL -> cân nhắc process\nGUI -> main thread xử lý widget, worker gửi kết quả\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Bài giả định CPython có GIL."
+        },
+        {
+          "n": 2,
+          "body": "Có build free-threaded từ Python3.13; luôn ghi phiên bản/build và loại tác vụ khi so sánh."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Còn GIL và chi phí điều phối."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Bốn thread tính Python thuần trên CPython có GIL có chắc nhanh gấp4 không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Còn GIL và chi phí điều phối."
+            },
+            {
+              "text": "Không",
+              "correct": true,
+              "detail": "Đúng: phải đo, không suy từ số core."
+            },
+            {
+              "text": "GIL cấm mọi I/O song song",
+              "correct": false,
+              "detail": "Thread vẫn hữu ích khi chờ I/O."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: phải đo, không suy từ số core."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thêm overhead khởi tạo process vào mô hình một tác vụ rất nhỏ; giải thích vì sao tuần tự có thể nhanh hơn."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Vẽ hai thread cùng trỏ heap và stack riêng; sửa shared list ở worker, parent thấy thay đổi sau join."
+          },
+          {
+            "label": "B2",
+            "text": "So hai process có memory riêng, muốn trao đổi cần IPC."
+          },
+          {
+            "label": "B3",
+            "text": "Dựa mô hình Apache/Chromium trong slide, đánh dấu nơi dùng nhiều process để cô lập và nơi dùng thread để xử lý đồng thời; không xem sơ đồ lịch sử là mô tả phiên bản hiện tại."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Với ba case tải10URL, tính nhiều số nguyên tố bằng Python thuần, GUI lưu file lớn: chọn mô hình, vẽ memory/stack và kênh kết quả; nêu responsiveness, throughput, scalability khác nhau. So kiến trúc Apache/Chromium theo trang274-276 và ghi rõ giới hạn phiên bản/build."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Bài giả định CPython có GIL. Có build free-threaded từ Python3.13; luôn ghi phiên bản/build và loại tác vụ khi so sánh."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "procedure": [
+        "Tải URL: thread hoặc async để xen kẽ I/O, giới hạn đồng thời. CPU Python trên build có GIL: process có thể dùng nhiều core nhưng phải tính overhead. GUI: main loop giữ widget, worker chỉ gửi dữ liệu qua queue. Apache/Chromium là ví dụ phân chia worker/process trong slide, không chứng minh kiến trúc mọi phiên bản. Scalability phải đo khi tăng worker và tải; responsiveness là khả năng trả lời sự kiện."
+      ]
+    }
+  }
+}

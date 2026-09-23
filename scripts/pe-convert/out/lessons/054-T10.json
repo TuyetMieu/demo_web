@@ -1,0 +1,170 @@
+{
+  "lesson_code": "T10",
+  "sort_order": 54,
+  "module": "Module 9: Tkinter chuyên sâu",
+  "title": "Người học tự viết unit test cho GUI",
+  "subtitle": "T10 · Lộ trình chính · 45 phút",
+  "estimated_minutes": 45,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Người học tự viết unit test cho GUI",
+    "subtitle": "T10 · Lộ trình chính · 45 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#T10",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Test GUI nên kiểm tra hành vi người dùng nhận được và tách logic thuần để chạy nhanh. Một bài test phải bắt được lỗi, không chỉ chạy mà không crash."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "import unittest\nclass TestThreshold(unittest.TestCase):\n    def test_boundary(self):\n        self.assertTrue(passed(5))\nif __name__==\"__main__\": unittest.main()\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "unittest tìm method test_*."
+        },
+        {
+          "n": 2,
+          "body": "Main guard cho phép chạy test trực tiếp mà không chạy khi module được import."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Cả >=5 và >5 đều nhận 8."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Test passed(8)==True có bắt được mutant score>5 không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Cả >=5 và >5 đều nhận 8."
+            },
+            {
+              "text": "Không, cần test đúng 5",
+              "correct": true,
+              "detail": "Đúng: test biên phân biệt hai chương trình."
+            },
+            {
+              "text": "Chỉ cần thêm print",
+              "correct": false,
+              "detail": "print không tự tạo assertion."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: test biên phân biệt hai chương trình."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thay callback append hai lần; bộ test phải đỏ vì saved có độ dài 2 thay vì 1."
+      },
+      "scaffold": {
+        "template": "import unittest\nimport tkinter as tk\nfrom form_app import passed,build\nclass ThresholdTests(unittest.TestCase):\n    {{slot1}}\n    def test_boundary(self): self.assertTrue(passed(5))\n    def test_above(self): self.assertTrue(passed(8))\nclass FormTests(unittest.TestCase):\n    def setUp(self):\n        self.root=tk.Tk(); self.root.withdraw(); self.widgets=build(self.root)\n    {{slot2}}\n    def test_button(self):\n        self.widgets[\"entry\"].insert(0,\"5\")\n        self.widgets[\"button\"].invoke()\n        self.assertEqual(self.widgets[\"status\"].cget(\"text\"),\"Dat\")\n{{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "def test_below(self): self.assertFalse(passed(4.9))"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "def tearDown(self): self.root.destroy()"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "if __name__==\"__main__\": unittest.main()"
+          }
+        ],
+        "bank": [
+          {
+            "label": "def test_below(self): self.assertFalse(passed(4.9))",
+            "slot": 1
+          },
+          {
+            "label": "import unittest",
+            "slot": 1
+          },
+          {
+            "label": "def tearDown(self): self.root.destroy()",
+            "slot": 2
+          },
+          {
+            "label": "class TestThreshold(unittest.TestCase):",
+            "slot": 2
+          },
+          {
+            "label": "if __name__==\"__main__\": unittest.main()",
+            "slot": 3
+          },
+          {
+            "label": "if __name__!=\"__main__\": unittest.main()",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Viết test cho ngưỡng dưới/đúng/trên 5; chạy runner, tô dòng assertion thất bại với mutant >5."
+          },
+          {
+            "label": "B2",
+            "text": "Tạo Tk trong setUp, withdraw và destroy trong tearDown; test button.invoke rồi đọc label, không phụ thuộc pixel."
+          },
+          {
+            "label": "B3",
+            "text": "Chạy cùng suite bằng CLI và Eclipse PyDev test runner hoặc VS Code Testing; ghi rõ công cụ thay thế, không coi workflow IDE là đã thực hiện nếu chỉ chạy CLI."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Nộp test_form.py dùng unittest kiểm tra form được cấp ở form_app.py: score>=5 đổi label Dat, dưới5 Chua dat. Test 4.9/5/8; test UI nhập 5, invoke nút, label Dat. Main guard cho phép python test_form.py. Chạy mutant >5 phải có ít nhất một FAIL. Nộp ảnh test runner IDE.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Thực hiện mutation >5: suite chuyển FAIL ở boundary và UI; sửa lại suite PASS. IDE runner phát hiện đủ bốn test, mở assertion lỗi tới đúng dòng."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "unittest tìm method test_*. Main guard cho phép chạy test trực tiếp mà không chạy khi module được import."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import unittest\nimport tkinter as tk\nfrom form_app import passed,build\nclass ThresholdTests(unittest.TestCase):\n    def test_below(self): self.assertFalse(passed(4.9))\n    def test_boundary(self): self.assertTrue(passed(5))\n    def test_above(self): self.assertTrue(passed(8))\nclass FormTests(unittest.TestCase):\n    def setUp(self):\n        self.root=tk.Tk(); self.root.withdraw(); self.widgets=build(self.root)\n    def tearDown(self): self.root.destroy()\n    def test_button(self):\n        self.widgets[\"entry\"].insert(0,\"5\")\n        self.widgets[\"button\"].invoke()\n        self.assertEqual(self.widgets[\"status\"].cget(\"text\"),\"Dat\")\nif __name__==\"__main__\": unittest.main()\n"
+    }
+  }
+}

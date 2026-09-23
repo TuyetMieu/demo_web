@@ -1,0 +1,170 @@
+{
+  "lesson_code": "A05",
+  "sort_order": 64,
+  "module": "Module 10: Nâng cao — OOP, NumPy, pandas và biểu đồ",
+  "title": "Pickle, JSON và dữ liệu có kiểu",
+  "subtitle": "A05 · Nâng cao · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Pickle, JSON và dữ liệu có kiểu",
+    "subtitle": "A05 · Nâng cao · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A05",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "JSON trao đổi cấu trúc đơn giản; pickle lưu nhiều kiểu Python hơn nhưng phụ thuộc Python và không được nạp từ nguồn không tin cậy."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "import pickle,json\nvalue=(\"An\",[8,9])\nprint(type(pickle.loads(pickle.dumps(value))).__name__)\nprint(type(json.loads(json.dumps(value))).__name__)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Pickle khôi phục tuple; JSON trở thành list."
+        },
+        {
+          "n": 2,
+          "body": "Không phải mọi object như file đang mở đều pickle được."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có vì chỉ là dữ liệu\" — Pickle không chỉ là parser dữ liệu thuần."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Có thể dùng pickle.load cho file người lạ tải lên không?",
+          "options": [
+            {
+              "text": "Có vì chỉ là dữ liệu",
+              "correct": false,
+              "detail": "Pickle không chỉ là parser dữ liệu thuần."
+            },
+            {
+              "text": "Không, quá trình unpickle có thể chạy mã",
+              "correct": true,
+              "detail": "Đúng: chỉ lab file tự tạo và tin cậy."
+            },
+            {
+              "text": "Có nếu đuôi .dat",
+              "correct": false,
+              "detail": "Đuôi file không xác định mức tin cậy."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: chỉ lab file tự tạo và tin cậy."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Chuyển schema giữa hai phiên bản: giải thích cần version/migration và giữ module class khi pickle object."
+      },
+      "scaffold": {
+        "template": "import pickle,gzip\ndef dump_state(state):\n    {{slot1}}\ndef load_state(blob):\n    {{slot2}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "return gzip.compress(pickle.dumps(state,protocol=pickle.HIGHEST_PROTOCOL))"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "return pickle.loads(gzip.decompress(blob))"
+          }
+        ],
+        "bank": [
+          {
+            "label": "return gzip.compress(pickle.dumps(state,protocol=pickle.HIGHEST_PROTOCOL))",
+            "slot": 1
+          },
+          {
+            "label": "print(gzip.compress(pickle.dumps(state,protocol=pickle.HIGHEST_PROTOCOL)))",
+            "slot": 1
+          },
+          {
+            "label": "return pickle.loads(gzip.decompress(blob))",
+            "slot": 2
+          },
+          {
+            "label": "print(pickle.loads(gzip.decompress(blob)))",
+            "slot": 2
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Round-trip tuple và dict chứa set bằng pickle; thử JSON với set để quan sát TypeError."
+          },
+          {
+            "label": "B2",
+            "text": "Thử pickle file handle đang mở; ghi loại lỗi và giải thích tài nguyên bên ngoài không được giữ nguyên như dữ liệu."
+          },
+          {
+            "label": "B3",
+            "text": "Gzip pickle bytes, giải nén rồi load; đối chiếu kiểu và giá trị."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết dump_state(state) trả gzip(pickle(state)), load_state(blob) trả object từ blob tự tạo trong lab. Fixture có tuple và set, phải giữ kiểu. Dữ liệu gzip hỏng phải phát sinh lỗi, không trả state rỗng. Nộp bảng so JSON/pickle về kiểu, trao đổi và mức tin cậy.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Bảng so phải nêu tuple->list của JSON, set không JSON mặc định, pickle chỉ dữ liệu tin cậy và class cần import đúng module."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Pickle khôi phục tuple; JSON trở thành list. Không phải mọi object như file đang mở đều pickle được."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "import pickle, gzip\ndef dump_state(state):\n    # Viết lời giải của bạn ở đây\n    pass\ndef load_state(blob):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "types (A05-K01)",
+          "call": "(exec('state={\"student\":(\"An\",19),\"courses\":{\"PY\",\"DB\"}}\\nr=load_state(dump_state(state)); assert r==state and type(r[\"student\"]) is tuple and type(r[\"courses\"]) is set\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "corrupt (A05-K02)",
+          "call": "(exec('try: load_state(b\"broken\")\\nexcept (OSError,EOFError): pass\\nelse: raise AssertionError(\"corruption hidden\")\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "import pickle,gzip\ndef dump_state(state):\n    return gzip.compress(pickle.dumps(state,protocol=pickle.HIGHEST_PROTOCOL))\ndef load_state(blob):\n    return pickle.loads(gzip.decompress(blob))\n"
+    }
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "lesson_code": "A16",
+  "sort_order": 67,
+  "module": "Module 10: Nâng cao — OOP, NumPy, pandas và biểu đồ",
+  "title": "SAS, Stata, HDF5 và MATLAB",
+  "subtitle": "A16 · Nâng cao · 60 phút",
+  "estimated_minutes": 60,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "SAS, Stata, HDF5 và MATLAB",
+    "subtitle": "A16 · Nâng cao · 60 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A16",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Định dạng khoa học lưu bảng hoặc mảng kèm metadata. Đọc đúng file cần chọn reader theo format, kiểm tra shape và đóng tài nguyên đúng lúc."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "stata=pd.read_stata(\"scores.dta\")\nwith h5py.File(\"scores.h5\",\"r\") as f:\n    values=f[\"scores\"][()]\nmat=scipy.io.loadmat(\"scores.mat\")[\"scores\"]\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "HDF5 có group/dataset; MATLAB trả dictionary biến."
+        },
+        {
+          "n": 2,
+          "body": "Với SAS bài dùng cả reader sas7bdat và fixture XPORT; XPORT không chứng minh đã đọc sas7bdat."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Đổi tên không đổi cấu trúc file."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Có thể đổi đuôi CSV thành .h5 để h5py đọc không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Đổi tên không đổi cấu trúc file."
+            },
+            {
+              "text": "Không, nội dung nhị phân phải đúng format",
+              "correct": true,
+              "detail": "Đúng."
+            },
+            {
+              "text": "Chỉ cần encode UTF-8",
+              "correct": false,
+              "detail": "HDF5 có cấu trúc riêng, không là CSV text."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi tên dataset HDF5 thành marks; truy cập scores phải KeyError, không âm thầm chọn dataset đầu."
+      },
+      "scaffold": {
+        "template": "import pandas as pd\nimport h5py\nfrom scipy.io import loadmat\ndef read_science(path,kind):\n    {{slot1}}\n    if kind in (\"sas7bdat\",\"xport\"): return pd.read_sas(path,format=kind,encoding=\"utf8\")\n    if kind==\"hdf5\":\n        {{slot2}}\n    {{slot3}}\n    raise ValueError(\"kind\")\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "if kind==\"stata\": return pd.read_stata(path)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "with h5py.File(path,\"r\") as handle: return handle[\"scores\"][()]"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "if kind==\"mat\": return loadmat(path)[\"scores\"]"
+          }
+        ],
+        "bank": [
+          {
+            "label": "if kind==\"stata\": return pd.read_stata(path)",
+            "slot": 1
+          },
+          {
+            "label": "if kind!=\"stata\": return pd.read_stata(path)",
+            "slot": 1
+          },
+          {
+            "label": "with h5py.File(path,\"r\") as handle: return handle[\"scores\"][()]",
+            "slot": 2
+          },
+          {
+            "label": "with h5py.File(\"scores.h5\",\"r\") as f:",
+            "slot": 2
+          },
+          {
+            "label": "if kind==\"mat\": return loadmat(path)[\"scores\"]",
+            "slot": 3
+          },
+          {
+            "label": "if kind!=\"mat\": return loadmat(path)[\"scores\"]",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tạo fixture Stata,HDF5,MAT cùng giá trị [[8,6],[5,9]], đọc rồi so shape và values."
+          },
+          {
+            "label": "B2",
+            "text": "Tạo SAS XPORT bằng pyreadstat.write_xport version5, đọc pandas.read_sas(format=xport); xem tên cột."
+          },
+          {
+            "label": "B3",
+            "text": "Với fixture .sas7bdat do lab cấp, dùng pd.read_sas(format=sas7bdat); chỉ ra đây là format khác XPORT. Không dùng thuộc tính .value HDF5 cũ, dùng [()]."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết read_science(path,kind): kind stata->DataFrame, sas7bdat/xport->DataFrame; hdf5 đọc dataset scores thành ndarray sau khi đóng file; mat đọc biến scores. Nộp bốn kết quả shape/giá trị và hai kết quả cho hai format SAS khi có fixture. Cột SAS bytes cần decode trước khi đối chiếu tên người.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "SAS7BDAT gate: dev cấp fixture thực cùng schema math/python và expected [[8,6],[5,9]] hoặc dùng fixture công khai đã kiểm chứng + expected tương ứng. Không đánh dấu format này PASS từ test XPORT."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "HDF5 có group/dataset; MATLAB trả dictionary biến. Với SAS bài dùng cả reader sas7bdat và fixture XPORT; XPORT không chứng minh đã đọc sas7bdat."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import pandas as pd\nimport h5py\nfrom scipy.io import loadmat\ndef read_science(path,kind):\n    if kind==\"stata\": return pd.read_stata(path)\n    if kind in (\"sas7bdat\",\"xport\"): return pd.read_sas(path,format=kind,encoding=\"utf8\")\n    if kind==\"hdf5\":\n        with h5py.File(path,\"r\") as handle: return handle[\"scores\"][()]\n    if kind==\"mat\": return loadmat(path)[\"scores\"]\n    raise ValueError(\"kind\")\n"
+    }
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "lesson_code": "C10",
+  "sort_order": 17,
+  "module": "Module 3: List, dict, tuple và set",
+  "title": "Tuple, unpacking và lựa chọn collection",
+  "subtitle": "C10 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Tuple, unpacking và lựa chọn collection",
+    "subtitle": "C10 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C10",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Tuple giữ nhóm giá trị theo vị trí và không cho thay phần tử trực tiếp. Unpacking gắn từng vị trí với tên có ý nghĩa."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "record=(\"An\",19,\"50m\")\nname,age,distance=record\nprint(name,age,distance)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Ba biến nhận ba phần tử."
+        },
+        {
+          "n": 2,
+          "body": "Nếu số biến không khớp số phần tử sẽ ValueError; gán record[1]=20 sẽ TypeError."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Không vì tuple bất biến\" — Bất biến không tự lan vào list lồng."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Tuple chứa một list thì list bên trong có thể append không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": true,
+              "detail": "Đúng: tuple cố định tham chiếu phần tử, không làm mọi đối tượng bên trong bất biến."
+            },
+            {
+              "text": "Không vì tuple bất biến",
+              "correct": false,
+              "detail": "Bất biến không tự lan vào list lồng."
+            },
+            {
+              "text": "Chỉ được nếu tuple dài 1",
+              "correct": false,
+              "detail": "Độ dài tuple không quyết định."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: tuple cố định tham chiếu phần tử, không làm mọi đối tượng bên trong bất biến."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thay record bằng (\"Binh\",20,\"100m\"); dự đoán biến nào đổi. Thử sửa tuổi bằng tạo tuple mới."
+      },
+      "scaffold": {
+        "template": "def birthday(record):\n    {{slot1}}\n    {{slot2}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "name,age,distance=record"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "return name,age+1,distance"
+          }
+        ],
+        "bank": [
+          {
+            "label": "name,age,distance=record",
+            "slot": 1
+          },
+          {
+            "label": "record=(\"An\",19,\"50m\")",
+            "slot": 1
+          },
+          {
+            "label": "return name,age+1,distance",
+            "slot": 2
+          },
+          {
+            "label": "print(name,age+1,distance)",
+            "slot": 2
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Gắn ba thẻ tên vào ba vị trí; chạy unpack và hiện các biến."
+          },
+          {
+            "label": "B2",
+            "text": "Bỏ một biến để quan sát ValueError, rồi sửa đủ số biến."
+          },
+          {
+            "label": "B3",
+            "text": "So tuple hồ sơ, list lượt bơi, dict tra theo mã và set mã duy nhất; chọn theo yêu cầu."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết birthday(record) nhận tuple (name,age,distance), age int>=0, dùng unpack trả tuple tuổi tăng 1; không sửa đầu vào. Giải thích vì sao dùng list cho danh sách lượt bơi có thể thêm mới.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Học viên dự đoán rồi xác nhận TypeError cho gán phần tử tuple, ValueError cho unpack sai số lượng; phân loại đúng cả bốn collection."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Ba biến nhận ba phần tử. Nếu số biến không khớp số phần tử sẽ ValueError; gán record[1]=20 sẽ TypeError."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "def birthday(record):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "unpack (C10-K01)",
+          "call": "(exec('r=(\"An\",19,\"50m\"); assert birthday(r)==(\"An\",20,\"50m\"); assert r==(\"An\",19,\"50m\")\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "zero (C10-K02)",
+          "call": "birthday(('B', 0, '25m'))",
+          "expect": "('B', 1, '25m')"
+        }
+      ],
+      "solutionCode": "def birthday(record):\n    name,age,distance=record\n    return name,age+1,distance\n"
+    }
+  }
+}

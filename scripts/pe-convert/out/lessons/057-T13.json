@@ -1,0 +1,170 @@
+{
+  "lesson_code": "T13",
+  "sort_order": 57,
+  "module": "Module 9: Tkinter chuyên sâu",
+  "title": "Slideshow GIF/JPEG và vòng đời ảnh",
+  "subtitle": "T13 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Slideshow GIF/JPEG và vòng đời ảnh",
+    "subtitle": "T13 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#T13",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Tk cần giữ tham chiếu tới ảnh đang hiển thị. Pillow đọc nhiều định dạng, còn after điều khiển chuyển ảnh mà không khóa giao diện."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "from PIL import Image,ImageTk\nphoto=ImageTk.PhotoImage(Image.open(\"slide.jpg\"))\nlabel.configure(image=photo)\nlabel.image=photo\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Giữ label.image ngăn ảnh Python bị thu gom khi biến local hết scope."
+        },
+        {
+          "n": 2,
+          "body": "Mở file ảnh bằng context để đóng handle."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Ảnh luôn còn\" — Tên file không giữ object PhotoImage."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Nếu chỉ giữ tên file mà không giữ PhotoImage thì sao?",
+          "options": [
+            {
+              "text": "Ảnh luôn còn",
+              "correct": false,
+              "detail": "Tên file không giữ object PhotoImage."
+            },
+            {
+              "text": "Ảnh có thể biến mất khi object bị thu gom",
+              "correct": true,
+              "detail": "Đúng."
+            },
+            {
+              "text": "Tk tự đọc lại file",
+              "correct": false,
+              "detail": "Không có tự đọc lại như vậy."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Bấm Start hai lần; chỉ còn một lịch timer, không tăng tốc ngoài ý muốn."
+      },
+      "scaffold": {
+        "template": "from tkinter import ttk\nfrom PIL import Image,ImageTk\nclass SlideShow:\n    def __init__(self,root,paths):\n        self.root=root; self.paths=list(paths); self.index=0; self.pending=None; self.photo=None\n        {{slot1}}\n    def show(self):\n        if not self.paths:\n            self.label.configure(text=\"Khong co anh\",image=\"\"); return\n        with Image.open(self.paths[self.index]) as image:\n            image.thumbnail((320,200)); self.photo=ImageTk.PhotoImage(image,master=self.root)\n        self.label.configure(image=self.photo,text=\"\")\n    def next(self):\n        {{slot2}}\n        self.show()\n    def start(self):\n        self.stop(); self.pending=self.root.after(1000,self.tick)\n    def tick(self):\n        {{slot3}}\n    def stop(self):\n        if self.pending is not None: self.root.after_cancel(self.pending); self.pending=None\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "self.label=ttk.Label(root); self.label.pack(); self.show()"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "if self.paths: self.index=(self.index+1)%len(self.paths)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "self.pending=None; self.next(); self.pending=self.root.after(1000,self.tick)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "self.label=ttk.Label(root); self.label.pack(); self.show()",
+            "slot": 1
+          },
+          {
+            "label": "photo=ImageTk.PhotoImage(Image.open(\"slide.jpg\"))",
+            "slot": 1
+          },
+          {
+            "label": "if self.paths: self.index=(self.index+1)%len(self.paths)",
+            "slot": 2
+          },
+          {
+            "label": "from PIL import Image,ImageTk",
+            "slot": 2
+          },
+          {
+            "label": "self.pending=None; self.next(); self.pending=self.root.after(1000,self.tick)",
+            "slot": 3
+          },
+          {
+            "label": "label.image=photo",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Lab cấp một GIF đỏ và một JPEG xanh; Next chuyển index 0->1->0."
+          },
+          {
+            "label": "B2",
+            "text": "Thêm after 1000ms và giữ token lịch; Pause hủy token."
+          },
+          {
+            "label": "B3",
+            "text": "Thử danh sách rỗng: hiện Không có ảnh, không chia modulo 0."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết SlideShow(root,paths) với label, index, show(), next(), start(), stop(); giữ photo, hỗ trợ GIF/JPEG bằng Pillow. Ảnh thumbnail tối đa 320x200. Danh sách rỗng hiện Khong co anh. start hủy lịch trước và lên lịch mỗi giây; stop hủy lịch. Fixture do test tự tạo bằng Pillow.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Chạy native qua ít nhất hai chu kỳ timer và Pause; ảnh không trắng; đóng cửa sổ sau stop không có TclError."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Giữ label.image ngăn ảnh Python bị thu gom khi biến local hết scope. Mở file ảnh bằng context để đóng handle."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "from tkinter import ttk\nfrom PIL import Image,ImageTk\nclass SlideShow:\n    def __init__(self,root,paths):\n        self.root=root; self.paths=list(paths); self.index=0; self.pending=None; self.photo=None\n        self.label=ttk.Label(root); self.label.pack(); self.show()\n    def show(self):\n        if not self.paths:\n            self.label.configure(text=\"Khong co anh\",image=\"\"); return\n        with Image.open(self.paths[self.index]) as image:\n            image.thumbnail((320,200)); self.photo=ImageTk.PhotoImage(image,master=self.root)\n        self.label.configure(image=self.photo,text=\"\")\n    def next(self):\n        if self.paths: self.index=(self.index+1)%len(self.paths)\n        self.show()\n    def start(self):\n        self.stop(); self.pending=self.root.after(1000,self.tick)\n    def tick(self):\n        self.pending=None; self.next(); self.pending=self.root.after(1000,self.tick)\n    def stop(self):\n        if self.pending is not None: self.root.after_cancel(self.pending); self.pending=None\n"
+    }
+  }
+}

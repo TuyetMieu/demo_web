@@ -1,0 +1,170 @@
+{
+  "lesson_code": "C06",
+  "sort_order": 9,
+  "module": "Module 2: Biến, kiểu dữ liệu và điều kiện",
+  "title": "Chuỗi: chuẩn hóa, định dạng và không sửa tại chỗ",
+  "subtitle": "C06 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Chuỗi: chuẩn hóa, định dạng và không sửa tại chỗ",
+    "subtitle": "C06 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C06",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Tên nhập từ form có thể thừa khoảng trắng và khác kiểu chữ. Các phương thức chuỗi tạo kết quả mới; cần giữ kết quả đó."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "raw = \"  aN  \"\nclean = raw.strip().lower().title()\nprint(clean)\nprint(f\"{23:04d}\")\nprint(\"23\".zfill(4))\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "clean là An, raw vẫn còn khoảng trắng."
+        },
+        {
+          "n": 2,
+          "body": "Hai cách cuối cho 0023; zfill làm việc với chuỗi."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — str là immutable."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "raw.upper() không gán lại. raw có đổi không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "str là immutable."
+            },
+            {
+              "text": "Không",
+              "correct": true,
+              "detail": "Đúng: cần dùng chuỗi được trả về."
+            },
+            {
+              "text": "Chỉ ký tự đầu đổi",
+              "correct": false,
+              "detail": "upper không phải title, và vẫn trả chuỗi mới."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: cần dùng chuỗi được trả về."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thay newline LF bằng CRLF trong danh sách tên, dùng splitlines để vẫn nhận các dòng."
+      },
+      "scaffold": {
+        "template": "def labels(text):\n    names=[line.strip().lower().title() for line in text.splitlines() if line.strip()]\n    {{slot1}}\ndef score_label(name,score):\n    {{slot2}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "return [str(i).zfill(3)+\": \"+name for i,name in enumerate(names,1)]"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "return \"{}: {:.1f}\".format(name,score)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "return [str(i).zfill(3)+\": \"+name for i,name in enumerate(names,1)]",
+            "slot": 1
+          },
+          {
+            "label": "print([str(i).zfill(3)+\": \"+name for i,name in enumerate(names,1)])",
+            "slot": 1
+          },
+          {
+            "label": "return \"{}: {:.1f}\".format(name,score)",
+            "slot": 2
+          },
+          {
+            "label": "print(\"{}: {:.1f}\".format(name,score))",
+            "slot": 2
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chạy strip rồi lower rồi title ở ba dòng riêng; mỗi bước hiện chuỗi trước/sau trong ô mới."
+          },
+          {
+            "label": "B2",
+            "text": "Gộp thành chain và đối chiếu; không thay đổi thứ tự các phương thức khi chưa chứng minh tương đương."
+          },
+          {
+            "label": "B3",
+            "text": "So f-string với \"{}: {:.1f}\".format(name,score); chỉ tô phần placeholder được thay."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết labels(text) nhận nhiều dòng tên, bỏ dòng trống sau strip; chuẩn hóa title và trả list dạng \"001: An\", \"002: Binh\". Viết score_label(name,score) dùng format hoặc f-string trả \"An: 8.5\" với một chữ số thập phân. Không sửa text nguồn.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Học viên tách một chain thành ba biến trung gian và giải thích cùng kết quả; so lower, upper và title trên aN."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "clean là An, raw vẫn còn khoảng trắng. Hai cách cuối cho 0023; zfill làm việc với chuỗi."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "def labels(text):\n    # Viết lời giải của bạn ở đây\n    pass\ndef score_label(name,score):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "lines (C06-K01)",
+          "call": "(exec('assert labels(\" aN \\\\r\\\\n\\\\n BINH \")==[\"001: An\",\"002: Binh\"]\\nassert labels(\"\")==[]\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "format (C06-K02)",
+          "call": "score_label('An', 8.5)",
+          "expect": "'An: 8.5'"
+        }
+      ],
+      "solutionCode": "def labels(text):\n    names=[line.strip().lower().title() for line in text.splitlines() if line.strip()]\n    return [str(i).zfill(3)+\": \"+name for i,name in enumerate(names,1)]\ndef score_label(name,score):\n    return \"{}: {:.1f}\".format(name,score)\n"
+    }
+  }
+}

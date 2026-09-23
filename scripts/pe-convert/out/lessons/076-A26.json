@@ -1,0 +1,183 @@
+{
+  "lesson_code": "A26",
+  "sort_order": 76,
+  "module": "Module 11: MySQL, wxPython và đồ họa 3D",
+  "title": "Hoạt ảnh OpenGL: chuyển động theo thời gian",
+  "subtitle": "A26 · Nâng cao · 45 phút",
+  "estimated_minutes": 45,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Hoạt ảnh OpenGL: chuyển động theo thời gian",
+    "subtitle": "A26 · Nâng cao · 45 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A26",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Hoạt ảnh cập nhật trạng thái theo thời gian đã trôi, rồi render trạng thái đó. Gắn quãng đường với số frame làm tốc độ thay đổi khi máy chậm."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "x += velocity * dt\nif x>right:\n    x=2*right-x\n    velocity=-velocity\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Phản xạ giữ phần quãng đường vượt biên thay vì bỏ nó."
+        },
+        {
+          "n": 2,
+          "body": "Khi dt lớn có thể vượt nhiều lần, cần xử lý đủ."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Mỗi giây có số bước khác nhau."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Cập nhật x+=1 mỗi frame trên30FPS và60FPS có cùng tốc độ không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Mỗi giây có số bước khác nhau."
+            },
+            {
+              "text": "Không,60FPS nhanh gấp đôi",
+              "correct": true,
+              "detail": "Đúng: dùng velocity*dt."
+            },
+            {
+              "text": "Chỉ phụ thuộc màu",
+              "correct": false,
+              "detail": "Màu không quyết định vận tốc."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: dùng velocity*dt."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Chạy cùng1giây chia30 hoặc60bước; trạng thái cuối gần bằng nhau trong sai số float."
+      },
+      "scaffold": {
+        "template": "def advance(x,v,dt,limit):\n    if limit<=0 or dt<0: raise ValueError(\"bounds\")\n    {{slot1}}\n    phase=(x+v*dt)%(2*limit)\n    {{slot2}}\n    if phase==limit: return limit,-abs(v)\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "if v==0: return x,0"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "if phase==0: return 0,abs(v)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return (phase,v) if phase<limit else (2*limit-phase,-v)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "if v==0: return x,0",
+            "slot": 1
+          },
+          {
+            "label": "if v!=0: return x,0",
+            "slot": 1
+          },
+          {
+            "label": "if phase==0: return 0,abs(v)",
+            "slot": 2
+          },
+          {
+            "label": "if phase!=0: return 0,abs(v)",
+            "slot": 2
+          },
+          {
+            "label": "return (phase,v) if phase<limit else (2*limit-phase,-v)",
+            "slot": 3
+          },
+          {
+            "label": "print((phase,v) if phase<limit else (2*limit-phase,-v))",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Mô phỏng square đỏ chuyển trên trục0..100; hiển thị x,v,dt cạnh khung render."
+          },
+          {
+            "label": "B2",
+            "text": "Đến biên phản xạ và đổi dấu velocity; bật một frame dt lớn để thấy overshoot."
+          },
+          {
+            "label": "B3",
+            "text": "Dùng pyglet.clock.schedule_interval gọi update và rectangle.draw trong on_draw; Pause unschedule, Resume chỉ tạo một lịch."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết advance(x,v,dt,limit): 0<=x<=limit, limit>0,dt>=0; trả (x_mới,v_mới) phản xạ ở0 vàlimit, kể cả vượt nhiều lần. Sau đó gắn vào square đỏ trong cửa sổ pyglet (render qua OpenGL), hai trục độc lập, kích thước square20; giới hạn tâm theo client area. Pause/Resume không nhân đôi lịch.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Native integration cần square đỏ bounce cảx/y, dt đo từ clock, Pause giữ trạng thái và Resume tiếp; answer pure function PASS chưa là chứng cứ hoạt ảnh GPU PASS."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Phản xạ giữ phần quãng đường vượt biên thay vì bỏ nó. Khi dt lớn có thể vượt nhiều lần, cần xử lý đủ."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "def advance(x,v,dt,limit):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "bounce (A26-K01)",
+          "call": "(exec('assert advance(9,4,1,10)==(7,-4)\\nassert advance(1,-4,1,10)==(3,4)\\nassert advance(1,4,10,10)==(1,4)\\nassert advance(5,5,1,10)==(10,-5)\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "dt (A26-K02)",
+          "call": "(exec('x,v=3,7\\nfor _ in range(60): x,v=advance(x,v,1/60,100)\\nassert abs(x-10)<1e-9\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "def advance(x,v,dt,limit):\n    if limit<=0 or dt<0: raise ValueError(\"bounds\")\n    if v==0: return x,0\n    phase=(x+v*dt)%(2*limit)\n    if phase==0: return 0,abs(v)\n    if phase==limit: return limit,-abs(v)\n    return (phase,v) if phase<limit else (2*limit-phase,-v)\n"
+    }
+  }
+}

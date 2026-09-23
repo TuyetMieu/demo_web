@@ -1,0 +1,170 @@
+{
+  "lesson_code": "X05",
+  "sort_order": 91,
+  "module": "Module 13: Capstone PW2–PW9",
+  "title": "PW8: lưu pickle có nén trong background",
+  "subtitle": "X05 · Nâng cao · 60 phút",
+  "estimated_minutes": 60,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "PW8: lưu pickle có nén trong background",
+    "subtitle": "X05 · Nâng cao · 60 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#X05",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Lưu nền giữ giao diện phản hồi, nhưng dữ liệu phải là một snapshot ổn định. Không được báo đã lưu khi worker còn đang ghi."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "snapshot=copy.deepcopy(state)\nworker=Thread(target=save_snapshot,args=(snapshot,path,results))\nworker.start()\n# UI poll queue, không join blocking trong callback\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Snapshot ngăn dữ liệu đang sửa bị ghi dở thành trạng thái pha trộn."
+        },
+        {
+          "n": 2,
+          "body": "Worker chỉ ghi file và gửi kết quả; UI nhận rồi đổi trạng thái."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Luôn đủ\" — Các phần bên trong vẫn dùng chung tham chiếu."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Sao chép nông có đủ nếu state có list/dict lồng nhau đang thay đổi không?",
+          "options": [
+            {
+              "text": "Luôn đủ",
+              "correct": false,
+              "detail": "Các phần bên trong vẫn dùng chung tham chiếu."
+            },
+            {
+              "text": "Không",
+              "correct": true,
+              "detail": "Đúng: cần snapshot nhất quán theo mô hình dữ liệu."
+            },
+            {
+              "text": "Chỉ cần daemon",
+              "correct": false,
+              "detail": "Daemon không bảo vệ dữ liệu."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: cần snapshot nhất quán theo mô hình dữ liệu."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Giả lập lỗi ghi: giữ file cũ, UI báo error và vẫn cho chỉnh sửa; không ghi đè bằng file nửa chừng."
+      },
+      "scaffold": {
+        "template": "import copy,gzip,pickle,os,uuid\nfrom pathlib import Path\nfrom threading import Thread\nfrom queue import Queue\ndef start_save(state,path):\n    {{slot1}}\n    def work():\n        temporary=path.with_name(path.name+\".\"+uuid.uuid4().hex+\".tmp\")\n        try:\n            with gzip.open(temporary,\"wb\") as stream: pickle.dump(snapshot,stream,pickle.HIGHEST_PROTOCOL)\n            os.replace(temporary,path); results.put((\"ok\",str(path)))\n        {{slot2}}\n        finally:\n            if temporary.exists(): temporary.unlink()\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "snapshot=copy.deepcopy(state); path=Path(path); results=Queue()"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "except Exception as error: results.put((\"error\",str(error)))"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "worker=Thread(target=work); worker.start(); return worker,results"
+          }
+        ],
+        "bank": [
+          {
+            "label": "snapshot=copy.deepcopy(state); path=Path(path); results=Queue()",
+            "slot": 1
+          },
+          {
+            "label": "snapshot=copy.deepcopy(state)",
+            "slot": 1
+          },
+          {
+            "label": "except Exception as error: results.put((\"error\",str(error)))",
+            "slot": 2
+          },
+          {
+            "label": "worker.start()",
+            "slot": 2
+          },
+          {
+            "label": "worker=Thread(target=work); worker.start(); return worker,results",
+            "slot": 3
+          },
+          {
+            "label": "worker=Thread(target=save_snapshot,args=(snapshot,path,results))",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chụp deepcopy ở main thread khi không có mutator khác; đổi tên sau đó, file phải chứa tên thời điểm bắt đầu lưu."
+          },
+          {
+            "label": "B2",
+            "text": "Worker ghi file tạm cùng thư mục rồi os.replace; thành công put(\"ok\",path), lỗi put(\"error\",message)."
+          },
+          {
+            "label": "B3",
+            "text": "UI poll bằng after; ngăn hai job lưu cùng path chồng nhau và yêu cầu chờ/hủy đóng cho tới khi job kết thúc."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết start_save(state,path) chụp deepcopy rồi khởi chạy Thread, trả (thread,Queue). Worker ghi gzip pickle snapshot vào file tạm cùng folder và os.replace khi hoàn tất; lỗi gửi error, xóa file tạm do job tạo. File cũ còn nguyên nếu bước ghi thất bại. UI tích hợp không gọi join trong callback, chỉ cho một job lưu mỗi path.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Native UI vẫn đếm nút phụ trong khi job lớn; một path chỉ có một worker; WM_DELETE_WINDOW hỏi chờ, poll tới xong rồi destroy. Kiểm thử injection lỗi trước replace xác nhận file cũ nguyên vẹn."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Snapshot ngăn dữ liệu đang sửa bị ghi dở thành trạng thái pha trộn. Worker chỉ ghi file và gửi kết quả; UI nhận rồi đổi trạng thái."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import copy,gzip,pickle,os,uuid\nfrom pathlib import Path\nfrom threading import Thread\nfrom queue import Queue\ndef start_save(state,path):\n    snapshot=copy.deepcopy(state); path=Path(path); results=Queue()\n    def work():\n        temporary=path.with_name(path.name+\".\"+uuid.uuid4().hex+\".tmp\")\n        try:\n            with gzip.open(temporary,\"wb\") as stream: pickle.dump(snapshot,stream,pickle.HIGHEST_PROTOCOL)\n            os.replace(temporary,path); results.put((\"ok\",str(path)))\n        except Exception as error: results.put((\"error\",str(error)))\n        finally:\n            if temporary.exists(): temporary.unlink()\n    worker=Thread(target=work); worker.start(); return worker,results\n"
+    }
+  }
+}

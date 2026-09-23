@@ -1,0 +1,170 @@
+{
+  "lesson_code": "T02",
+  "sort_order": 46,
+  "module": "Module 9: Tkinter chuyên sâu",
+  "title": "Lựa chọn dữ liệu: combo, radio, check và list",
+  "subtitle": "T02 · Lộ trình chính · 45 phút",
+  "estimated_minutes": 45,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Lựa chọn dữ liệu: combo, radio, check và list",
+    "subtitle": "T02 · Lộ trình chính · 45 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#T02",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Các loại widget diễn đạt loại lựa chọn khác nhau. Radio dùng chung một biến cho lựa chọn đơn; check giữ một trạng thái độc lập."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "level=tk.StringVar(value=\"basic\")\nfor value in [\"basic\",\"advanced\"]:\n    ttk.Radiobutton(parent,text=value,value=value,variable=level).pack()\ncourse=ttk.Combobox(parent,values=[\"PY\",\"DB\"],state=\"readonly\")\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Hai radio cùng level nên chỉ một giá trị được chọn."
+        },
+        {
+          "n": 2,
+          "body": "Combobox readonly chỉ cho chọn trong danh sách."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Không đổi gì\" — Biến chung là cơ chế của nhóm."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Mỗi radio dùng một StringVar khác nhau thì điều gì sai?",
+          "options": [
+            {
+              "text": "Không còn nhóm loại trừ nhau",
+              "correct": true,
+              "detail": "Đúng: mỗi nút có state riêng nên có thể cùng chọn."
+            },
+            {
+              "text": "Không đổi gì",
+              "correct": false,
+              "detail": "Biến chung là cơ chế của nhóm."
+            },
+            {
+              "text": "Tất cả tự disabled",
+              "correct": false,
+              "detail": "State disabled là thuộc tính khác."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: mỗi nút có state riêng nên có thể cùng chọn."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Xóa selection Listbox và thử gõ 99 vào Spinbox: giới hạn mũi tên không thay thế validation đầu vào."
+      },
+      "scaffold": {
+        "template": "import tkinter as tk\nfrom tkinter import ttk\nfrom tkinter.scrolledtext import ScrolledText\ndef build(root):\n    for row,title in enumerate([\"Mon\",\"Trinh do\",\"Nhac\",\"Xac nhan\",\"Sinh vien\",\"Ghi chu\",\"So buoi\"]):\n        {{slot1}}\n    course=ttk.Combobox(root,values=(\"PY\",\"DB\"),state=\"readonly\"); course.set(\"PY\"); course.grid(row=0,column=1)\n    level=tk.StringVar(root,value=\"basic\"); box=ttk.Frame(root); box.grid(row=1,column=1)\n    for value in (\"basic\",\"advanced\"):\n        ttk.Radiobutton(box,text=value,value=value,variable=level).pack(side=\"left\")\n    reminder=tk.BooleanVar(root,value=False); confirmed=tk.BooleanVar(root,value=True)\n    ttk.Checkbutton(root,variable=reminder).grid(row=2,column=1)\n    {{slot2}}\n    students=tk.Listbox(root,exportselection=False,height=3); students.insert(\"end\",\"A\",\"B\",\"C\"); students.grid(row=4,column=1)\n    notes=ScrolledText(root,width=24,height=3); notes.grid(row=5,column=1)\n    sessions=ttk.Spinbox(root,from_=1,to=7); sessions.set(\"1\"); sessions.grid(row=6,column=1)\n    def collect():\n        n=int(sessions.get())\n        if not 1<=n<=7: raise ValueError(\"sessions\")\n        {{slot3}}\n        return dict(course=course.get(),level=level.get(),reminder=reminder.get(),\n                    student=students.get(selected[0]) if selected else None,\n                    notes=notes.get(\"1.0\",\"end-1c\"),sessions=n)\n    return dict(course=course,level=level,reminder=reminder,confirmed=confirmed,\n                students=students,notes=notes,sessions=sessions,collect=collect)\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "ttk.Label(root,text=title).grid(row=row,column=0)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "ttk.Checkbutton(root,variable=confirmed,state=\"disabled\").grid(row=3,column=1)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "selected=students.curselection()"
+          }
+        ],
+        "bank": [
+          {
+            "label": "ttk.Label(root,text=title).grid(row=row,column=0)",
+            "slot": 1
+          },
+          {
+            "label": "for value in [\"basic\",\"advanced\"]:",
+            "slot": 1
+          },
+          {
+            "label": "ttk.Checkbutton(root,variable=confirmed,state=\"disabled\").grid(row=3,column=1)",
+            "slot": 2
+          },
+          {
+            "label": "ttk.Radiobutton(parent,text=value,value=value,variable=level).pack()",
+            "slot": 2
+          },
+          {
+            "label": "selected=students.curselection()",
+            "slot": 3
+          },
+          {
+            "label": "level=tk.StringVar(value=\"basic\")",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tạo combo PY/DB và hai radio basic/advanced; đổi lựa chọn, ô state hiển thị đúng giá trị."
+          },
+          {
+            "label": "B2",
+            "text": "Thêm check Nhac hoc ban đầu False và check Xac nhan ban đầu True nhưng disabled; giải thích khác nhau giữa giá trị và khả năng tương tác."
+          },
+          {
+            "label": "B3",
+            "text": "Thêm Listbox nhiều mã, ScrolledText ghi chú và Spinbox số buổi 1..7; tạo các label bằng vòng lặp."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết build(root) trả các widget/variable: course readonly mặc định PY; level basic; reminder False; confirmed True disabled; students Listbox A/B/C chọn một; notes ScrolledText; sessions Spinbox 1..7 mặc định 1. collect() trả dict dữ liệu; sessions gõ ngoài 1..7 phải ValueError; selection rỗng trả student=None.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Thử đủ mỗi widget bằng bàn phím; radio loại trừ nhau, disabled check không đổi; Spinbox nhập 99 bị từ chối bởi collect; ScrolledText cuộn khi có 20 dòng."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Hai radio cùng level nên chỉ một giá trị được chọn. Combobox readonly chỉ cho chọn trong danh sách."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import tkinter as tk\nfrom tkinter import ttk\nfrom tkinter.scrolledtext import ScrolledText\ndef build(root):\n    for row,title in enumerate([\"Mon\",\"Trinh do\",\"Nhac\",\"Xac nhan\",\"Sinh vien\",\"Ghi chu\",\"So buoi\"]):\n        ttk.Label(root,text=title).grid(row=row,column=0)\n    course=ttk.Combobox(root,values=(\"PY\",\"DB\"),state=\"readonly\"); course.set(\"PY\"); course.grid(row=0,column=1)\n    level=tk.StringVar(root,value=\"basic\"); box=ttk.Frame(root); box.grid(row=1,column=1)\n    for value in (\"basic\",\"advanced\"):\n        ttk.Radiobutton(box,text=value,value=value,variable=level).pack(side=\"left\")\n    reminder=tk.BooleanVar(root,value=False); confirmed=tk.BooleanVar(root,value=True)\n    ttk.Checkbutton(root,variable=reminder).grid(row=2,column=1)\n    ttk.Checkbutton(root,variable=confirmed,state=\"disabled\").grid(row=3,column=1)\n    students=tk.Listbox(root,exportselection=False,height=3); students.insert(\"end\",\"A\",\"B\",\"C\"); students.grid(row=4,column=1)\n    notes=ScrolledText(root,width=24,height=3); notes.grid(row=5,column=1)\n    sessions=ttk.Spinbox(root,from_=1,to=7); sessions.set(\"1\"); sessions.grid(row=6,column=1)\n    def collect():\n        n=int(sessions.get())\n        if not 1<=n<=7: raise ValueError(\"sessions\")\n        selected=students.curselection()\n        return dict(course=course.get(),level=level.get(),reminder=reminder.get(),\n                    student=students.get(selected[0]) if selected else None,\n                    notes=notes.get(\"1.0\",\"end-1c\"),sessions=n)\n    return dict(course=course,level=level,reminder=reminder,confirmed=confirmed,\n                students=students,notes=notes,sessions=sessions,collect=collect)\n"
+    }
+  }
+}

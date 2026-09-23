@@ -1,0 +1,205 @@
+{
+  "lesson_code": "P14",
+  "sort_order": 32,
+  "module": "Module 6: File, ngoại lệ và dữ liệu lâu dài",
+  "title": "Lưu cấu trúc dữ liệu bằng JSON",
+  "subtitle": "P14 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Lưu cấu trúc dữ liệu bằng JSON",
+    "subtitle": "P14 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P14",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Danh sách điểm có nhiều trường nên lưu từng dòng thủ công dễ nhầm. JSON biểu diễn list, dict và các giá trị đơn giản dưới dạng văn bản. Đọc lại cần khôi phục dữ liệu chứ không chỉ lấy chuỗi."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "import json\nstate = {\"students\": [{\"id\": \"S01\", \"name\": \"An\"}]}\nwith open(\"state.json\", \"w\", encoding=\"utf-8\") as f:\n    json.dump(state, f, ensure_ascii=False)"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "dump ghi dữ liệu có cấu trúc."
+        },
+        {
+          "n": 2,
+          "body": "Khi đọc dùng load."
+        },
+        {
+          "n": 3,
+          "body": "Bài chỉ dùng kiểu JSON hỗ trợ, không lưu trực tiếp object Student hay khóa tuple."
+        }
+      ],
+      "predict": {
+        "question": "Có tự lưu mọi đối tượng Python vào JSON không?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Không, phải chuyển sang dữ liệu được hỗ trợ",
+            "detail": "Đúng: bài dùng list/dict với kiểu đơn giản.",
+            "correct": true
+          },
+          {
+            "id": "b",
+            "title": "Chỉ cần đổi đuôi file",
+            "detail": "Đổi tên không đổi định dạng.",
+            "correct": false
+          },
+          {
+            "id": "c",
+            "title": "Có",
+            "detail": "Đối tượng tự định nghĩa cần chuyển biểu diễn.",
+            "correct": false
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu file hỏng bị trả danh sách rỗng: dữ liệu lỗi đang bị che; chỉ bắt trường hợp thiếu file."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "json.load(file) phục vụ việc gì?",
+          "options": [
+            {
+              "text": "Chỉ trả nguyên văn mọi ký tự",
+              "correct": false,
+              "detail": "Đó là cách đọc text thuần, chưa parse."
+            },
+            {
+              "text": "Chạy mã Python trong file",
+              "correct": false,
+              "detail": "JSON không phải lệnh chạy mã Python."
+            },
+            {
+              "text": "Đọc lại cấu trúc dữ liệu",
+              "correct": true,
+              "detail": "Đúng: parse văn bản JSON thành kiểu phù hợp."
+            }
+          ],
+          "correct": 2,
+          "explanation": "Đúng: parse văn bản JSON thành kiểu phù hợp."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thêm tên \"Hà\"; dự đoán đọc lại vẫn đúng Unicode, không chấm thứ tự khóa trong văn bản."
+      },
+      "scaffold": {
+        "template": "import json\n\ndef save_state(path, state):\n    with open(path, \"w\", encoding=\"utf-8\") as f:\n        {{slot1}}\n\ndef load_state(path):\n    try:\n        with open(path, encoding=\"utf-8\") as f:\n            {{slot2}}\n    except FileNotFoundError:\n        {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "json.dump(state, f, ensure_ascii=False)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "return json.load(f)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return {\"students\": []}"
+          }
+        ],
+        "bank": [
+          {
+            "label": "json.dump(state, f, ensure_ascii=False)",
+            "slot": 1
+          },
+          {
+            "label": "import json",
+            "slot": 1
+          },
+          {
+            "label": "return json.load(f)",
+            "slot": 2
+          },
+          {
+            "label": "print(json.load(f))",
+            "slot": 2
+          },
+          {
+            "label": "return {\"students\": []}",
+            "slot": 3
+          },
+          {
+            "label": "print({\"students\": []})",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Đặt dump trong with mode w; chạy: file ảo chưa có -> JSON chứa students; trạng thái tệp trở lại Đóng."
+          },
+          {
+            "label": "B2",
+            "text": "Bấm Reset runtime, giữ file theo kịch bản demo được ghi rõ; biến state biến mất, file vẫn có."
+          },
+          {
+            "label": "B3",
+            "text": "Đặt load trong with mode r; chạy: restored có dict tương đương, hiển thị so sánh cấu trúc thay vì chuỗi JSON."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết save_state(path, state) và load_state(path). state chỉ gồm list/dict khóa str và giá trị JSON hữu hạn. File thiếu: load_state trả {\"students\":[]}; file JSON hỏng phải phát sinh JSONDecodeError, không âm thầm đổi thành rỗng. save ghi đè có chủ đích trong khu bài tập.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "(save_state(\"state.json\", {\"students\":[{\"id\":\"S01\",\"name\":\"Hà\"}]}), load_state(\"state.json\"))[1] → {\"students\": [{\"id\": \"S01\", \"name\": \"Hà\"}]}"
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Phân biệt file thiếu và file đã có nhưng hỏng."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Dùng json.dump/load trong with; chỉ xử lý FileNotFoundError theo hợp đồng."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "load_state bắt FileNotFoundError rồi trả {\"students\":[]}; các lỗi JSON giữ nguyên."
+        }
+      ],
+      "starterCode": "import json\ndef save_state(path, state):\n    # Viết lời giải của bạn ở đây\n    pass\ndef load_state(path):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "Ca mẫu P14-a",
+          "call": "(save_state(\"state.json\", {\"students\":[{\"id\":\"S01\",\"name\":\"Hà\"}]}), load_state(\"state.json\"))[1]",
+          "expect": "{'students': [{'id': 'S01', 'name': 'Hà'}]}"
+        }
+      ],
+      "solutionCode": "import json\n\ndef save_state(path, state):\n    with open(path, \"w\", encoding=\"utf-8\") as f:\n        json.dump(state, f, ensure_ascii=False)\n\ndef load_state(path):\n    try:\n        with open(path, encoding=\"utf-8\") as f:\n            return json.load(f)\n    except FileNotFoundError:\n        return {\"students\": []}"
+    }
+  }
+}

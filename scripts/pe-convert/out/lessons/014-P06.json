@@ -1,0 +1,194 @@
+{
+  "lesson_code": "P06",
+  "sort_order": 14,
+  "module": "Module 3: List, dict, tuple và set",
+  "title": "Dictionary và tra cứu theo khóa",
+  "subtitle": "P06 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Dictionary và tra cứu theo khóa",
+    "subtitle": "P06 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P06",
+      "parser": "pe-convert/override",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Hai bạn có thể trùng tên. Sổ học tập dùng mã sinh viên để tra điểm. Dictionary nối mỗi khóa với một giá trị; thiếu khóa cần có cách phản hồi rõ."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "marks = {\"S01\": 8, \"S02\": 5}\nscore = marks.get(\"S03\", None)"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "S03 không có nên get trả None."
+        },
+        {
+          "n": 2,
+          "body": "Điểm 0 vẫn là dữ liệu hợp lệ, không được nhầm với thiếu điểm."
+        },
+        {
+          "n": 3,
+          "body": "Khóa trùng trong dict không giữ hai bản ghi riêng."
+        }
+      ],
+      "predict": {
+        "question": "marks có S01:0; get(\"S01\",None) trả gì?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Lỗi",
+            "detail": "get đọc được khóa này.",
+            "correct": false
+          },
+          {
+            "id": "b",
+            "title": "None",
+            "detail": "Khóa tồn tại nên không dùng mặc định.",
+            "correct": false
+          },
+          {
+            "id": "c",
+            "title": "0",
+            "detail": "Đúng: 0 là giá trị hợp lệ.",
+            "correct": true
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu điểm 0 bị coi là thiếu: đừng dùng điều kiện truthiness để suy ra khóa có tồn tại."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "score bằng gì?",
+          "options": [
+            {
+              "text": "0",
+              "correct": false,
+              "detail": "Chưa có điểm không đồng nghĩa điểm 0."
+            },
+            {
+              "text": "None",
+              "correct": true,
+              "detail": "Đúng: trả mặc định vì khóa không tồn tại."
+            },
+            {
+              "text": "5",
+              "correct": false,
+              "detail": "Không tự lấy giá trị cuối cùng."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: trả mặc định vì khóa không tồn tại."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu. Nhật ký thao tác bên dưới mô tả bản script gốc của PE; cách nghĩ giữ nguyên, chỉ khác phần vỏ hàm.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thêm S03:0 vào dữ liệu rồi chạy lại; tự giải thích vì sao kết quả đổi từ None sang 0."
+      },
+      "scaffold": {
+        "template": "def lookup_mark(marks, student_id):\n    \"\"\"Trả về điểm của mã, hoặc None nếu mã không có.\"\"\"\n    {{slot1}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "return marks.get(student_id, None)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "return marks.get(student_id, None)",
+            "slot": 1
+          },
+          {
+            "label": "print(marks.get(student_id, None))",
+            "slot": 1
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chọn khóa S01; hàng tương ứng nổi viền, value preview -> 8."
+          },
+          {
+            "label": "B2",
+            "text": "Đặt .get(student_id, None) vào mã; chạy với S03: lookup ghi Không tìm thấy -> score=None."
+          },
+          {
+            "label": "B3",
+            "text": "Thử khóa có giá trị 0; highlight tìm thấy, score -> 0; nhãn khác trạng thái thiếu."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết hàm lookup_mark(marks, student_id): marks là dict mã -> điểm, student_id là str. Trả về điểm nếu có mã, None nếu không. Không thay marks, không tra theo tên hay vị trí.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "result → 8"
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Bài toán là tra bằng khóa."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Thiếu khóa phải khác điểm 0."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "marks.get(student_id, None)"
+        }
+      ],
+      "starterCode": "def lookup_mark(marks, student_id):\n    \"\"\"Trả về điểm của mã, hoặc None nếu mã không có.\"\"\"\n    # Viết lời giải của bạn ở đây\n",
+      "tests": [
+        {
+          "name": "Ca mẫu PE: có mã",
+          "call": "lookup_mark({\"S01\": 8}, \"S01\")",
+          "expect": "8"
+        },
+        {
+          "name": "Điểm 0 không phải là thiếu",
+          "call": "lookup_mark({\"S01\": 0}, \"S01\")",
+          "expect": "0"
+        },
+        {
+          "name": "Không có mã thì None",
+          "call": "lookup_mark({\"S01\": 8}, \"S02\")",
+          "expect": "None"
+        },
+        {
+          "name": "Không thay đổi dict nguồn",
+          "call": "(exec('marks = {\"S01\": 8}\\nlookup_mark(marks, \"S09\")\\nassert marks == {\"S01\": 8}, marks\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "def lookup_mark(marks, student_id):\n    \"\"\"Trả về điểm của mã, hoặc None nếu mã không có.\"\"\"\n    return marks.get(student_id, None)\n"
+    }
+  }
+}

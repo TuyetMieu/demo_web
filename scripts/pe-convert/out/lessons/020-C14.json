@@ -1,0 +1,178 @@
+{
+  "lesson_code": "C14",
+  "sort_order": 20,
+  "module": "Module 4: Vòng lặp và biến tích lũy",
+  "title": "Comprehension, enumerate, zip và Counter",
+  "subtitle": "C14 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Comprehension, enumerate, zip và Counter",
+    "subtitle": "C14 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C14",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Cùng một tập dữ liệu có thể được lọc, đánh số hoặc ghép theo vị trí. Hãy chọn phép biến đổi theo đầu ra cần có."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "from collections import Counter\nprint([x*x for x in [-2,0,3] if x>0])\nprint(list(enumerate([\"A\",\"B\"],1)))\nprint(list(zip([\"A\",\"B\"],[8,9])))\nprint(Counter([\"A\",\"B\",\"A\"]).most_common(1))\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Kết quả là [9], [(1,A),(2,B)], [(A,8),(B,9)] và [(A,2)] với các tên là chuỗi."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"3\" — Không tự thêm phần tử thiếu."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "zip hai list độ dài 3 và 2 mặc định tạo bao nhiêu cặp?",
+          "options": [
+            {
+              "text": "2",
+              "correct": true,
+              "detail": "Đúng: dừng ở iterable ngắn hơn."
+            },
+            {
+              "text": "3",
+              "correct": false,
+              "detail": "Không tự thêm phần tử thiếu."
+            },
+            {
+              "text": "Báo lỗi",
+              "correct": false,
+              "detail": "Muốn bắt mismatch có thể dùng strict, nhưng mặc định không lỗi."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: dừng ở iterable ngắn hơn."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thêm một mã nhưng không thêm điểm; dự đoán cặp nào bị mất và bổ sung kiểm tra độ dài trước zip."
+      },
+      "scaffold": {
+        "template": "from collections import Counter\ndef report(ids,scores):\n    {{slot1}}\n        raise ValueError(\"length mismatch\")\n    pairs=[(sid,score) for sid,score in zip(ids,scores) if score>=5]\n    {{slot2}}\ndef top_votes(ids,k):\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "if len(ids)!=len(scores):"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "return [(i,sid,score) for i,(sid,score) in enumerate(pairs,1)]"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return Counter(ids).most_common(k)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "if len(ids)!=len(scores):",
+            "slot": 1
+          },
+          {
+            "label": "if len(ids)==len(scores):",
+            "slot": 1
+          },
+          {
+            "label": "return [(i,sid,score) for i,(sid,score) in enumerate(pairs,1)]",
+            "slot": 2
+          },
+          {
+            "label": "print([(i,sid,score) for i,(sid,score) in enumerate(pairs,1)])",
+            "slot": 2
+          },
+          {
+            "label": "return Counter(ids).most_common(k)",
+            "slot": 3
+          },
+          {
+            "label": "print(Counter(ids).most_common(k))",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Biến vòng for + if + append thành comprehension, giữ cùng thứ tự."
+          },
+          {
+            "label": "B2",
+            "text": "Ghép mã và điểm bằng zip; thêm thứ hạng bằng enumerate bắt đầu 1."
+          },
+          {
+            "label": "B3",
+            "text": "Đếm phiếu bằng Counter; so số lượt với số mã duy nhất."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết report(ids,scores): nếu độ dài khác nhau raise ValueError; trả list (thứ_tự,mã,điểm) chỉ với điểm>=5, thứ tự đánh lại từ 1. Viết top_votes(ids,k) trả Counter(ids).most_common(k), k>=0; hòa tần suất giữ thứ tự gặp đầu."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Kết quả là [9], [(1,A),(2,B)], [(A,8),(B,9)] và [(A,2)] với các tên là chuỗi."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "from collections import Counter\ndef report(ids,scores):\n    # Viết lời giải của bạn ở đây\n    pass\ndef top_votes(ids,k):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "filter (C14-K01)",
+          "call": "(exec('assert report([\"A\",\"B\",\"C\"],[4,5,8])==[(1,\"B\",5),(2,\"C\",8)]\\nassert report([],[])==[]\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "count (C14-K02)",
+          "call": "(exec('assert top_votes([\"B\",\"A\",\"B\",\"A\",\"C\"],2)==[(\"B\",2),(\"A\",2)]\\nassert top_votes([],3)==[]\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "mismatch (C14-K03)",
+          "call": "(exec('try:\\n    report([\"A\"],[])\\nexcept ValueError:\\n    pass\\nelse:\\n    raise AssertionError(\"missing length validation\")\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "from collections import Counter\ndef report(ids,scores):\n    if len(ids)!=len(scores):\n        raise ValueError(\"length mismatch\")\n    pairs=[(sid,score) for sid,score in zip(ids,scores) if score>=5]\n    return [(i,sid,score) for i,(sid,score) in enumerate(pairs,1)]\ndef top_votes(ids,k):\n    return Counter(ids).most_common(k)\n"
+    }
+  }
+}

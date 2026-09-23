@@ -1,0 +1,156 @@
+{
+  "lesson_code": "A09",
+  "sort_order": 82,
+  "module": "Module 12: Thread, tiến trình, đồng thời và mạng",
+  "title": "Luồng chuẩn, pipe và vòng đời process",
+  "subtitle": "A09 · Nâng cao · 40 phút",
+  "estimated_minutes": 40,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Luồng chuẩn, pipe và vòng đời process",
+    "subtitle": "A09 · Nâng cao · 40 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A09",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "stdin đưa dữ liệu vào, stdout đưa kết quả ra, stderr dành cho thông báo lỗi. Pipe nối luồng; timeout cần thu dọn process để không để việc chạy mồ côi."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "p=subprocess.Popen(args,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)\ntry:\n    out,err=p.communicate(\"An\",timeout=2)\nexcept subprocess.TimeoutExpired:\n    p.kill(); out,err=p.communicate()\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "communicate vừa ghi vừa đọc để giảm nguy cơ tắc pipe."
+        },
+        {
+          "n": 2,
+          "body": "Sau kill vẫn cần communicate/wait để thu process."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Luôn tự dừng\" — Không được giả định vậy."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Sau TimeoutExpired, process đã chắc bị dừng chưa?",
+          "options": [
+            {
+              "text": "Chưa với Popen.communicate",
+              "correct": true,
+              "detail": "Đúng: caller phải xử lý vòng đời."
+            },
+            {
+              "text": "Luôn tự dừng",
+              "correct": false,
+              "detail": "Không được giả định vậy."
+            },
+            {
+              "text": "Luôn exit0",
+              "correct": false,
+              "detail": "Timeout không là thành công."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: caller phải xử lý vòng đời."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Child exit3 nhưng stdout có dữ liệu: giữ cả stdout và returncode, không coi có output là thành công."
+      },
+      "scaffold": {
+        "template": "import subprocess\ndef run_child(args,text,timeout):\n    process=subprocess.Popen(args,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,shell=False)\n    {{slot1}}\n    try:\n        {{slot2}}\n    except subprocess.TimeoutExpired:\n        {{slot3}}\n    return dict(stdout=out,stderr=err,returncode=process.returncode,timed_out=timed_out)\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "timed_out=False"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "out,err=process.communicate(text,timeout=timeout)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "timed_out=True; process.kill(); out,err=process.communicate()"
+          }
+        ],
+        "bank": [
+          {
+            "label": "timed_out=False",
+            "slot": 1
+          },
+          {
+            "label": "out,err=p.communicate(\"An\",timeout=2)",
+            "slot": 1
+          },
+          {
+            "label": "out,err=process.communicate(text,timeout=timeout)",
+            "slot": 2
+          },
+          {
+            "label": "timed_out=True; process.kill(); out,err=process.communicate()",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chạy child đọc stdin, in upper vào stdout và note vào stderr; hiện ba vùng riêng."
+          },
+          {
+            "label": "B2",
+            "text": "Redirect stdout vào file, stderr vẫn riêng; đọc file kiểm tra kết quả."
+          },
+          {
+            "label": "B3",
+            "text": "Chạy child ngủ10giây với timeout0.2; kill + communicate, UI báo timed_out=True."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết run_child(args,text,timeout): Popen shell=False, pipes text=True; communicate; khi timeout kill và communicate lần nữa. Trả dict stdout,stderr,returncode,timed_out. args list do lab cấp; không ghép chuỗi shell."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "communicate vừa ghi vừa đọc để giảm nguy cơ tắc pipe. Sau kill vẫn cần communicate/wait để thu process."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import subprocess\ndef run_child(args,text,timeout):\n    process=subprocess.Popen(args,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,shell=False)\n    timed_out=False\n    try:\n        out,err=process.communicate(text,timeout=timeout)\n    except subprocess.TimeoutExpired:\n        timed_out=True; process.kill(); out,err=process.communicate()\n    return dict(stdout=out,stderr=err,returncode=process.returncode,timed_out=timed_out)\n"
+    }
+  }
+}

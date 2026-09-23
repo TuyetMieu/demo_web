@@ -1,0 +1,183 @@
+{
+  "lesson_code": "T12",
+  "sort_order": 56,
+  "module": "Module 9: Tkinter chuyên sâu",
+  "title": "Quốc tế hóa và định dạng theo ngôn ngữ",
+  "subtitle": "T12 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Quốc tế hóa và định dạng theo ngôn ngữ",
+    "subtitle": "T12 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#T12",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Dịch nhãn và định dạng ngày/số là hai việc khác nhau. Tách khóa thông điệp khỏi widget giúp đổi toàn bộ giao diện mà không mất dữ liệu đang nhập."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "TEXT={\"vi\":{\"save\":\"Lưu\"},\"en\":{\"save\":\"Save\"}}\nbutton.configure(text=TEXT[language][\"save\"])\n# Ngày: vi 31/12/2024; en 12/31/2024\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Ngôn ngữ hiển thị không nên quyết định cách lưu dữ liệu."
+        },
+        {
+          "n": 2,
+          "body": "Lưu ngày ở ISO, số ở kiểu số; chỉ format ở rìa giao diện."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Đó là dữ liệu người dùng, không phải bản dịch."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Đổi language có nên xóa nội dung Entry đang nhập không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Đó là dữ liệu người dùng, không phải bản dịch."
+            },
+            {
+              "text": "Không",
+              "correct": true,
+              "detail": "Đúng: chỉ cập nhật nhãn và định dạng trình bày."
+            },
+            {
+              "text": "Chỉ khi đổi sang English",
+              "correct": false,
+              "detail": "Không phụ thuộc ngôn ngữ đích."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: chỉ cập nhật nhãn và định dạng trình bày."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Xóa một khóa trong catalog đích; hiển thị fallback từ en và ghi cảnh báo thiếu bản dịch."
+      },
+      "scaffold": {
+        "template": "from datetime import date\nTEXT={\"vi\":{\"title\":\"Sổ học tập\",\"save\":\"Lưu\"},\"en\":{\"title\":\"Study book\",\"save\":\"Save\"}}\ndef tr(lang,key):\n    {{slot1}}\ndef format_date(iso,lang):\n    value=date.fromisoformat(iso)\n    return value.strftime(\"%d/%m/%Y\" if lang==\"vi\" else \"%m/%d/%Y\")\ndef format_number(value,lang):\n    {{slot2}}\n    return text.translate(str.maketrans({\",\":\".\",\".\":\",\"})) if lang==\"vi\" else text\ndef apply_language(root,button,lang):\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "return TEXT.get(lang,{}).get(key,TEXT[\"en\"].get(key,key))"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "text=f\"{value:,.2f}\""
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "root.title(tr(lang,\"title\")); button.configure(text=tr(lang,\"save\"))"
+          }
+        ],
+        "bank": [
+          {
+            "label": "return TEXT.get(lang,{}).get(key,TEXT[\"en\"].get(key,key))",
+            "slot": 1
+          },
+          {
+            "label": "print(TEXT.get(lang,{}).get(key,TEXT[\"en\"].get(key,key)))",
+            "slot": 1
+          },
+          {
+            "label": "text=f\"{value:,.2f}\"",
+            "slot": 2
+          },
+          {
+            "label": "TEXT={\"vi\":{\"save\":\"Lưu\"},\"en\":{\"save\":\"Save\"}}",
+            "slot": 2
+          },
+          {
+            "label": "root.title(tr(lang,\"title\")); button.configure(text=tr(lang,\"save\"))",
+            "slot": 3
+          },
+          {
+            "label": "button.configure(text=TEXT[language][\"save\"])",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tách title/save/name thành catalog vi/en; widget chỉ giữ khóa thông điệp."
+          },
+          {
+            "label": "B2",
+            "text": "Bấm đổi ngôn ngữ, cả title và button đổi cùng lượt; Entry giữ An."
+          },
+          {
+            "label": "B3",
+            "text": "Format cùng số 1234.5 và ngày 2024-12-31 theo vi/en; không thay giá trị lưu."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết tr(lang,key): fallback en nếu ngôn ngữ/khóa thiếu, nếu en cũng thiếu trả key. Viết format_date(iso,lang) theo vi dd/mm/YYYY, en mm/dd/YYYY. format_number(value,lang) hai chữ số: vi 1.234,50; en 1,234.50. Viết apply_language(root,button,lang) đổi title và nút bằng catalog, không chạm Entry.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Native: hai lần đổi ngôn ngữ cập nhật mọi nhãn theo catalog và giữ Entry; quy tắc format hai locale trong đề là thiết kế bài, không bao quát toàn bộ locale thế giới."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Ngôn ngữ hiển thị không nên quyết định cách lưu dữ liệu. Lưu ngày ở ISO, số ở kiểu số; chỉ format ở rìa giao diện."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "from datetime import date\ndef tr(lang,key):\n    # Viết lời giải của bạn ở đây\n    pass\ndef format_date(iso,lang):\n    # Viết lời giải của bạn ở đây\n    pass\ndef format_number(value,lang):\n    # Viết lời giải của bạn ở đây\n    pass\ndef apply_language(root,button,lang):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "locale (T12-K01)",
+          "call": "(exec('assert format_date(\"2024-12-31\",\"vi\")==\"31/12/2024\"\\nassert format_date(\"2024-12-31\",\"en\")==\"12/31/2024\"\\nassert format_number(1234.5,\"vi\")==\"1.234,50\"\\nassert format_number(1234.5,\"en\")==\"1,234.50\"\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "fallback (T12-K02)",
+          "call": "(exec('assert tr(\"fr\",\"save\")==\"Save\"\\nassert tr(\"vi\",\"unknown\")==\"unknown\"\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "from datetime import date\nTEXT={\"vi\":{\"title\":\"Sổ học tập\",\"save\":\"Lưu\"},\"en\":{\"title\":\"Study book\",\"save\":\"Save\"}}\ndef tr(lang,key):\n    return TEXT.get(lang,{}).get(key,TEXT[\"en\"].get(key,key))\ndef format_date(iso,lang):\n    value=date.fromisoformat(iso)\n    return value.strftime(\"%d/%m/%Y\" if lang==\"vi\" else \"%m/%d/%Y\")\ndef format_number(value,lang):\n    text=f\"{value:,.2f}\"\n    return text.translate(str.maketrans({\",\":\".\",\".\":\",\"})) if lang==\"vi\" else text\ndef apply_language(root,button,lang):\n    root.title(tr(lang,\"title\")); button.configure(text=tr(lang,\"save\"))\n"
+    }
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "lesson_code": "C21",
+  "sort_order": 33,
+  "module": "Module 6: File, ngoại lệ và dữ liệu lâu dài",
+  "title": "File modes, buffering và lỗi I/O",
+  "subtitle": "C21 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "File modes, buffering và lỗi I/O",
+    "subtitle": "C21 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C21",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Chế độ mở quyết định đọc, ghi đè hay nối. Buffer giữ dữ liệu tạm; flush đẩy buffer của Python nhưng không đồng nghĩa dữ liệu chắc chắn đã tới thiết bị vật lý."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "with open(\"log.txt\",\"w\",encoding=\"utf8\") as f:\n    f.write(\"A\\n\")\nwith open(\"log.txt\",\"a\",encoding=\"utf8\") as f:\n    f.write(\"B\\n\")\n    f.flush()\nwith open(\"log.txt\",encoding=\"utf8\") as f:\n    print(f.readline(),f.read())\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "w tạo/ghi đè, a nối cuối, r đọc."
+        },
+        {
+          "n": 2,
+          "body": "b dùng bytes; + cho phép đọc và ghi nhưng vẫn phải quản lý vị trí con trỏ."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Giữ toàn bộ và nối\" — a mới là nối."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Mở log đang có bằng w để thêm một dòng sẽ thế nào?",
+          "options": [
+            {
+              "text": "Giữ toàn bộ và nối",
+              "correct": false,
+              "detail": "a mới là nối."
+            },
+            {
+              "text": "Xóa nội dung cũ lúc mở",
+              "correct": true,
+              "detail": "Đúng: lựa chọn mode là một phần hợp đồng dữ liệu."
+            },
+            {
+              "text": "Chỉ đọc",
+              "correct": false,
+              "detail": "r mới chỉ đọc."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: lựa chọn mode là một phần hợp đồng dữ liệu."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi a thành w trên bản sao log và giải thích mất dòng đầu. Thử read trên handle đã đóng: ValueError."
+      },
+      "scaffold": {
+        "template": "def append_line(path,text):\n    with open(path,\"a\",encoding=\"utf8\") as stream:\n        {{slot1}}\n        stream.flush()\ndef read_status(path):\n    try:\n        with open(path,encoding=\"utf8\") as stream:\n            {{slot2}}\n    except FileNotFoundError:\n        return \"missing\",None\n    except PermissionError:\n        {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "stream.write(text+\"\\n\")"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "return \"ok\",stream.read()"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return \"denied\",None"
+          }
+        ],
+        "bank": [
+          {
+            "label": "stream.write(text+\"\\n\")",
+            "slot": 1
+          },
+          {
+            "label": "with open(\"log.txt\",\"w\",encoding=\"utf8\") as f:",
+            "slot": 1
+          },
+          {
+            "label": "return \"ok\",stream.read()",
+            "slot": 2
+          },
+          {
+            "label": "print(\"ok\",stream.read())",
+            "slot": 2
+          },
+          {
+            "label": "return \"denied\",None",
+            "slot": 3
+          },
+          {
+            "label": "print(\"denied\",None)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Mở fixture bằng r, đọc 1 ký tự rồi readline rồi readlines; con trỏ di chuyển, hiển thị phần còn lại."
+          },
+          {
+            "label": "B2",
+            "text": "Dùng r+b trên bytes ABC; seek(1), write(b\"Z\"), flush, seek(0) đọc AZC."
+          },
+          {
+            "label": "B3",
+            "text": "Dùng TemporaryDirectory làm vùng thử; chạy xong thư mục tự dọn. Mock PermissionError để kiểm tra mà không sửa quyền hệ thống."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết append_line(path,text) nối text+newline UTF-8; read_status(path) trả (\"ok\",nội_dung), (\"missing\",None) khi FileNotFoundError, (\"denied\",None) khi PermissionError; lỗi khác truyền ra. Dùng with. Nộp thêm trace lab binary và TemporaryDirectory.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Trace bắt buộc gồm r/w/a/b/+, read(size), readline, readlines và seek; binary ABC thành AZC; xác nhận folder tạm không tồn tại sau context."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "w tạo/ghi đè, a nối cuối, r đọc. b dùng bytes; + cho phép đọc và ghi nhưng vẫn phải quản lý vị trí con trỏ."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "def append_line(path,text):\n    # Viết lời giải của bạn ở đây\n    pass\ndef read_status(path):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "append (C21-K01)",
+          "call": "(exec('append_line(\"log.txt\",\"An\"); append_line(\"log.txt\",\"Binh\")\\nassert read_status(\"log.txt\")==(\"ok\",\"An\\\\nBinh\\\\n\")\\nassert read_status(\"absent.txt\")==(\"missing\",None)\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "permission (C21-K02)",
+          "call": "(exec('from unittest.mock import patch\\nwith patch(\"builtins.open\",side_effect=PermissionError):\\n    assert read_status(\"private.txt\")==(\"denied\",None)\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "def append_line(path,text):\n    with open(path,\"a\",encoding=\"utf8\") as stream:\n        stream.write(text+\"\\n\")\n        stream.flush()\ndef read_status(path):\n    try:\n        with open(path,encoding=\"utf8\") as stream:\n            return \"ok\",stream.read()\n    except FileNotFoundError:\n        return \"missing\",None\n    except PermissionError:\n        return \"denied\",None\n"
+    }
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "lesson_code": "C19",
+  "sort_order": 27,
+  "module": "Module 5: Hàm, module và package",
+  "title": "Module, alias và package lồng nhau",
+  "subtitle": "C19 · Lộ trình chính · 40 phút",
+  "estimated_minutes": 40,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Module, alias và package lồng nhau",
+    "subtitle": "C19 · Lộ trình chính · 40 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C19",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Chia chương trình theo trách nhiệm giúp tái sử dụng mà không copy mã. __init__.py của package khác với phương thức __init__ của một class."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "# domains/grades.py\ndef passed(score): return score>=5\n# domains/__init__.py\nfrom .grades import passed\n# main.py\nimport domains as dm\nprint(dm.passed(6))\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Import domains nạp API đã export; alias dm chỉ là tên khác trong module gọi."
+        },
+        {
+          "n": 2,
+          "body": "Relative import chấm chỉ package hiện tại."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Đừng nhầm file package với constructor class."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "domains/__init__.py tự tạo Student object mỗi khi gọi hàm không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Đừng nhầm file package với constructor class."
+            },
+            {
+              "text": "Không",
+              "correct": true,
+              "detail": "Đúng: nội dung file chạy khi module được nạp, không phải mỗi lời gọi hàm."
+            },
+            {
+              "text": "Chỉ khi có alias",
+              "correct": false,
+              "detail": "Alias không làm đổi cơ chế đó."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: nội dung file chạy khi module được nạp, không phải mỗi lời gọi hàm."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thêm print trong main dưới main guard; import main phải không tự chạy giao diện."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tạo cây domains/grades.py và __init__.py; UI nối import với file được nạp."
+          },
+          {
+            "label": "B2",
+            "text": "Đổi import domains thành import domains as dm và sửa nơi gọi; thử gọi tên cũ để thấy NameError."
+          },
+          {
+            "label": "B3",
+            "text": "Thêm domains/reports/summary.py và import tương đối lên grades; chạy từ thư mục gốc."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Tạo package domains với grades.py: passed(score), reports/summary.py: count_passed(scores), __init__.py export count_passed. main.py import domains as dm và in kết quả [4,5,8] chỉ khi chạy trực tiếp. Nộp đủ file, không sửa sys.path để che cấu trúc sai."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Import domains nạp API đã export; alias dm chỉ là tên khác trong module gọi. Relative import chấm chỉ package hiện tại."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "procedure": [
+        "domains/grades.py: def passed(score): return score >= 5",
+        "domains/reports/__init__.py: để trống",
+        "domains/reports/summary.py:",
+        "    from ..grades import passed",
+        "    def count_passed(scores): return sum(passed(s) for s in scores)",
+        "domains/__init__.py:",
+        "    from .reports.summary import count_passed",
+        "main.py:",
+        "    import domains as dm",
+        "    if __name__ == \"__main__\": print(dm.count_passed([4,5,8]))"
+      ]
+    }
+  }
+}

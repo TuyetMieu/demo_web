@@ -1,0 +1,125 @@
+{
+  "lesson_code": "A18",
+  "sort_order": 69,
+  "module": "Module 11: MySQL, wxPython và đồ họa 3D",
+  "title": "Dựng MySQL và thiết kế schema bằng Workbench",
+  "subtitle": "A18 · Nâng cao · 60 phút",
+  "estimated_minutes": 60,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Dựng MySQL và thiết kế schema bằng Workbench",
+    "subtitle": "A18 · Nâng cao · 60 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A18",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Ứng dụng cần tách cấu hình kết nối khỏi mã và có schema phản ánh định danh, quan hệ. Workbench giúp xem cấu trúc và chạy SQL trong database lab."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "config={\"host\":\"127.0.0.1\",\"port\":3306,\"user\":\"pe_lab\",\"password\":os.environ[\"PE_DB_PASSWORD\"],\"database\":\"pe_lab\"}\nconnection=mysql.connector.connect(**config)\ncursor=connection.cursor(); cursor.execute(\"SELECT 1\")\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Server MySQL và package connector là hai thành phần khác nhau."
+        },
+        {
+          "n": 2,
+          "body": "Không hard-code mật khẩu trong lesson hoặc bản nộp."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Đó là driver client."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "pip install mysql-connector-python có tự tạo MySQL server đang chạy không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Đó là driver client."
+            },
+            {
+              "text": "Không",
+              "correct": true,
+              "detail": "Đúng: server cần được cài/chạy riêng."
+            },
+            {
+              "text": "Chỉ trên Windows",
+              "correct": false,
+              "detail": "Vai trò package không đổi theo OS."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: server cần được cài/chạy riêng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi port sai và password sai trong bản cấu hình tạm; phân biệt lỗi kết nối với lỗi xác thực, không ghi password vào log."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Lab cài MySQL Server và Workbench theo hệ điều hành; tạo database pe_lab và user chỉ có quyền trong database đó; kiểm tra service/port."
+          },
+          {
+            "label": "B2",
+            "text": "Kết nối bằng Workbench rồi bằng Python với cùng host/port/database; SELECT1 trả1."
+          },
+          {
+            "label": "B3",
+            "text": "Thiết kế students(id,name,dob), courses(id,name,credits), marks(student_id,course_id,score); khóa kép marks và FK tới hai bảng."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Nộp schema.sql, ảnh sơ đồ quan hệ Workbench, cấu hình mẫu không có bí mật và log SELECT1 từ Python. students.id/courses.id khóa chính; marks khóa kép và hai FK; credits>0, score0..10. Trong lab có quyền, tạo user pe_lab chỉ truy cập pe_lab. Server/version ghi lại chính xác."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Server MySQL và package connector là hai thành phần khác nhau. Không hard-code mật khẩu trong lesson hoặc bản nộp."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "procedure": [
+        "CREATE TABLE students(id VARCHAR(20) PRIMARY KEY,name VARCHAR(100) NOT NULL,dob DATE NOT NULL);",
+        "CREATE TABLE courses(id VARCHAR(20) PRIMARY KEY,name VARCHAR(100) NOT NULL,credits INT NOT NULL CHECK(credits>0));",
+        "CREATE TABLE marks(student_id VARCHAR(20),course_id VARCHAR(20),score DECIMAL(4,1) CHECK(score BETWEEN 0 AND 10),",
+        "  PRIMARY KEY(student_id,course_id),FOREIGN KEY(student_id) REFERENCES students(id),FOREIGN KEY(course_id) REFERENCES courses(id));",
+        "-- Python: dùng mysql.connector.connect với config từ biến môi trường, SELECT 1, đóng cursor và connection trong finally.",
+        "-- Workbench: tạo connection localhost, mở pe_lab, reverse engineer schema để xem hai FK và khóa kép."
+      ]
+    }
+  }
+}

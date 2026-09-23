@@ -1,0 +1,210 @@
+{
+  "lesson_code": "P15",
+  "sort_order": 35,
+  "module": "Module 7: Lập trình hướng đối tượng",
+  "title": "Class và trạng thái riêng từng đối tượng",
+  "subtitle": "P15 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Class và trạng thái riêng từng đối tượng",
+    "subtitle": "P15 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P15",
+      "parser": "pe-convert/override",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Mỗi sinh viên có mã và danh sách điểm riêng. Class mô tả cách tạo và thao tác với một sinh viên. Hai đối tượng cùng class không được vô tình dùng chung list điểm."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "class Student:\n    def __init__(self, student_id):\n        self.student_id = student_id\n        self.scores = []\n    def add_score(self, score):\n        self.scores.append(score)"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "self là đối tượng đang nhận lời gọi."
+        },
+        {
+          "n": 2,
+          "body": "Tạo scores bên trong __init__ giúp mỗi instance có list riêng."
+        },
+        {
+          "n": 3,
+          "body": "Bài chưa dạy quyền truy cập như cơ chế bảo mật."
+        }
+      ],
+      "predict": {
+        "question": "self trong add_score là gì?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Điểm đang thêm",
+            "detail": "Điểm là tham số score riêng.",
+            "correct": false
+          },
+          {
+            "id": "b",
+            "title": "Tên lớp cố định",
+            "detail": "Tên class và instance khác nhau.",
+            "correct": false
+          },
+          {
+            "id": "c",
+            "title": "Đối tượng nhận lời gọi",
+            "detail": "Đúng: a.add_score dùng a làm self.",
+            "correct": true
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu thêm điểm cho a làm b đổi theo: kiểm tra list có được tạo lại ở mỗi lần __init__ không."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Tạo a,b rồi a.add_score(8): điểm của b là gì?",
+          "options": [
+            {
+              "text": "Không thể có hai instance",
+              "correct": false,
+              "detail": "Một lớp có thể tạo nhiều đối tượng."
+            },
+            {
+              "text": "[]",
+              "correct": true,
+              "detail": "Đúng: mỗi lần __init__ tạo list riêng."
+            },
+            {
+              "text": "[8]",
+              "correct": false,
+              "detail": "Chỉ đúng nếu bạn dùng chung list ngoài ý muốn."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: mỗi lần __init__ tạo list riêng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu. Nhật ký thao tác bên dưới mô tả bản script gốc của PE; cách nghĩ giữ nguyên, chỉ khác phần vỏ hàm.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thêm điểm0 cho b; dự đoán a=[8], b=[0]. Hỏi lỗi nếu scores=[] đặt ở thân class."
+      },
+      "scaffold": {
+        "template": "class Student:\n    def __init__(self, student_id):\n        {{slot1}}\n        self.scores = []\n    def add_score(self, score):\n        self.scores.append(score)\n    def average(self):\n        {{slot2}}\n            return None\n        {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "self.student_id = student_id"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "if not self.scores:"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return sum(self.scores) / len(self.scores)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "self.student_id = student_id",
+            "slot": 1
+          },
+          {
+            "label": "self.scores = []",
+            "slot": 1
+          },
+          {
+            "label": "if not self.scores:",
+            "slot": 2
+          },
+          {
+            "label": "class Student:",
+            "slot": 2
+          },
+          {
+            "label": "return sum(self.scores) / len(self.scores)",
+            "slot": 3
+          },
+          {
+            "label": "print(sum(self.scores) / len(self.scores))",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Đặt self.scores=[] trong __init__; tạo a=S01 rồi b=S02: hai thẻ đối tượng, hai list rỗng."
+          },
+          {
+            "label": "B2",
+            "text": "Chạy a.add_score(8): chỉ list của a đổi []->[8], b vẫn[]."
+          },
+          {
+            "label": "B3",
+            "text": "Bấm b rồi xem thuộc tính: student_id=S02, scores=[]; mã không tự chạy lại khi đổi thẻ xem."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết Student(student_id) có thuộc tính student_id, scores; add_score(score) thêm điểm hợp lệ [0,10] được cấp sẵn; average() trả trung bình hoặc None. Mỗi instance có list riêng. Không cần validation trong bài này.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "student_average(Student,[6,8]) → 7.0"
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Dữ liệu nào thuộc riêng mỗi sinh viên?"
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Tạo list mới trong __init__, không làm thuộc tính class dùng chung."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "self.scores=[] trong __init__; average xử lý list rỗng trước chia."
+        }
+      ],
+      "starterCode": "class Student:\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "Trung bình và trạng thái ban đầu",
+          "call": "(exec('a = Student(\"S01\")\\nassert a.student_id == \"S01\"\\nassert a.scores == [], a.scores\\nassert a.average() is None\\na.add_score(6); a.add_score(8)\\nassert a.average() == 7.0, a.average()\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "Mỗi instance có list điểm riêng",
+          "call": "(exec('a = Student(\"S01\"); b = Student(\"S02\")\\na.add_score(9)\\nassert b.scores == [], b.scores\\nassert a.scores is not b.scores\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "class Student:\n    def __init__(self, student_id):\n        self.student_id = student_id\n        self.scores = []\n    def add_score(self, score):\n        self.scores.append(score)\n    def average(self):\n        if not self.scores:\n            return None\n        return sum(self.scores) / len(self.scores)"
+    }
+  }
+}

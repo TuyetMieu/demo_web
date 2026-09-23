@@ -1,0 +1,137 @@
+{
+  "lesson_code": "A23",
+  "sort_order": 73,
+  "module": "Module 11: MySQL, wxPython và đồ họa 3D",
+  "title": "Bitmap lát nền trong wxPython",
+  "subtitle": "A23 · Nâng cao · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Bitmap lát nền trong wxPython",
+    "subtitle": "A23 · Nâng cao · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A23",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Ảnh bitmap có thể được lặp thành nền. Khi cửa sổ bị che hoặc resize, nền phải được vẽ lại trong paint event, không chỉ vẽ một lần lúc khởi tạo."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "def on_paint(event):\n    dc=wx.AutoBufferedPaintDC(panel)\n    for y in range(0,height,tile_height):\n        for x in range(0,width,tile_width): dc.DrawBitmap(tile,x,y)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "EVT_PAINT là nơi vẽ; EVT_SIZE gọi Refresh rồi cho event tiếp tục."
+        },
+        {
+          "n": 2,
+          "body": "Đây là hiệu chỉnh từ ví dụ ClientDC vẽ trực tiếp trong sự kiện resize ở nguồn."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — OS có thể yêu cầu repaint sau đó."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Vẽ bằng ClientDC một lần có bảo đảm nền còn sau khi bị cửa sổ khác che không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "OS có thể yêu cầu repaint sau đó."
+            },
+            {
+              "text": "Không, cần paint handler",
+              "correct": true,
+              "detail": "Đúng."
+            },
+            {
+              "text": "Chỉ cần sleep",
+              "correct": false,
+              "detail": "Sleep không lưu nội dung vẽ."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Che rồi mở lại cửa sổ và thu nhỏ/phóng lớn; nền phải được tái tạo, không để vùng trắng."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tạo tile8x8 hai màu bằng MemoryDC, chuyển thành bitmap độc lập."
+          },
+          {
+            "label": "B2",
+            "text": "Vẽ lặp theo hàng/cột trong EVT_PAINT; resize làm số tile thay đổi."
+          },
+          {
+            "label": "B3",
+            "text": "Đặt nút Quit trên panel; nền không được làm mất khả năng click control."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết TiledPanel(wx.Panel) tự tạo bitmap8x8 hai màu, SetBackgroundStyle(PAINT), EVT_PAINT dùng AutoBufferedPaintDC lát kín client area; EVT_SIZE gọi Refresh và Skip. Thêm nút Quit đóng frame. Không cần file ảnh bên ngoài."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "EVT_PAINT là nơi vẽ; EVT_SIZE gọi Refresh rồi cho event tiếp tục. Đây là hiệu chỉnh từ ví dụ ClientDC vẽ trực tiếp trong sự kiện resize ở nguồn."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import wx\nclass TiledPanel(wx.Panel):\n    def __init__(self,parent):\n        super().__init__(parent); self.SetBackgroundStyle(wx.BG_STYLE_PAINT)\n        self.tile=wx.Bitmap(8,8); dc=wx.MemoryDC(self.tile)\n        dc.SetBackground(wx.Brush(\"#eaf3f5\")); dc.Clear()\n        dc.SetPen(wx.TRANSPARENT_PEN); dc.SetBrush(wx.Brush(\"#087e86\")); dc.DrawRectangle(0,0,4,4)\n        dc.SelectObject(wx.NullBitmap)\n        self.Bind(wx.EVT_PAINT,self.paint); self.Bind(wx.EVT_SIZE,self.resize)\n        button=wx.Button(self,label=\"Quit\",pos=(12,12)); button.Bind(wx.EVT_BUTTON,lambda event:parent.Close())\n    def resize(self,event): self.Refresh(); event.Skip()\n    def paint(self,event):\n        dc=wx.AutoBufferedPaintDC(self); width,height=self.GetClientSize()\n        for y in range(0,height,8):\n            for x in range(0,width,8): dc.DrawBitmap(self.tile,x,y)\nif __name__==\"__main__\":\n    app=wx.App(False); frame=wx.Frame(None,title=\"Bitmap\",size=(400,300)); TiledPanel(frame); frame.Show(); app.MainLoop()\n",
+      "procedure": [
+        "import wx",
+        "class TiledPanel(wx.Panel):",
+        "    def __init__(self,parent):",
+        "        super().__init__(parent); self.SetBackgroundStyle(wx.BG_STYLE_PAINT)",
+        "        self.tile=wx.Bitmap(8,8); dc=wx.MemoryDC(self.tile)",
+        "        dc.SetBackground(wx.Brush(\"#eaf3f5\")); dc.Clear()",
+        "        dc.SetPen(wx.TRANSPARENT_PEN); dc.SetBrush(wx.Brush(\"#087e86\")); dc.DrawRectangle(0,0,4,4)",
+        "        dc.SelectObject(wx.NullBitmap)",
+        "        self.Bind(wx.EVT_PAINT,self.paint); self.Bind(wx.EVT_SIZE,self.resize)",
+        "        button=wx.Button(self,label=\"Quit\",pos=(12,12)); button.Bind(wx.EVT_BUTTON,lambda event:parent.Close())",
+        "    def resize(self,event): self.Refresh(); event.Skip()",
+        "    def paint(self,event):",
+        "        dc=wx.AutoBufferedPaintDC(self); width,height=self.GetClientSize()",
+        "        for y in range(0,height,8):",
+        "            for x in range(0,width,8): dc.DrawBitmap(self.tile,x,y)",
+        "if __name__==\"__main__\":",
+        "    app=wx.App(False); frame=wx.Frame(None,title=\"Bitmap\",size=(400,300)); TiledPanel(frame); frame.Show(); app.MainLoop()"
+      ]
+    }
+  }
+}

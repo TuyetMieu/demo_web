@@ -1,0 +1,166 @@
+{
+  "lesson_code": "X01",
+  "sort_order": 59,
+  "module": "Module 10: Nâng cao — OOP, NumPy, pandas và biểu đồ",
+  "title": "PW1: quản lý lớp bằng collection và CLI",
+  "subtitle": "X01 · Lộ trình chính · 90 phút",
+  "estimated_minutes": 90,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "PW1: quản lý lớp bằng collection và CLI",
+    "subtitle": "X01 · Lộ trình chính · 90 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#X01",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Một hệ thống quản lý lớp cần nối hồ sơ, môn học và điểm bằng mã định danh. Bài này dùng collection và hàm để hiểu dữ liệu trước khi chuyển sang class."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "students={\"S01\":{\"name\":\"An\",\"dob\":\"2005-01-02\"}}\ncourses={\"PY\":{\"name\":\"Python\"}}\nmarks={\"PY\":{\"S01\":8.0}}\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Điểm nằm dưới cặp course_id/student_id; tên có thể trùng nhưng mã không trùng."
+        },
+        {
+          "n": 2,
+          "body": "DoB lưu ISO để kiểm tra bằng date."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Tên không là định danh ổn định."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Hai sinh viên cùng tên có phải là cùng một người không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Tên không là định danh ổn định."
+            },
+            {
+              "text": "Không, dùng mã để phân biệt",
+              "correct": true,
+              "detail": "Đúng."
+            },
+            {
+              "text": "Chỉ cần lấy người đầu",
+              "correct": false,
+              "detail": "Lấy người đầu có thể gán nhầm điểm."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi số lượng thành0; chương trình phải có collection rỗng hợp lệ, không hỏi hồ sơ thừa."
+      },
+      "scaffold": {
+        "template": "from datetime import date\nimport math\n{{slot1}}\ndef add_student(state,sid,name,dob):\n    if not sid.strip() or not name.strip() or sid in state[\"students\"]: raise ValueError(\"student\")\n    date.fromisoformat(dob); state[\"students\"][sid]=dict(name=name,dob=dob)\ndef add_course(state,cid,name):\n    if not cid.strip() or not name.strip() or cid in state[\"courses\"]: raise ValueError(\"course\")\n    state[\"courses\"][cid]=dict(name=name)\ndef set_mark(state,cid,sid,score):\n    if cid not in state[\"courses\"] or sid not in state[\"students\"]: raise ValueError(\"unknown id\")\n    if type(score) not in (int,float) or not math.isfinite(score) or not 0<=score<=10: raise ValueError(\"score\")\n    state[\"marks\"].setdefault(cid,{})[sid]=float(score)\ndef list_students(state): return [(sid,r[\"name\"],r[\"dob\"]) for sid,r in state[\"students\"].items()]\ndef list_courses(state): return [(cid,r[\"name\"]) for cid,r in state[\"courses\"].items()]\ndef course_marks(state,cid):\n    if cid not in state[\"courses\"]: raise ValueError(\"unknown course\")\n    return [(sid,r[\"name\"],state[\"marks\"].get(cid,{}).get(sid)) for sid,r in state[\"students\"].items()]\ndef collect(input_fn=input):\n    state=empty(); count=int(input_fn(\"So sinh vien: \"))\n    if count<0: raise ValueError(\"count\")\n    for _ in range(count): add_student(state,input_fn(\"ID: \"),input_fn(\"Ten: \"),input_fn(\"DoB YYYY-MM-DD: \"))\n    count=int(input_fn(\"So mon: \"))\n    if count<0: raise ValueError(\"count\")\n    for _ in range(count): add_course(state,input_fn(\"Ma mon: \"),input_fn(\"Ten mon: \"))\n    return state\ndef main():\n    state=collect()\n    while True:\n        {{slot2}}\n        if cmd==\"exit\": return\n        if cmd==\"students\": print(list_students(state))\n        elif cmd==\"courses\": print(list_courses(state))\n        elif cmd==\"marks\": print(course_marks(state,input(\"Ma mon: \")))\n        elif cmd==\"input\":\n            cid=input(\"Ma mon: \")\n            for sid in state[\"students\"]: set_mark(state,cid,sid,float(input(sid+\": \")))\n{{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "def empty(): return dict(students={},courses={},marks={})"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "cmd=input(\"students/courses/marks/input/exit: \")"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "if __name__==\"__main__\": main()"
+          }
+        ],
+        "bank": [
+          {
+            "label": "def empty(): return dict(students={},courses={},marks={})",
+            "slot": 1
+          },
+          {
+            "label": "cmd=input(\"students/courses/marks/input/exit: \")",
+            "slot": 2
+          },
+          {
+            "label": "students={\"S01\":{\"name\":\"An\",\"dob\":\"2005-01-02\"}}",
+            "slot": 2
+          },
+          {
+            "label": "if __name__==\"__main__\": main()",
+            "slot": 3
+          },
+          {
+            "label": "if __name__!=\"__main__\": main()",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Nhập số sinh viên2, hai bộ id/name/dob; nhập số môn1 và id/name; hiển thị bảng tương ứng."
+          },
+          {
+            "label": "B2",
+            "text": "Chọn PY và nhập điểm từng mã sinh viên; map cập nhật theo mã."
+          },
+          {
+            "label": "B3",
+            "text": "Liệt kê sinh viên, môn và điểm theo môn; thử hai người trùng tên."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Theo PW1 (SL97-98), tạo 1.student.mark.py dùng list/dict/tuple, không class. Nhập số lượng sinh viên/môn, hồ sơ id/name/dob và môn id/name; chọn môn nhập điểm cho mọi sinh viên. Cung cấp list_students/list_courses/course_marks. Mã trùng/DoB sai/điểm ngoài0..10 phải ValueError. Bản CLI có menu xem ba loại danh sách và exit. Commit/push vào fork của C03.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Đối chiếu từng chức năng PW1, chạy menu và bài input2sinh viên/1môn; push commit có file đúng tên lên fork. Lỗi nhập có thể nộp lại ở phiên luyện, không đánh dấu hoàn thành nếu app crash giữa luồng demo."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Điểm nằm dưới cặp course_id/student_id; tên có thể trùng nhưng mã không trùng. DoB lưu ISO để kiểm tra bằng date."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "from datetime import date\nimport math\ndef empty(): return dict(students={},courses={},marks={})\ndef add_student(state,sid,name,dob):\n    if not sid.strip() or not name.strip() or sid in state[\"students\"]: raise ValueError(\"student\")\n    date.fromisoformat(dob); state[\"students\"][sid]=dict(name=name,dob=dob)\ndef add_course(state,cid,name):\n    if not cid.strip() or not name.strip() or cid in state[\"courses\"]: raise ValueError(\"course\")\n    state[\"courses\"][cid]=dict(name=name)\ndef set_mark(state,cid,sid,score):\n    if cid not in state[\"courses\"] or sid not in state[\"students\"]: raise ValueError(\"unknown id\")\n    if type(score) not in (int,float) or not math.isfinite(score) or not 0<=score<=10: raise ValueError(\"score\")\n    state[\"marks\"].setdefault(cid,{})[sid]=float(score)\ndef list_students(state): return [(sid,r[\"name\"],r[\"dob\"]) for sid,r in state[\"students\"].items()]\ndef list_courses(state): return [(cid,r[\"name\"]) for cid,r in state[\"courses\"].items()]\ndef course_marks(state,cid):\n    if cid not in state[\"courses\"]: raise ValueError(\"unknown course\")\n    return [(sid,r[\"name\"],state[\"marks\"].get(cid,{}).get(sid)) for sid,r in state[\"students\"].items()]\ndef collect(input_fn=input):\n    state=empty(); count=int(input_fn(\"So sinh vien: \"))\n    if count<0: raise ValueError(\"count\")\n    for _ in range(count): add_student(state,input_fn(\"ID: \"),input_fn(\"Ten: \"),input_fn(\"DoB YYYY-MM-DD: \"))\n    count=int(input_fn(\"So mon: \"))\n    if count<0: raise ValueError(\"count\")\n    for _ in range(count): add_course(state,input_fn(\"Ma mon: \"),input_fn(\"Ten mon: \"))\n    return state\ndef main():\n    state=collect()\n    while True:\n        cmd=input(\"students/courses/marks/input/exit: \")\n        if cmd==\"exit\": return\n        if cmd==\"students\": print(list_students(state))\n        elif cmd==\"courses\": print(list_courses(state))\n        elif cmd==\"marks\": print(course_marks(state,input(\"Ma mon: \")))\n        elif cmd==\"input\":\n            cid=input(\"Ma mon: \")\n            for sid in state[\"students\"]: set_mark(state,cid,sid,float(input(sid+\": \")))\nif __name__==\"__main__\": main()\n"
+    }
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "lesson_code": "A19",
+  "sort_order": 70,
+  "module": "Module 11: MySQL, wxPython và đồ họa 3D",
+  "title": "MySQL INSERT, UPDATE, DELETE và transaction",
+  "subtitle": "A19 · Nâng cao · 45 phút",
+  "estimated_minutes": 45,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "MySQL INSERT, UPDATE, DELETE và transaction",
+    "subtitle": "A19 · Nâng cao · 45 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A19",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Thao tác dữ liệu cần chỉ rõ bản ghi nào thay đổi. Tham số SQL truyền dữ liệu riêng với câu lệnh; commit xác nhận thay đổi, rollback hủy transaction lỗi."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "cursor.execute(\"INSERT INTO students(id,name,dob) VALUES (%s,%s,%s)\",(\"S01\",\"An\",\"2005-01-02\"))\nconnection.commit()\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Placeholder của mysql.connector là %s; không dùng nối chuỗi hay f-string để nhét input vào SQL."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Xóa một dòng đầu\" — Không có giới hạn một dòng."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "DELETE FROM students thiếu WHERE làm gì?",
+          "options": [
+            {
+              "text": "Xóa một dòng đầu",
+              "correct": false,
+              "detail": "Không có giới hạn một dòng."
+            },
+            {
+              "text": "Xóa mọi dòng phù hợp quyền/ràng buộc",
+              "correct": true,
+              "detail": "Đúng: WHERE xác định phạm vi."
+            },
+            {
+              "text": "Chỉ xóa schema",
+              "correct": false,
+              "detail": "DROP TABLE mới bỏ bảng."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: WHERE xác định phạm vi."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Update id không có: rowcount0; không tự tạo bản ghi mới. Delete đang được marks tham chiếu phải thông báo ràng buộc."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Insert S01, SELECT kiểm tra đủ ba trường; thử tên có dấu nháy để chứng minh tham số."
+          },
+          {
+            "label": "B2",
+            "text": "Update theo id S01, giữ S02; quan sát rowcount."
+          },
+          {
+            "label": "B3",
+            "text": "Delete theo id, commit rồi reconnect kiểm tra; thử FK lỗi và rollback."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết Students(connection) với add(id,name,dob), rename(id,name), delete(id), all(); SQL tham số, write commit thành công/rollback nếu lỗi, luôn đóng cursor. all trả list tuple id,name,dob ORDER BY id. Không tự cascade xóa marks. Test trên MySQL pe_lab, không thay bằng SQLite rồi gọi là MySQL PASS."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Placeholder của mysql.connector là %s; không dùng nối chuỗi hay f-string để nhét input vào SQL."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "class Students:\n    def __init__(self,connection): self.connection=connection\n    def write(self,sql,params):\n        cursor=self.connection.cursor()\n        try:\n            cursor.execute(sql,params); count=cursor.rowcount; self.connection.commit(); return count\n        except Exception:\n            self.connection.rollback(); raise\n        finally: cursor.close()\n    def add(self,sid,name,dob):\n        return self.write(\"INSERT INTO students(id,name,dob) VALUES (%s,%s,%s)\",(sid,name,dob))\n    def rename(self,sid,name):\n        return self.write(\"UPDATE students SET name=%s WHERE id=%s\",(name,sid))\n    def delete(self,sid):\n        return self.write(\"DELETE FROM students WHERE id=%s\",(sid,))\n    def all(self):\n        cursor=self.connection.cursor()\n        try:\n            cursor.execute(\"SELECT id,name,dob FROM students ORDER BY id\"); return cursor.fetchall()\n        finally: cursor.close()\n",
+      "procedure": [
+        "class Students:",
+        "    def __init__(self,connection): self.connection=connection",
+        "    def write(self,sql,params):",
+        "        cursor=self.connection.cursor()",
+        "        try:",
+        "            cursor.execute(sql,params); count=cursor.rowcount; self.connection.commit(); return count",
+        "        except Exception:",
+        "            self.connection.rollback(); raise",
+        "        finally: cursor.close()",
+        "    def add(self,sid,name,dob):",
+        "        return self.write(\"INSERT INTO students(id,name,dob) VALUES (%s,%s,%s)\",(sid,name,dob))",
+        "    def rename(self,sid,name):",
+        "        return self.write(\"UPDATE students SET name=%s WHERE id=%s\",(name,sid))",
+        "    def delete(self,sid):",
+        "        return self.write(\"DELETE FROM students WHERE id=%s\",(sid,))",
+        "    def all(self):",
+        "        cursor=self.connection.cursor()",
+        "        try:",
+        "            cursor.execute(\"SELECT id,name,dob FROM students ORDER BY id\"); return cursor.fetchall()",
+        "        finally: cursor.close()"
+      ]
+    }
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "lesson_code": "A17",
+  "sort_order": 68,
+  "module": "Module 10: Nâng cao — OOP, NumPy, pandas và biểu đồ",
+  "title": "Chọn loại biểu đồ và quản lý Figure",
+  "subtitle": "A17 · Nâng cao · 90 phút",
+  "estimated_minutes": 90,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Chọn loại biểu đồ và quản lý Figure",
+    "subtitle": "A17 · Nâng cao · 90 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A17",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Loại biểu đồ phụ thuộc câu hỏi: xu hướng, quan hệ, phân phối hay trường hai chiều. Tạo nhiều hình không có nghĩa mỗi hình đều phù hợp với dữ liệu."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "fig,axes=plt.subplots(1,2)\naxes[0].plot([1,2,3],[4,7,6],label=\"Diem\")\naxes[0].legend()\naxes[1].hist([4,7,6],bins=[0,5,10])\nfig.tight_layout(); fig.savefig(\"report.png\"); plt.close(fig)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Histogram đếm theo khoảng; line nối các điểm có thứ tự."
+        },
+        {
+          "n": 2,
+          "body": "savefig trước close; Axes là vùng vẽ nằm trong Figure."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Luôn phù hợp\" — Tên sinh viên không tự có ý nghĩa liên tục."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Muốn thấy phân phối điểm, chỉ nối các điểm theo tên sinh viên có phù hợp không?",
+          "options": [
+            {
+              "text": "Luôn phù hợp",
+              "correct": false,
+              "detail": "Tên sinh viên không tự có ý nghĩa liên tục."
+            },
+            {
+              "text": "Không, histogram/box/violin có thể phù hợp hơn",
+              "correct": true,
+              "detail": "Đúng: chọn theo câu hỏi phân phối."
+            },
+            {
+              "text": "Phải dùng 3D",
+              "correct": false,
+              "detail": "3D không giải quyết câu hỏi này."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: chọn theo câu hỏi phân phối."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi limits/ticks/style, thêm annotation và alpha; nêu thay đổi nào chỉ trình bày, thay đổi nào có thể làm hiểu sai mức chênh lệch."
+      },
+      "scaffold": {
+        "template": "import numpy as np\nimport matplotlib\n{{slot1}}\nimport matplotlib.pyplot as plt\ndef gallery(folder):\n    from pathlib import Path\n    folder=Path(folder); folder.mkdir(parents=True,exist_ok=True)\n    x=np.arange(1,5); y=np.array([2,5,3,6])\n    fig,axes=plt.subplots(2,4,figsize=(12,6)); a=axes.ravel()\n    a[0].plot(x,y,\"o--\",label=\"Diem\",alpha=.7); a[0].legend(); a[0].set_xticks(x)\n    a[1].scatter(x,y); a[2].bar(x,y); a[3].barh(x,y)\n    a[4].axhline(3); a[5].axvline(2); a[6].fill(x,y); a[7].fill_between(x,y)\n    for ax,title in zip(a,[\"line\",\"scatter\",\"bar\",\"barh\",\"axhline\",\"axvline\",\"fill\",\"fill_between\"]): ax.set_title(title)\n    a[0].set(xlim=(0,5),ylim=(0,7),xlabel=\"Luot\",ylabel=\"Diem\"); a[0].annotate(\"Max\",(4,6))\n    fig.tight_layout(); fig.savefig(folder/\"one.png\",transparent=True); plt.close(fig)\n    fig,a=plt.subplots(1,3,figsize=(9,3)); a[0].hist(y,bins=[0,3,5,7]); a[1].boxplot(y); a[2].violinplot(y)\n    {{slot2}}\n    fig.tight_layout(); fig.savefig(folder/\"dist.png\",transparent=True); plt.close(fig)\n    X,Y=np.meshgrid(np.linspace(-2,2,12),np.linspace(-2,2,12)); Z=X**2+Y**2; U=-Y; V=X\n    fig,axes=plt.subplots(2,4,figsize=(12,6)); a=axes.ravel()\n    im=a[0].imshow(Z,cmap=\"viridis\",origin=\"lower\"); fig.colorbar(im,ax=a[0],label=\"Gia tri\")\n    a[1].pcolor(X,Y,Z); a[2].pcolormesh(X,Y,Z,shading=\"auto\")\n    contours=a[3].contour(X,Y,Z); a[3].clabel(contours)\n    a[4].contourf(X,Y,Z); a[5].arrow(0,0,1,1,head_width=.15)\n    a[6].quiver(X,Y,U,V); a[7].streamplot(X,Y,U,V)\n    for ax,title in zip(a,[\"imshow\",\"pcolor\",\"pcolormesh\",\"contour\",\"contourf\",\"arrow\",\"quiver\",\"streamplot\"]):\n        ax.set_title(title); ax.set_aspect(\"equal\")\n    fig.tight_layout(); fig.savefig(folder/\"fields.png\",transparent=True); plt.close(fig)\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "matplotlib.use(\"Agg\")"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "for ax,title in zip(a,[\"hist\",\"box\",\"violin\"]): ax.set_title(title)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return [str(folder/name) for name in (\"one.png\",\"dist.png\",\"fields.png\")]"
+          }
+        ],
+        "bank": [
+          {
+            "label": "matplotlib.use(\"Agg\")",
+            "slot": 1
+          },
+          {
+            "label": "axes[0].plot([1,2,3],[4,7,6],label=\"Diem\")",
+            "slot": 1
+          },
+          {
+            "label": "for ax,title in zip(a,[\"hist\",\"box\",\"violin\"]): ax.set_title(title)",
+            "slot": 2
+          },
+          {
+            "label": "axes[0].legend()",
+            "slot": 2
+          },
+          {
+            "label": "return [str(folder/name) for name in (\"one.png\",\"dist.png\",\"fields.png\")]",
+            "slot": 3
+          },
+          {
+            "label": "print([str(folder/name) for name in (\"one.png\",\"dist.png\",\"fields.png\")])",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tạo gallery1D: line/scatter/bar/barh/axhline/axvline/fill/fill_between; chú thích câu hỏi phù hợp cho mỗi loại."
+          },
+          {
+            "label": "B2",
+            "text": "Tạo histogram, boxplot, violinplot từ dữ liệu ít nhất ba giá trị khác nhau; so thông tin được giữ/mất."
+          },
+          {
+            "label": "B3",
+            "text": "Tạo gallery2D: imshow,pcolor,pcolormesh,contour,contourf,clabel,arrow,quiver,streamplot; colorbar có nhãn, aspect equal khi cần."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Nộp gallery.py tạo ba Figure: 2x4 loại1D; 1x3 phân phối; 2x4 ảnh/vector. Dùng cùng fixture được cấp trong đáp án mẫu, tự chọn màu khác nhưng giữ dữ liệu. Mỗi axes có title; có legend,ticks,limits,colorbar,annotation. Lưu PNG transparent và đóng mọi Figure. Giải thích ít nhất ba lựa chọn loại biểu đồ.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Chia ba phiên30phút. Xem cả ba ảnh, không cắt title/legend; đối chiếu bar heights [2,5,3,6], histogram counts [1,1,2]; có bài thử cla/clf/close phân biệt xóa axes/figure và đóng window; interactive show chạy riêng backend native, không coi Agg là test show."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Histogram đếm theo khoảng; line nối các điểm có thứ tự. savefig trước close; Axes là vùng vẽ nằm trong Figure."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import numpy as np\nimport matplotlib\nmatplotlib.use(\"Agg\")\nimport matplotlib.pyplot as plt\ndef gallery(folder):\n    from pathlib import Path\n    folder=Path(folder); folder.mkdir(parents=True,exist_ok=True)\n    x=np.arange(1,5); y=np.array([2,5,3,6])\n    fig,axes=plt.subplots(2,4,figsize=(12,6)); a=axes.ravel()\n    a[0].plot(x,y,\"o--\",label=\"Diem\",alpha=.7); a[0].legend(); a[0].set_xticks(x)\n    a[1].scatter(x,y); a[2].bar(x,y); a[3].barh(x,y)\n    a[4].axhline(3); a[5].axvline(2); a[6].fill(x,y); a[7].fill_between(x,y)\n    for ax,title in zip(a,[\"line\",\"scatter\",\"bar\",\"barh\",\"axhline\",\"axvline\",\"fill\",\"fill_between\"]): ax.set_title(title)\n    a[0].set(xlim=(0,5),ylim=(0,7),xlabel=\"Luot\",ylabel=\"Diem\"); a[0].annotate(\"Max\",(4,6))\n    fig.tight_layout(); fig.savefig(folder/\"one.png\",transparent=True); plt.close(fig)\n    fig,a=plt.subplots(1,3,figsize=(9,3)); a[0].hist(y,bins=[0,3,5,7]); a[1].boxplot(y); a[2].violinplot(y)\n    for ax,title in zip(a,[\"hist\",\"box\",\"violin\"]): ax.set_title(title)\n    fig.tight_layout(); fig.savefig(folder/\"dist.png\",transparent=True); plt.close(fig)\n    X,Y=np.meshgrid(np.linspace(-2,2,12),np.linspace(-2,2,12)); Z=X**2+Y**2; U=-Y; V=X\n    fig,axes=plt.subplots(2,4,figsize=(12,6)); a=axes.ravel()\n    im=a[0].imshow(Z,cmap=\"viridis\",origin=\"lower\"); fig.colorbar(im,ax=a[0],label=\"Gia tri\")\n    a[1].pcolor(X,Y,Z); a[2].pcolormesh(X,Y,Z,shading=\"auto\")\n    contours=a[3].contour(X,Y,Z); a[3].clabel(contours)\n    a[4].contourf(X,Y,Z); a[5].arrow(0,0,1,1,head_width=.15)\n    a[6].quiver(X,Y,U,V); a[7].streamplot(X,Y,U,V)\n    for ax,title in zip(a,[\"imshow\",\"pcolor\",\"pcolormesh\",\"contour\",\"contourf\",\"arrow\",\"quiver\",\"streamplot\"]):\n        ax.set_title(title); ax.set_aspect(\"equal\")\n    fig.tight_layout(); fig.savefig(folder/\"fields.png\",transparent=True); plt.close(fig)\n    return [str(folder/name) for name in (\"one.png\",\"dist.png\",\"fields.png\")]\n"
+    }
+  }
+}

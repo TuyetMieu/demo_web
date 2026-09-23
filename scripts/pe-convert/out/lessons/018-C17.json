@@ -1,0 +1,179 @@
+{
+  "lesson_code": "C17",
+  "sort_order": 18,
+  "module": "Module 3: List, dict, tuple và set",
+  "title": "Tên file thành hồ sơ người bơi",
+  "subtitle": "C17 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Tên file thành hồ sơ người bơi",
+    "subtitle": "C17 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C17",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Trước khi tính thời gian, bạn cần biết dữ liệu thuộc ai và môn nào. Chia công việc thành đọc tên file, đọc nội dung, tính toán và trình bày giúp tìm lỗi đúng chỗ."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "filename=\"An-19-50m-Free.txt\"\nname,age,distance,stroke=filename.removesuffix(\".txt\").split(\"-\")\nprint(name,int(age),distance,stroke)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Bốn trường có nghĩa khác nhau; age được chuyển int, distance giữ đơn vị m trong chuỗi."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Tính trung bình lượt bơi\" — Bước tính lượt không đọc tuổi."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Tên An-19-50m-Free.txt có lỗi tuổi thì sửa ở bước nào?",
+          "options": [
+            {
+              "text": "Tính trung bình lượt bơi",
+              "correct": false,
+              "detail": "Bước tính lượt không đọc tuổi."
+            },
+            {
+              "text": "Phân tích metadata",
+              "correct": true,
+              "detail": "Đúng: xác thực từng trường ngay sau tách tên file."
+            },
+            {
+              "text": "Vẽ biểu đồ",
+              "correct": false,
+              "detail": "Biểu đồ không sửa metadata."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: xác thực từng trường ngay sau tách tên file."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thay An bằng tên có dấu chấm; giải thích vì sao không split toàn tên theo dấu chấm."
+      },
+      "scaffold": {
+        "template": "import re\ndef parse_filename(filename):\n    {{slot1}}\n        raise ValueError(\"extension\")\n    parts=filename.removesuffix(\".txt\").split(\"-\")\n    if len(parts)!=4:\n        raise ValueError(\"fields\")\n    {{slot2}}\n    if not name or not stroke or not age_text.isdecimal():\n        raise ValueError(\"metadata\")\n    if not re.fullmatch(r\"[1-9]\\d*m\",distance):\n        raise ValueError(\"distance\")\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "if not filename.endswith(\".txt\"):"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "name,age_text,distance,stroke=parts"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return dict(name=name,age=int(age_text),distance=distance,stroke=stroke)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "if not filename.endswith(\".txt\"):",
+            "slot": 1
+          },
+          {
+            "label": "print(name,int(age),distance,stroke)",
+            "slot": 1
+          },
+          {
+            "label": "name,age_text,distance,stroke=parts",
+            "slot": 2
+          },
+          {
+            "label": "filename=\"An-19-50m-Free.txt\"",
+            "slot": 2
+          },
+          {
+            "label": "return dict(name=name,age=int(age_text),distance=distance,stroke=stroke)",
+            "slot": 3
+          },
+          {
+            "label": "print(dict(name=name,age=int(age_text),distance=distance,stroke=stroke))",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Sắp bốn nhiệm vụ metadata -> read -> mean -> format; nối đầu ra bước trước vào đầu vào bước sau."
+          },
+          {
+            "label": "B2",
+            "text": "Tách .txt bằng removesuffix rồi split; bốn thẻ tên nhận bốn giá trị."
+          },
+          {
+            "label": "B3",
+            "text": "Đổi age từ str sang int; thử tên thiếu trường và hiển thị lỗi có ngữ cảnh."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết parse_filename(filename) cho basename dạng name-age-distance-stroke.txt, các trường không chứa dấu -, tuổi int>=0, distance là số nguyên dương theo sau m, name/stroke không rỗng. Sai raise ValueError. Trả dict name,age,distance,stroke. Nộp sơ đồ phân rã pipeline bốn bước.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Sơ đồ có đầu vào/đầu ra từng bước; không lẫn tuổi với dữ liệu lượt bơi."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Bốn trường có nghĩa khác nhau; age được chuyển int, distance giữ đơn vị m trong chuỗi."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "import re\ndef parse_filename(filename):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "metadata (C17-K01)",
+          "call": "parse_filename('A.N-19-50m-Free.txt')",
+          "expect": "dict(name='A.N', age=19, distance='50m', stroke='Free')"
+        },
+        {
+          "name": "invalid (C17-K02)",
+          "call": "(exec('for bad in [\"An-19.txt\",\"An-x-50m-Free.txt\",\"An-19-0m-Free.txt\",\"An-19-50m-Free.csv\"]:\\n    try: parse_filename(bad)\\n    except ValueError: pass\\n    else: raise AssertionError(bad)\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "import re\ndef parse_filename(filename):\n    if not filename.endswith(\".txt\"):\n        raise ValueError(\"extension\")\n    parts=filename.removesuffix(\".txt\").split(\"-\")\n    if len(parts)!=4:\n        raise ValueError(\"fields\")\n    name,age_text,distance,stroke=parts\n    if not name or not stroke or not age_text.isdecimal():\n        raise ValueError(\"metadata\")\n    if not re.fullmatch(r\"[1-9]\\d*m\",distance):\n        raise ValueError(\"distance\")\n    return dict(name=name,age=int(age_text),distance=distance,stroke=stroke)\n"
+    }
+  }
+}

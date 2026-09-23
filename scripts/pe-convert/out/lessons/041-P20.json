@@ -1,0 +1,185 @@
+{
+  "lesson_code": "P20",
+  "sort_order": 41,
+  "module": "Module 8: GUI cơ bản, biểu đồ, test và capstone nhỏ",
+  "title": "Test trường hợp thường và trường hợp biên",
+  "subtitle": "P20 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Test trường hợp thường và trường hợp biên",
+    "subtitle": "P20 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P20",
+      "parser": "pe-convert/override",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Một hàm chạy được chưa chắc xử lý đúng mọi dữ liệu. Nếu quy tắc là điểm >= 5, test chỉ dùng8 sẽ không phát hiện hàm viết nhầm >5. Trường hợp biên giúp kiểm tra đúng điều kiện."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "def passed(score):\n    return score >= 5\n\nassert passed(4) is False\nassert passed(5) is True\nassert passed(8) is True"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Ba test bao gồm dưới ngưỡng, đúng ngưỡng và trên ngưỡng."
+        },
+        {
+          "n": 2,
+          "body": "Assert thất bại giúp chỉ ra khác biệt mong đợi, không chứng minh toàn bộ chương trình tuyệt đối đúng."
+        }
+      ],
+      "predict": {
+        "question": "Một hàm qua ba test có chắc không còn lỗi?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Không; test chỉ kiểm tra trường hợp đã bao phủ",
+            "detail": "Đúng: test là bằng chứng có phạm vi.",
+            "correct": true
+          },
+          {
+            "id": "b",
+            "title": "Không cần test nữa",
+            "detail": "Cần chọn thêm test khi có rủi ro chưa bao phủ.",
+            "correct": false
+          },
+          {
+            "id": "c",
+            "title": "Có",
+            "detail": "Vẫn có thể có đầu vào khác hoặc vi phạm hợp đồng.",
+            "correct": false
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu tất cả case đều >=5, bộ test chưa phát hiện được hàm luôn trảTrue."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Test nào bắt lỗi viết >5?",
+          "options": [
+            {
+              "text": "8",
+              "correct": false,
+              "detail": "8 True ở cả hai."
+            },
+            {
+              "text": "4",
+              "correct": false,
+              "detail": "4 vẫn False với cả hai cách."
+            },
+            {
+              "text": "5",
+              "correct": true,
+              "detail": "Đúng: hai cách khác nhau tại5."
+            }
+          ],
+          "correct": 2,
+          "explanation": "Đúng: hai cách khác nhau tại5."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu. Nhật ký thao tác bên dưới mô tả bản script gốc của PE; cách nghĩ giữ nguyên, chỉ khác phần vỏ hàm.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi ngưỡng thành10; đề nghị ba giá trị mới9,10,11 và giải thích vai trò từng giá trị."
+      },
+      "scaffold": {
+        "template": "def make_cases():\n    {{slot1}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "return [(4, False), (5, True), (8, True)]"
+          }
+        ],
+        "bank": [
+          {
+            "label": "return [(4, False), (5, True), (8, True)]",
+            "slot": 1
+          },
+          {
+            "label": "print([(4, False), (5, True), (8, True)])",
+            "slot": 1
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chạy hàm sai >5 với test8: Passed; UI ghi Chưa kiểm tra ranh giới, không gán Hoàn toàn đúng."
+          },
+          {
+            "label": "B2",
+            "text": "Thêm test5 kỳ vọngTrue; chạy: actualFalse -> Failed, highlight điều kiện."
+          },
+          {
+            "label": "B3",
+            "text": "Sửa >=5 rồi chạy cả ba: 3/3 qua; giữ lịch sử test phát hiện lỗi."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết make_cases() trả list các tuple (score, expected_bool) cho quy tắc >=5 với score trong[0,10]. Phải có ít nhất một số dưới5, đúng5, trên5; mọi expected phải đúng. Chấm khả năng phân biệt hàm đúng và ba mutant: >5, luônTrue, luônFalse. Không chỉ đếm số case.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "valid_boundary_cases(make_cases()) → true"
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Tìm điểm mà >= và > khác nhau."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Thêm một điểm dưới và một điểm trên để bắt hàm hằng."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Bộ mẫu: (4,False), (5,True), (8,True)."
+        }
+      ],
+      "starterCode": "def make_cases():\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "Bộ case đúng dạng và đúng quy tắc >= 5",
+          "call": "(exec('cases = make_cases()\\nassert all(isinstance(c, tuple) and len(c) == 2 for c in cases), cases\\nassert all(0 <= s <= 10 for s, _ in cases), cases\\nassert all((s >= 5) == e for s, e in cases), cases\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "Có đủ dưới 5, đúng 5 và trên 5",
+          "call": "(exec('cases = make_cases()\\nassert any(s < 5 for s, _ in cases), cases\\nassert any(s == 5 for s, _ in cases), cases\\nassert any(s > 5 for s, _ in cases), cases\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "Phân biệt được 3 mutant: > 5, luôn True, luôn False",
+          "call": "(exec('cases = make_cases()\\nmutants = [(\"> 5\", lambda s: s > 5), (\"luôn True\", lambda s: True),\\n           (\"luôn False\", lambda s: False)]\\nfor ten, mutant in mutants:\\n    assert any(mutant(s) != e for s, e in cases), \"không bắt được mutant \" + ten\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "def make_cases():\n    return [(4, False), (5, True), (8, True)]"
+    }
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "lesson_code": "A14",
+  "sort_order": 65,
+  "module": "Module 10: Nâng cao — OOP, NumPy, pandas và biểu đồ",
+  "title": "Đọc bảng số bằng NumPy",
+  "subtitle": "A14 · Nâng cao · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Đọc bảng số bằng NumPy",
+    "subtitle": "A14 · Nâng cao · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A14",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "File số đồng nhất có thể đọc thẳng vào array. File có header, kiểu hỗn hợp hoặc dữ liệu thiếu cần quy tắc đọc rõ ràng."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "data=np.loadtxt(\"scores.csv\",delimiter=\",\",skiprows=1,usecols=[1,2],ndmin=2)\nprint(data.shape,data.dtype)\nrecords=np.genfromtxt(\"mixed.csv\",delimiter=\",\",names=True,dtype=None,encoding=\"utf8\")\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "loadtxt phù hợp bảng số sạch; genfromtxt hỗ trợ tên cột và dữ liệu thiếu."
+        },
+        {
+          "n": 2,
+          "body": "recfromcsv trong phụ lục cũ không được dùng làm API mặc định ở NumPy mới."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Thứ1 và2\" — Index cột bắt đầu từ0."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "usecols=[1,2] chọn cột thứ mấy?",
+          "options": [
+            {
+              "text": "Thứ1 và2",
+              "correct": false,
+              "detail": "Index cột bắt đầu từ0."
+            },
+            {
+              "text": "Thứ2 và3",
+              "correct": true,
+              "detail": "Đúng."
+            },
+            {
+              "text": "Hai dòng đầu",
+              "correct": false,
+              "detail": "usecols là cột, không phải dòng."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: File chỉ một dòng: ndmin=2 giữ shape(1,2), tránh code sau hiểu thành vector."
+      },
+      "scaffold": {
+        "template": "import numpy as np\ndef load_scores(path):\n    {{slot1}}\ndef load_missing(path):\n    {{slot2}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "return np.loadtxt(path,delimiter=\",\",skiprows=1,usecols=[1,2],ndmin=2)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "return np.genfromtxt(path,delimiter=\",\",skip_header=1,filling_values=-1,ndmin=2)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "return np.loadtxt(path,delimiter=\",\",skiprows=1,usecols=[1,2],ndmin=2)",
+            "slot": 1
+          },
+          {
+            "label": "print(np.loadtxt(path,delimiter=\",\",skiprows=1,usecols=[1,2],ndmin=2))",
+            "slot": 1
+          },
+          {
+            "label": "return np.genfromtxt(path,delimiter=\",\",skip_header=1,filling_values=-1,ndmin=2)",
+            "slot": 2
+          },
+          {
+            "label": "print(np.genfromtxt(path,delimiter=\",\",skip_header=1,filling_values=-1,ndmin=2))",
+            "slot": 2
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tạo fixture id,math,python với A,8,6 và B,5,9; bỏ header và cột mã."
+          },
+          {
+            "label": "B2",
+            "text": "Xem shape=(2,2), dtype=float; dùng help(np.loadtxt) đối chiếu skiprows/usecols."
+          },
+          {
+            "label": "B3",
+            "text": "Thêm một giá trị thiếu; genfromtxt filling_values=-1 rồi phân biệt missing với điểm0."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết load_scores(path) đọc CSV có header và ba cột id,math,python; trả ndarray float chỉ hai cột số, luôn2D. Viết load_missing(path) đọc hai cột số, có header, ô rỗng thành-1 bằng genfromtxt. Các file có ít nhất một dòng dữ liệu.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Học viên đọc thêm fixture mixed bằng names=True,dtype=None, nêu tên field, shape và kiểu của từng field."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "loadtxt phù hợp bảng số sạch; genfromtxt hỗ trợ tên cột và dữ liệu thiếu. recfromcsv trong phụ lục cũ không được dùng làm API mặc định ở NumPy mới."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import numpy as np\ndef load_scores(path):\n    return np.loadtxt(path,delimiter=\",\",skiprows=1,usecols=[1,2],ndmin=2)\ndef load_missing(path):\n    return np.genfromtxt(path,delimiter=\",\",skip_header=1,filling_values=-1,ndmin=2)\n"
+    }
+  }
+}

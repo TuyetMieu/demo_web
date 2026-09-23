@@ -1,0 +1,120 @@
+{
+  "lesson_code": "C03",
+  "sort_order": 3,
+  "module": "Module 1: Môi trường, REPL và Git",
+  "title": "Git: lưu một thay đổi và gửi vào fork",
+  "subtitle": "C03 · Lộ trình chính · 40 phút",
+  "estimated_minutes": 40,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Git: lưu một thay đổi và gửi vào fork",
+    "subtitle": "C03 · Lộ trình chính · 40 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C03",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Commit lưu một mốc trong lịch sử; push gửi commit tới remote. Fork tạo bản repository dưới tài khoản của bạn để làm bài riêng."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "git clone <URL-fork-cua-ban> pe-lab\ncd pe-lab\ngit status\ngit add README.md\ngit commit -m \"First student commit\"\ngit push origin HEAD\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Sửa README trước git add."
+        },
+        {
+          "n": 2,
+          "body": "URL là fork của người học; không đẩy lên repository gốc của giảng viên."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Đã thấy ngay\" — Commit local chưa gửi tới remote."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Commit thành công nhưng chưa push. Bạn khác thấy commit trên GitHub chưa?",
+          "options": [
+            {
+              "text": "Chưa",
+              "correct": true,
+              "detail": "Đúng: commit mới còn ở local."
+            },
+            {
+              "text": "Đã thấy ngay",
+              "correct": false,
+              "detail": "Commit local chưa gửi tới remote."
+            },
+            {
+              "text": "Phải xóa rồi clone lại",
+              "correct": false,
+              "detail": "Chỉ cần push khi remote đúng."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: commit mới còn ở local."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thêm một dòng mục tiêu học; tạo commit thứ hai và giải thích vì sao push không thay thế commit."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Fork repository học tập do giảng viên chỉ định; xác nhận owner là tài khoản của mình."
+          },
+          {
+            "label": "B2",
+            "text": "Clone fork, sửa README với tên người học, xem git diff; tô sáng dòng mới."
+          },
+          {
+            "label": "B3",
+            "text": "Add, commit, kiểm tra log; push rồi so commit hash ở local và trên fork."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Theo PW0, fork repository môn học được giảng viên xác nhận (slide nêu SonTG/pp2022), clone, sửa README, commit First student commit, push vào fork. Nộp URL fork, hai hash commit, git remote -v và diff. Không cần cung cấp token/mật khẩu."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Sửa README trước git add. URL là fork của người học; không đẩy lên repository gốc của giảng viên."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "procedure": [
+        "Fork qua giao diện GitHub; clone URL fork; sửa README; git add README.md; git commit -m \"First student commit\"; git push origin HEAD. Xác nhận origin thuộc tài khoản học viên và hash commit remote bằng local."
+      ]
+    }
+  }
+}

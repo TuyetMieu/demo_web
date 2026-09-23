@@ -1,0 +1,178 @@
+{
+  "lesson_code": "T14",
+  "sort_order": 58,
+  "module": "Module 9: Tkinter chuyên sâu",
+  "title": "Thiết kế lặp và factory cho thành phần GUI",
+  "subtitle": "T14 · Lộ trình chính · 45 phút",
+  "estimated_minutes": 45,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Thiết kế lặp và factory cho thành phần GUI",
+    "subtitle": "T14 · Lộ trình chính · 45 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#T14",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Khi yêu cầu đổi, một thiết kế dễ sửa cần giữ hợp đồng giữa các phần. Factory chọn loại component; không nên thêm pattern nếu một hàm đơn giản đã đủ."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "def make_validator(kind):\n    if kind==\"name\": return lambda value: bool(value.strip())\n    if kind==\"score\": return score_valid\n    raise ValueError(kind)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Client chỉ biết validator nhận text và trả bool."
+        },
+        {
+          "n": 2,
+          "body": "Khi thêm loại mới, kiểm thử hợp đồng cũ vẫn phải chạy."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Pattern có chi phí và không là mục tiêu tự thân."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Có cần biến mọi hàm thành factory để code tốt hơn không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Pattern có chi phí và không là mục tiêu tự thân."
+            },
+            {
+              "text": "Không, chỉ dùng khi cần chọn nhiều biến thể",
+              "correct": true,
+              "detail": "Đúng: lý do sử dụng phải xuất phát từ yêu cầu."
+            },
+            {
+              "text": "Factory thay thế test",
+              "correct": false,
+              "detail": "Vẫn cần kiểm tra hành vi."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: lý do sử dụng phải xuất phát từ yêu cầu."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi yêu cầu từ điểm 0..10 thành tên khóa học không rỗng; xác định test nào thay, test nào phải giữ."
+      },
+      "scaffold": {
+        "template": "import math\ndef score_valid(text):\n    {{slot1}}\n    except ValueError: return False\n    {{slot2}}\ndef make_validator(kind):\n    if kind==\"name\": return lambda text: bool(text.strip())\n    {{slot3}}\n    raise ValueError(kind)\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "try: value=float(text)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "return math.isfinite(value) and 0<=value<=10"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "if kind==\"score\": return score_valid"
+          }
+        ],
+        "bank": [
+          {
+            "label": "try: value=float(text)",
+            "slot": 1
+          },
+          {
+            "label": "def make_validator(kind):",
+            "slot": 1
+          },
+          {
+            "label": "return math.isfinite(value) and 0<=value<=10",
+            "slot": 2
+          },
+          {
+            "label": "return math.isfinite(value) and 0<value<=10",
+            "slot": 2
+          },
+          {
+            "label": "if kind==\"score\": return score_valid",
+            "slot": 3
+          },
+          {
+            "label": "if kind!=\"score\": return score_valid",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Vòng 1: form chỉ có tên, tiêu chí tên không rỗng; test và thu phản hồi."
+          },
+          {
+            "label": "B2",
+            "text": "Vòng 2: thêm điểm; tách validation khỏi widget bằng factory; giao diện hiển thị lỗi gần đúng field."
+          },
+          {
+            "label": "B3",
+            "text": "Vòng 3: yêu cầu giữ input sau lỗi; viết acceptance case rồi cập nhật callback."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết make_validator(kind) trả callable cho name (strip không rỗng) và score (float hữu hạn 0..10), kind lạ raise ValueError. Nộp hai phiên bản wireframe form, một phản hồi cụ thể, thay đổi đáp ứng phản hồi và test hồi quy. Chứng minh form không xóa dữ liệu khi validation sai.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Rubric: yêu cầu ban đầu rõ; phản hồi có nguồn/tình huống; before/after đáp ứng đúng phản hồi; regression case giữ input sai. Thiếu một trong bốn thì chưa hoàn thành phần thiết kế lặp."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Client chỉ biết validator nhận text và trả bool. Khi thêm loại mới, kiểm thử hợp đồng cũ vẫn phải chạy."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "import math\ndef score_valid(text):\n    # Viết lời giải của bạn ở đây\n    pass\ndef make_validator(kind):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "factory (T14-K01)",
+          "call": "(exec('assert make_validator(\"name\")(\"An\") and not make_validator(\"name\")(\" \")\\nassert make_validator(\"score\")(\"0\") and make_validator(\"score\")(\"10\")\\nassert not make_validator(\"score\")(\"nan\") and not make_validator(\"score\")(\"11\")\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "import math\ndef score_valid(text):\n    try: value=float(text)\n    except ValueError: return False\n    return math.isfinite(value) and 0<=value<=10\ndef make_validator(kind):\n    if kind==\"name\": return lambda text: bool(text.strip())\n    if kind==\"score\": return score_valid\n    raise ValueError(kind)\n"
+    }
+  }
+}

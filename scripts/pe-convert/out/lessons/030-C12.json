@@ -1,0 +1,170 @@
+{
+  "lesson_code": "C12",
+  "sort_order": 30,
+  "module": "Module 6: File, ngoại lệ và dữ liệu lâu dài",
+  "title": "Nhánh elif và input trong chương trình CLI",
+  "subtitle": "C12 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Nhánh elif và input trong chương trình CLI",
+    "subtitle": "C12 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C12",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Một chuỗi if/elif chọn nhánh đầu tiên đúng. input trả chuỗi, nên cần đổi kiểu và xử lý lỗi trước khi phân loại."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "score=8\nif score>=8:\n    label=\"Gioi\"\nelif score>=5:\n    label=\"Dat\"\nelse:\n    label=\"Chua dat\"\nprint(label)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "8 thỏa hai ngưỡng nhưng chỉ nhánh đầu chạy."
+        },
+        {
+          "n": 2,
+          "body": "Các ngưỡng này là quy ước bài tập, không phải quy chế USTH."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Gioi\" — Nhánh đầu đã nhận điểm 9."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Nếu kiểm tra >=5 trước >=8 thì điểm 9 ra gì?",
+          "options": [
+            {
+              "text": "Gioi",
+              "correct": false,
+              "detail": "Nhánh đầu đã nhận điểm 9."
+            },
+            {
+              "text": "Dat",
+              "correct": true,
+              "detail": "Đúng: thứ tự điều kiện làm thay đổi kết quả."
+            },
+            {
+              "text": "Cả hai",
+              "correct": false,
+              "detail": "elif không chạy tiếp sau nhánh đúng."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: thứ tự điều kiện làm thay đổi kết quả."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Nhập \"abc\", \"nan\" và \"11\"; phân biệt lỗi chuyển kiểu với giá trị ngoài hợp đồng."
+      },
+      "scaffold": {
+        "template": "import math\ndef classify(text):\n    try:\n        {{slot1}}\n    except ValueError:\n        return \"Invalid\"\n    if math.isfinite(score) and 0<=score<=10:\n        if score>=8:\n            return \"Gioi\"\n        elif score>=5:\n            {{slot2}}\n        else:\n            return \"Chua dat\"\n    return \"Invalid\"\ndef main():\n    print(classify(input(\"Diem: \")))\nif __name__==\"__main__\":\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "score=float(text)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "return \"Dat\""
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "main()"
+          }
+        ],
+        "bank": [
+          {
+            "label": "score=float(text)",
+            "slot": 1
+          },
+          {
+            "label": "score=8",
+            "slot": 1
+          },
+          {
+            "label": "return \"Dat\"",
+            "slot": 2
+          },
+          {
+            "label": "print(\"Dat\")",
+            "slot": 2
+          },
+          {
+            "label": "main()",
+            "slot": 3
+          },
+          {
+            "label": "if score>=8:",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Nhập \"8\" qua input; hiện kiểu str rồi float sau chuyển đổi."
+          },
+          {
+            "label": "B2",
+            "text": "Thử 4.9,5,7.9,8; tô đúng một nhánh của chuỗi if/elif."
+          },
+          {
+            "label": "B3",
+            "text": "Thêm nhánh ngoài cùng kiểm tra dữ liệu hợp lệ; nhánh trong mới phân loại."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết classify(text) trả Gioi nếu 8..10, Dat nếu 5..<8, Chua dat nếu 0..<5, Invalid nếu không phải số hữu hạn trong 0..10. Viết main() gọi input(\"Diem: \"), rồi print nhãn; chỉ chạy main khi file là __main__.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Chạy file qua CLI: nhập 8, stdout gồm prompt Diem: và Gioi; import module không hỏi input."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "8 thỏa hai ngưỡng nhưng chỉ nhánh đầu chạy. Các ngưỡng này là quy ước bài tập, không phải quy chế USTH."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import math\ndef classify(text):\n    try:\n        score=float(text)\n    except ValueError:\n        return \"Invalid\"\n    if math.isfinite(score) and 0<=score<=10:\n        if score>=8:\n            return \"Gioi\"\n        elif score>=5:\n            return \"Dat\"\n        else:\n            return \"Chua dat\"\n    return \"Invalid\"\ndef main():\n    print(classify(input(\"Diem: \")))\nif __name__==\"__main__\":\n    main()\n"
+    }
+  }
+}

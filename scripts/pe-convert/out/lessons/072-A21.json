@@ -1,0 +1,137 @@
+{
+  "lesson_code": "A21",
+  "sort_order": 72,
+  "module": "Module 11: MySQL, wxPython và đồ họa 3D",
+  "title": "wxPython: cửa sổ và các nhóm control",
+  "subtitle": "A21 · Nâng cao · 45 phút",
+  "estimated_minutes": 45,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "wxPython: cửa sổ và các nhóm control",
+    "subtitle": "A21 · Nâng cao · 45 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A21",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "wxPython là toolkit khác với Tkinter: cùng nhu cầu form nhưng tên API, bố cục và cách nối event khác. Mỗi ứng dụng wx có một wx.App điều phối vòng lặp."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "app=wx.App(False)\nframe=wx.Frame(None,title=\"PE wx\",size=(420,300))\nbutton.Bind(wx.EVT_BUTTON,on_click)\nframe.Show()\napp.MainLoop()\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Bind đăng ký xử lý event."
+        },
+        {
+          "n": 2,
+          "body": "Sizer phân chia không gian giống vai trò layout manager nhưng không dùng API grid của Tk."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Hai toolkit có hợp đồng khác."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Có thể thay ttk.Button bằng wx.Button mà giữ mọi API bố cục Tk không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Hai toolkit có hợp đồng khác."
+            },
+            {
+              "text": "Không, phải dùng parent/event/sizer của wx",
+              "correct": true,
+              "detail": "Đúng."
+            },
+            {
+              "text": "Chỉ đổi import",
+              "correct": false,
+              "detail": "Import không chuyển API."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: So form Tk với form wx cùng chức năng; chỉ rõ callback command so với Bind và Frame/LabelFrame so với Panel/StaticBox."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Cài wxPython trong môi trường riêng bằng pip, ghi wx.version và thử frame tối thiểu; mainloop chạy trên main thread."
+          },
+          {
+            "label": "B2",
+            "text": "Thêm TextCtrl multiline, Button ghi log, CheckBox, RadioBox và StaticBox chứa label; dùng BoxSizer/StaticBoxSizer."
+          },
+          {
+            "label": "B3",
+            "text": "Thêm menu File/Exit, resize và kiểm tra TextCtrl giãn theo sizer."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết Frame wx title PE wx với TextCtrl multiline, nút Print append Clicked+newline, CheckBox Reminder False, RadioBox Basic/Advanced mặc định Basic, StaticBox Info chứa label Ready, menu File/Exit. TextCtrl giãn khi resize. build_frame() trả frame và dict controls, không tự gọi MainLoop khi import."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Bind đăng ký xử lý event. Sizer phân chia không gian giống vai trò layout manager nhưng không dùng API grid của Tk."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import wx\ndef build_frame():\n    frame=wx.Frame(None,title=\"PE wx\",size=(420,360)); panel=wx.Panel(frame)\n    sizer=wx.BoxSizer(wx.VERTICAL)\n    text=wx.TextCtrl(panel,style=wx.TE_MULTILINE); sizer.Add(text,1,wx.EXPAND|wx.ALL,8)\n    button=wx.Button(panel,label=\"Print\"); sizer.Add(button,0,wx.ALL,8)\n    button.Bind(wx.EVT_BUTTON,lambda event:text.AppendText(\"Clicked\\n\"))\n    check=wx.CheckBox(panel,label=\"Reminder\"); check.SetValue(False); sizer.Add(check,0,wx.ALL,8)\n    radio=wx.RadioBox(panel,label=\"Level\",choices=[\"Basic\",\"Advanced\"]); sizer.Add(radio,0,wx.ALL,8)\n    group=wx.StaticBoxSizer(wx.VERTICAL,panel,\"Info\")\n    group.Add(wx.StaticText(group.GetStaticBox(),label=\"Ready\"),0,wx.ALL,8); sizer.Add(group,0,wx.EXPAND|wx.ALL,8)\n    panel.SetSizer(sizer)\n    bar=wx.MenuBar(); menu=wx.Menu(); item=menu.Append(wx.ID_EXIT,\"Exit\"); bar.Append(menu,\"File\"); frame.SetMenuBar(bar)\n    frame.Bind(wx.EVT_MENU,lambda event:frame.Close(),item)\n    return frame,dict(text=text,button=button,check=check,radio=radio)\nif __name__==\"__main__\":\n    app=wx.App(False); frame,_=build_frame(); frame.Show(); app.MainLoop()\n",
+      "procedure": [
+        "import wx",
+        "def build_frame():",
+        "    frame=wx.Frame(None,title=\"PE wx\",size=(420,360)); panel=wx.Panel(frame)",
+        "    sizer=wx.BoxSizer(wx.VERTICAL)",
+        "    text=wx.TextCtrl(panel,style=wx.TE_MULTILINE); sizer.Add(text,1,wx.EXPAND|wx.ALL,8)",
+        "    button=wx.Button(panel,label=\"Print\"); sizer.Add(button,0,wx.ALL,8)",
+        "    button.Bind(wx.EVT_BUTTON,lambda event:text.AppendText(\"Clicked\\n\"))",
+        "    check=wx.CheckBox(panel,label=\"Reminder\"); check.SetValue(False); sizer.Add(check,0,wx.ALL,8)",
+        "    radio=wx.RadioBox(panel,label=\"Level\",choices=[\"Basic\",\"Advanced\"]); sizer.Add(radio,0,wx.ALL,8)",
+        "    group=wx.StaticBoxSizer(wx.VERTICAL,panel,\"Info\")",
+        "    group.Add(wx.StaticText(group.GetStaticBox(),label=\"Ready\"),0,wx.ALL,8); sizer.Add(group,0,wx.EXPAND|wx.ALL,8)",
+        "    panel.SetSizer(sizer)",
+        "    bar=wx.MenuBar(); menu=wx.Menu(); item=menu.Append(wx.ID_EXIT,\"Exit\"); bar.Append(menu,\"File\"); frame.SetMenuBar(bar)",
+        "    frame.Bind(wx.EVT_MENU,lambda event:frame.Close(),item)",
+        "    return frame,dict(text=text,button=button,check=check,radio=radio)",
+        "if __name__==\"__main__\":",
+        "    app=wx.App(False); frame,_=build_frame(); frame.Show(); app.MainLoop()"
+      ]
+    }
+  }
+}

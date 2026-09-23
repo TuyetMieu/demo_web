@@ -1,0 +1,128 @@
+{
+  "lesson_code": "C02",
+  "sort_order": 2,
+  "module": "Module 1: Môi trường, REPL và Git",
+  "title": "REPL, script và notebook: trạng thái đến từ đâu?",
+  "subtitle": "C02 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "REPL, script và notebook: trạng thái đến từ đâu?",
+    "subtitle": "C02 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C02",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Notebook giữ biến trong kernel giữa các cell. Một notebook chạy đúng phải tái tạo được kết quả khi khởi động kernel mới và chạy từ đầu."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "# Cell 1\ncount = 2\n# Cell 2\ncount += 1\nprint(count)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Chạy cell 1 rồi 2 cho 3."
+        },
+        {
+          "n": 2,
+          "body": "Chạy lại riêng cell 2 cho 4."
+        },
+        {
+          "n": 3,
+          "body": "Script chạy lại từ đầu vẫn cho 3."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"In 4\" — Giá trị cũ đã mất."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Sau Restart Kernel, chạy ngay cell 2 thì sao?",
+          "options": [
+            {
+              "text": "In 4",
+              "correct": false,
+              "detail": "Giá trị cũ đã mất."
+            },
+            {
+              "text": "NameError",
+              "correct": true,
+              "detail": "Đúng: count chưa tồn tại trong kernel mới."
+            },
+            {
+              "text": "Tự chạy cell 1",
+              "correct": false,
+              "detail": "Kernel không tự sắp thứ tự cell."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: count chưa tồn tại trong kernel mới."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi count ban đầu thành 10, dự đoán kết quả khi chạy từ đầu và khi chỉ chạy cell 2."
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chạy phép tính 2+3 trong REPL rồi trong script không có print; vùng output cho thấy REPL hiện 5, script không tự hiện."
+          },
+          {
+            "label": "B2",
+            "text": "Tạo notebook trong VS Code, chọn kernel .venv; chạy cell 1, cell 2 hai lần và lưu dự đoán 3 rồi 4."
+          },
+          {
+            "label": "B3",
+            "text": "Restart + Run All; counter hiển thị 3; lưu notebook với kết quả sạch."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Nộp counter.ipynb có cell khởi tạo base=7, cell tính total=base+5, cell in total; thêm Markdown giải thích state. Restart + Run All phải in 12. Tạo counter.py tương đương và chụp lỗi khi chạy cell tính trước khởi tạo."
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Chạy cell 1 rồi 2 cho 3. Chạy lại riêng cell 2 cho 4. Script chạy lại từ đầu vẫn cho 3."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "procedure": [
+        "Cell 1: base = 7",
+        "Cell 2: total = base + 5",
+        "Cell 3: print(total)",
+        "Script chứa ba câu theo đúng thứ tự.",
+        "Sau restart, cell 2 trước cell 1 phát sinh NameError. Kết quả đúng sau Run All là 12."
+      ]
+    }
+  }
+}

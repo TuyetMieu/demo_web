@@ -1,0 +1,205 @@
+{
+  "lesson_code": "P21",
+  "sort_order": 77,
+  "module": "Module 12: Thread, tiến trình, đồng thời và mạng",
+  "title": "Thread và queue: nhận kết quả việc nền",
+  "subtitle": "P21 · Nâng cao · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Thread và queue: nhận kết quả việc nền",
+    "subtitle": "P21 · Nâng cao · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P21",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Một việc lưu dữ liệu có thể kéo dài. Worker làm việc và gửi kết quả qua queue; giao diện lấy kết quả rồi cập nhật trên luồng UI. Bài này học đường đi dữ liệu, không thi đua tốc độ."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "from threading import Thread\nfrom queue import Queue\nq = Queue()\ndef work():\n    q.put(\"Da luu\")\nt = Thread(target=work)\nt.start()\nt.join()\nmessage = q.get()"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "start tạo luồng chạy; gọi run trực tiếp không tạo luồng mới."
+        },
+        {
+          "n": 2,
+          "body": "join trong harness giúp test đợi xong; không đặt join chặn callback UI thật."
+        },
+        {
+          "n": 3,
+          "body": "Demo hiển thị timeline luồng học riêng, không khẳng định thứ tự scheduler thực."
+        }
+      ],
+      "predict": {
+        "question": "Worker nên cập nhật UI của app theo thiết kế này bằng cách nào?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Gọi widget tùy ý từ worker",
+            "detail": "Không coi đây là cơ chế an toàn mặc định.",
+            "correct": false
+          },
+          {
+            "id": "b",
+            "title": "Dùng sleep thật lâu trong click",
+            "detail": "sleep trong click làm UI bị chặn.",
+            "correct": false
+          },
+          {
+            "id": "c",
+            "title": "Gửi message, UI thread nhận và cập nhật",
+            "detail": "Đúng: tách kết quả worker và cập nhật UI.",
+            "correct": true
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu chỉ gọi run: kết quả có thể đúng nhưng chưa đạt mục tiêu tạo thread. Bộ chấm phải kiểm tra hành vi luồng riêng."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Lệnh nào khởi động thread mới?",
+          "options": [
+            {
+              "text": "t.run()",
+              "correct": false,
+              "detail": "run trực tiếp chạy như lời gọi thường."
+            },
+            {
+              "text": "t.start()",
+              "correct": true,
+              "detail": "Đúng: start khởi động luồng."
+            },
+            {
+              "text": "q.get()",
+              "correct": false,
+              "detail": "get lấy dữ liệu từ queue."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: start khởi động luồng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi thông báo worker; dự đoán dữ liệu nhận, không dự đoán thời gian chính xác."
+      },
+      "scaffold": {
+        "template": "from threading import Thread\nfrom queue import Queue\n\ndef run_job(values):\n    {{slot1}}\n    def work():\n        q.put([value * value for value in values])\n    thread = Thread(target=work)\n    {{slot2}}\n    thread.join()\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "q = Queue()"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "thread.start()"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return q.get()"
+          }
+        ],
+        "bank": [
+          {
+            "label": "q = Queue()",
+            "slot": 1
+          },
+          {
+            "label": "t = Thread(target=work)",
+            "slot": 1
+          },
+          {
+            "label": "thread.start()",
+            "slot": 2
+          },
+          {
+            "label": "from threading import Thread",
+            "slot": 2
+          },
+          {
+            "label": "return q.get()",
+            "slot": 3
+          },
+          {
+            "label": "print(q.get())",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Đặt target=work chưa gọi; timeline có Main và Worker, worker chưa chạy."
+          },
+          {
+            "label": "B2",
+            "text": "Bấm Start: worker gửi \"Da luu\" vào q, queue0->1; trace minh họa gắn nhãn mô hình."
+          },
+          {
+            "label": "B3",
+            "text": "Trong harness join xong rồi get: queue1->0, message=\"Da luu\"; trong UI dùng poll/after thay join chặn."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết run_job(values) dùng một Thread và Queue, worker tính bình phương từng số nguyên rồi gửi list; hàm chờ hoàn tất và trả list theo thứ tự đầu vào. Đây là harness đồng bộ kiểm tra trao đổi kết quả, chưa phải callback UI. Đầu vào tối đa100 phần tử.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "run_job([2,3]) → [4, 9]"
+          },
+          {
+            "label": "Người chấm xem 1",
+            "value": "TH21: instrument Thread.start và Queue.put/get; worker có thread id khác luồng gọi; test hành vi số học riêng không chứng minh điểm này."
+          },
+          {
+            "label": "Người chấm xem 2",
+            "value": "TH21-UI: khi tích hợp GUI, công việc giả lập2s không chặn click/hủy; xử lý exception worker và không cập nhật widget sau đóng cửa sổ."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Worker và nơi nhận cần một kênh truyền dữ liệu."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Dùng Queue.put/get, Thread.start và join trong hàm harness."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Worker gửi cả list vào queue; sau join, return q.get()."
+        }
+      ],
+      "solutionCode": "from threading import Thread\nfrom queue import Queue\n\ndef run_job(values):\n    q = Queue()\n    def work():\n        q.put([value * value for value in values])\n    thread = Thread(target=work)\n    thread.start()\n    thread.join()\n    return q.get()"
+    }
+  }
+}

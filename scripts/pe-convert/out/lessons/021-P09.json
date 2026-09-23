@@ -1,0 +1,223 @@
+{
+  "lesson_code": "P09",
+  "sort_order": 21,
+  "module": "Module 4: Vòng lặp và biến tích lũy",
+  "title": "While, sentinel và điều kiện dừng",
+  "subtitle": "P09 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "While, sentinel và điều kiện dừng",
+    "subtitle": "P09 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P09",
+      "parser": "pe-convert/override",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Một lô nhập điểm dùng -1 để báo đã kết thúc. Điểm sau dấu này không thuộc lô. Vòng while cần điều kiện tiếp tục và một cách tiến tới lúc dừng."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "values = [6, 8, -1, 9]\ni = 0\ntotal = 0\nwhile i < len(values) and values[i] != -1:\n    total += values[i]\n    i += 1"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Kiểm tra chỉ số trước để không đọc ngoài list."
+        },
+        {
+          "n": 2,
+          "body": "Lượt đầu cộng 6, lượt sau cộng 8; khi thấy -1 dừng nên 9 không được cộng."
+        },
+        {
+          "n": 3,
+          "body": "and đánh giá từ trái sang phải, vế sau không cần chạy khi vế trước False."
+        }
+      ],
+      "predict": {
+        "question": "Nếu quên i += 1?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Tự tăng i",
+            "detail": "while không tự tăng biến chỉ số.",
+            "correct": false
+          },
+          {
+            "id": "b",
+            "title": "Luôn dừng ngay",
+            "detail": "Điều kiện không tự đổi sang False.",
+            "correct": false
+          },
+          {
+            "id": "c",
+            "title": "Có thể lặp mãi ở phần tử đầu",
+            "detail": "Đúng: i không tiến nên vẫn đọc cùng phần tử.",
+            "correct": true
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu IndexError ở list rỗng: bạn có đọc phần tử trước khi kiểm tra chỉ số không?"
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "total cuối là gì?",
+          "options": [
+            {
+              "text": "23",
+              "correct": false,
+              "detail": "Bạn đã cộng cả dữ liệu sau dấu kết thúc."
+            },
+            {
+              "text": "14",
+              "correct": true,
+              "detail": "Đúng: chỉ cộng 6 và 8."
+            },
+            {
+              "text": "13",
+              "correct": false,
+              "detail": "-1 là dấu kết thúc, không là điểm để cộng."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: chỉ cộng 6 và 8."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu. Nhật ký thao tác bên dưới mô tả bản script gốc của PE; cách nghĩ giữ nguyên, chỉ khác phần vỏ hàm.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi thành [-1,6] và []; cả hai total=0. Giải thích vì sao cần cả kiểm tra hết list."
+      },
+      "scaffold": {
+        "template": "def sum_before_sentinel(values):\n    \"\"\"Cộng các giá trị trước -1 đầu tiên bằng vòng while.\"\"\"\n    {{slot1}}\n    result = 0\n    while i < len(values) and values[i] != -1:\n        {{slot2}}\n        i += 1\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "i = 0"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "result += values[i]"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return result"
+          }
+        ],
+        "bank": [
+          {
+            "label": "i = 0",
+            "slot": 1
+          },
+          {
+            "label": "values = [6, 8, -1, 9]",
+            "slot": 1
+          },
+          {
+            "label": "result += values[i]",
+            "slot": 2
+          },
+          {
+            "label": "result = values[i]",
+            "slot": 2
+          },
+          {
+            "label": "return result",
+            "slot": 3
+          },
+          {
+            "label": "print(result)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Đặt điều kiện i < len(values) ở vế trái and; chạy kiểm tra i=0 hợp lệ, rồi đọc values[0]."
+          },
+          {
+            "label": "B2",
+            "text": "Đặt cộng tổng trước tăng i; trace lượt 1 [i=0,value=6,total=6], lượt 2 [i=1,value=8,total=14]."
+          },
+          {
+            "label": "B3",
+            "text": "Chạy kiểm tra i=2: value=-1, condition=False; con trỏ ra sau while, total giữ14."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết hàm sum_before_sentinel(values): values là list số nguyên không âm, có thể có -1 làm sentinel. Dùng while cộng các giá trị trước -1 đầu tiên, hoặc toàn bộ nếu không có -1. Trả về int; list rỗng cho 0. Mục tiêu học công khai là vòng while, nên bài chặn for.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "result → 7"
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Xác định hai lý do phải dừng."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Kiểm tra i trong phạm vi trước khi đọc values[i]."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Điều kiện i < len(values) and values[i] != -1; tăng i mỗi lượt."
+        }
+      ],
+      "starterCode": "def sum_before_sentinel(values):\n    \"\"\"Cộng các giá trị trước -1 đầu tiên bằng vòng while.\"\"\"\n    # Viết lời giải của bạn ở đây\n",
+      "tests": [
+        {
+          "name": "Ca mẫu PE: 3, 4, -1, 9",
+          "call": "sum_before_sentinel([3, 4, -1, 9])",
+          "expect": "7"
+        },
+        {
+          "name": "Không có sentinel thì cộng hết",
+          "call": "sum_before_sentinel([3, 4, 9])",
+          "expect": "16"
+        },
+        {
+          "name": "List rỗng không IndexError",
+          "call": "sum_before_sentinel([])",
+          "expect": "0"
+        },
+        {
+          "name": "Sentinel ngay đầu",
+          "call": "sum_before_sentinel([-1, 5])",
+          "expect": "0"
+        }
+      ],
+      "solutionCode": "def sum_before_sentinel(values):\n    \"\"\"Cộng các giá trị trước -1 đầu tiên bằng vòng while.\"\"\"\n    i = 0\n    result = 0\n    while i < len(values) and values[i] != -1:\n        result += values[i]\n        i += 1\n    return result\n",
+      "forbid": [
+        "for "
+      ]
+    }
+  }
+}

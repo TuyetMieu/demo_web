@@ -1,0 +1,166 @@
+{
+  "lesson_code": "T07",
+  "sort_order": 51,
+  "module": "Module 9: Tkinter chuyên sâu",
+  "title": "Event loop, after và thanh tiến độ",
+  "subtitle": "T07 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Event loop, after và thanh tiến độ",
+    "subtitle": "T07 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#T07",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Event loop chỉ xử lý sự kiện khi callback nhường quyền. after đặt một bước cho lần sau; sleep trong callback làm cả giao diện chờ."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "def tick():\n    progress[\"value\"] += 10\n    if progress[\"value\"]<100:\n        root.after(100,tick)\nroot.after(100,tick)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Mỗi tick làm ít việc rồi trả về."
+        },
+        {
+          "n": 2,
+          "body": "Đây là mô phỏng tiến độ; tác vụ I/O thật cần báo tiến độ thực từ worker."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Cần truyền hàm, không gọi ngay."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "root.after(100,tick()) có đúng không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Cần truyền hàm, không gọi ngay."
+            },
+            {
+              "text": "Không: tick chạy ngay",
+              "correct": true,
+              "detail": "Đúng: dùng tick."
+            },
+            {
+              "text": "Giống sleep",
+              "correct": false,
+              "detail": "after với callback không khóa như sleep."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: dùng tick."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Bấm Start hai lần nhanh: xác định chỉ một lịch tick hoạt động; Reset đưa value về 0."
+      },
+      "scaffold": {
+        "template": "from tkinter import ttk\nclass ProgressJob:\n    def __init__(self,root):\n        {{slot1}}\n        self.bar=ttk.Progressbar(root,maximum=100,mode=\"determinate\"); self.bar.pack()\n    def start(self):\n        self.cancel(); self.bar[\"value\"]=0\n        self.pending=self.root.after(100,self.tick)\n    def tick(self):\n        self.pending=None\n        {{slot2}}\n        if self.bar[\"value\"]<100:\n            self.pending=self.root.after(100,self.tick)\n    def cancel(self):\n        if self.pending is not None:\n            {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "self.root=root; self.pending=None"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "self.bar[\"value\"]=min(100,self.bar[\"value\"]+10)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "self.root.after_cancel(self.pending); self.pending=None"
+          }
+        ],
+        "bank": [
+          {
+            "label": "self.root=root; self.pending=None",
+            "slot": 1
+          },
+          {
+            "label": "self.bar[\"value\"]=min(100,self.bar[\"value\"]+10)",
+            "slot": 2
+          },
+          {
+            "label": "self.bar[\"value\"]=max(100,self.bar[\"value\"]+10)",
+            "slot": 2
+          },
+          {
+            "label": "self.root.after_cancel(self.pending); self.pending=None",
+            "slot": 3
+          },
+          {
+            "label": "def tick():",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chạy mô phỏng 0..100 từng bước 10; tô thanh progress và trạng thái job."
+          },
+          {
+            "label": "B2",
+            "text": "Trong lúc chạy thử click nút đếm khác: counter vẫn tăng."
+          },
+          {
+            "label": "B3",
+            "text": "Thêm Cancel bằng after_cancel; trạng thái stopped giữ tiến độ, không hiện completed."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết ProgressJob(root): có bar ttk.Progressbar maximum=100, start(), tick(), cancel(); start hủy lịch cũ và reset 0; mỗi tick tăng 10, lên lịch 100ms nếu <100; cancel hủy after đang chờ. Không dùng sleep hoặc vòng while update.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Kiểm tra native đủ 1 giây: bar tiến đều, nút phụ vẫn click được; Cancel dừng mọi cập nhật; đóng cửa sổ không callback vào widget đã hủy."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Mỗi tick làm ít việc rồi trả về. Đây là mô phỏng tiến độ; tác vụ I/O thật cần báo tiến độ thực từ worker."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "from tkinter import ttk\nclass ProgressJob:\n    def __init__(self,root):\n        self.root=root; self.pending=None\n        self.bar=ttk.Progressbar(root,maximum=100,mode=\"determinate\"); self.bar.pack()\n    def start(self):\n        self.cancel(); self.bar[\"value\"]=0\n        self.pending=self.root.after(100,self.tick)\n    def tick(self):\n        self.pending=None\n        self.bar[\"value\"]=min(100,self.bar[\"value\"]+10)\n        if self.bar[\"value\"]<100:\n            self.pending=self.root.after(100,self.tick)\n    def cancel(self):\n        if self.pending is not None:\n            self.root.after_cancel(self.pending); self.pending=None\n"
+    }
+  }
+}

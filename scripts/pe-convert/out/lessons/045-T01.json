@@ -1,0 +1,170 @@
+{
+  "lesson_code": "T01",
+  "sort_order": 45,
+  "module": "Module 9: Tkinter chuyên sâu",
+  "title": "Cửa sổ, focus và trạng thái nút",
+  "subtitle": "T01 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Cửa sổ, focus và trạng thái nút",
+    "subtitle": "T01 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#T01",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Ứng dụng cần cho người dùng biết cửa sổ nào đang làm việc và thao tác nào được phép. Focus nhận bàn phím; disabled ngăn thao tác trên widget."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "root.title(\"Ho so\")\nroot.geometry(\"420x240\")\nroot.resizable(False,False)\nentry.focus_set()\nbutton.configure(text=\"Da luu\",state=\"disabled\")\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Thuộc tính cửa sổ và thuộc tính widget có vai trò khác nhau."
+        },
+        {
+          "n": 2,
+          "body": "Khóa resize chỉ phù hợp form cố định đã kiểm tra độ vừa chữ."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Text và state độc lập."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Đổi text của nút thành Da luu có tự vô hiệu hóa nút không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Text và state độc lập."
+            },
+            {
+              "text": "Không, phải đổi state",
+              "correct": true,
+              "detail": "Đúng: cần state disabled."
+            },
+            {
+              "text": "Nút tự biến mất",
+              "correct": false,
+              "detail": "Đổi text không xóa widget."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: cần state disabled."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Bật resize lại, nhập tên dài và kiểm tra việc cắt chữ; giải thích vì sao không nên luôn khóa kích thước."
+      },
+      "scaffold": {
+        "template": "import tkinter as tk\nfrom tkinter import ttk\ndef build(root):\n    {{slot1}}\n    icon=tk.PhotoImage(master=root,width=16,height=16)\n    icon.put(\"#087e86\",to=(0,0,16,16)); root.iconphoto(True,icon); root._icon=icon\n    entry=ttk.Entry(root); entry.grid(row=0,column=0); entry.focus_set()\n    save=ttk.Button(root,text=\"Luu\")\n    save.configure(command=lambda:save.configure(text=\"Da luu\",state=\"disabled\"))\n    {{slot2}}\n    def help_window():\n        child=tk.Toplevel(root); child.title(\"Huong dan\")\n        ttk.Label(child,text=\"Nhap ten roi bam Luu\").pack(padx=12,pady=12)\n    help_button=ttk.Button(root,text=\"Tro giup\",command=help_window)\n    help_button.grid(row=2,column=0)\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "root.title(\"Ho so\"); root.geometry(\"420x240\"); root.resizable(False,False)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "save.grid(row=1,column=0)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return dict(entry=entry,save=save,help=help_button)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "root.title(\"Ho so\"); root.geometry(\"420x240\"); root.resizable(False,False)",
+            "slot": 1
+          },
+          {
+            "label": "root.title(\"Ho so\")",
+            "slot": 1
+          },
+          {
+            "label": "save.grid(row=1,column=0)",
+            "slot": 2
+          },
+          {
+            "label": "root.geometry(\"420x240\")",
+            "slot": 2
+          },
+          {
+            "label": "return dict(entry=entry,save=save,help=help_button)",
+            "slot": 3
+          },
+          {
+            "label": "print(dict(entry=entry,save=save,help=help_button))",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "So một thao tác nhập mã qua CLI và form GUI; chọn GUI khi cần nhiều trường/sự kiện, CLI khi tự động hóa lệnh."
+          },
+          {
+            "label": "B2",
+            "text": "Đặt title, size, icon; thử kéo mép cửa sổ trước và sau resizable(False,False)."
+          },
+          {
+            "label": "B3",
+            "text": "Nhập An, bấm Luu: text nút đổi Da luu, disabled; mở cửa sổ trợ giúp bằng Toplevel."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết build(root): cửa sổ title Ho so, size 420x240, không resize; Entry có focus khi hiện. Nút Luu khi click đổi thành Da luu và disabled. Nút Tro giup mở Toplevel title Huong dan (không tạo Tk thứ hai). Gắn icon ảnh 16x16 được tạo bằng PhotoImage và giữ tham chiếu. Trả dict entry/save/help.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Hiện cửa sổ: gõ ngay đi vào Entry; icon thấy trên title/taskbar theo hỗ trợ OS; click trợ giúp mở đúng một Toplevel mỗi lần; đóng child không tắt root."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Thuộc tính cửa sổ và thuộc tính widget có vai trò khác nhau. Khóa resize chỉ phù hợp form cố định đã kiểm tra độ vừa chữ."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import tkinter as tk\nfrom tkinter import ttk\ndef build(root):\n    root.title(\"Ho so\"); root.geometry(\"420x240\"); root.resizable(False,False)\n    icon=tk.PhotoImage(master=root,width=16,height=16)\n    icon.put(\"#087e86\",to=(0,0,16,16)); root.iconphoto(True,icon); root._icon=icon\n    entry=ttk.Entry(root); entry.grid(row=0,column=0); entry.focus_set()\n    save=ttk.Button(root,text=\"Luu\")\n    save.configure(command=lambda:save.configure(text=\"Da luu\",state=\"disabled\"))\n    save.grid(row=1,column=0)\n    def help_window():\n        child=tk.Toplevel(root); child.title(\"Huong dan\")\n        ttk.Label(child,text=\"Nhap ten roi bam Luu\").pack(padx=12,pady=12)\n    help_button=ttk.Button(root,text=\"Tro giup\",command=help_window)\n    help_button.grid(row=2,column=0)\n    return dict(entry=entry,save=save,help=help_button)\n"
+    }
+  }
+}

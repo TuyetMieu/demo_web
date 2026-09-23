@@ -1,0 +1,179 @@
+{
+  "lesson_code": "C09",
+  "sort_order": 15,
+  "module": "Module 3: List, dict, tuple và set",
+  "title": "Dictionary: duyệt, xóa và tìm cực trị",
+  "subtitle": "C09 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Dictionary: duyệt, xóa và tìm cực trị",
+    "subtitle": "C09 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C09",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Duyệt dictionary mặc định đi qua khóa. Muốn xét cả mã và điểm, dùng items; muốn tìm mã điểm cao nhất, so theo giá trị."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "marks={\"A\":8,\"B\":6}\nprint(list(marks.keys()))\nprint(list(marks.values()))\nprint(list(marks.items()))\nprint(\"A\" in marks, 8 in marks)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Ba view biểu diễn khóa, giá trị và cặp; membership mặc định kiểm tra khóa nên kết quả cuối True, False."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — max chưa nhận key để so theo điểm."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "max(marks) có chắc là mã có điểm cao nhất không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "max chưa nhận key để so theo điểm."
+            },
+            {
+              "text": "Không, mặc định so khóa",
+              "correct": true,
+              "detail": "Đúng: dùng key=marks.get nếu muốn so giá trị."
+            },
+            {
+              "text": "Luôn trả điểm",
+              "correct": false,
+              "detail": "Kết quả vẫn là một khóa."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: dùng key=marks.get nếu muốn so giá trị."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: So \"ab\" in \"abc\", 8 in [8], 8 in {8}, 8 in {\"A\":8}; giải thích membership của dict."
+      },
+      "scaffold": {
+        "template": "def summarize(marks,remove_id):\n    {{slot1}}\n    removed=remaining.pop(remove_id,None)\n    {{slot2}}\n    worst=min(remaining,key=lambda k:(remaining[k],k)) if remaining else None\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "remaining=marks.copy()"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "best=min(remaining,key=lambda k:(-remaining[k],k)) if remaining else None"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return dict(remaining=remaining,removed=removed,best=best,worst=worst)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "remaining=marks.copy()",
+            "slot": 1
+          },
+          {
+            "label": "remaining=marks",
+            "slot": 1
+          },
+          {
+            "label": "best=min(remaining,key=lambda k:(-remaining[k],k)) if remaining else None",
+            "slot": 2
+          },
+          {
+            "label": "best=max(remaining,key=lambda k:(-remaining[k],k)) if remaining else None",
+            "slot": 2
+          },
+          {
+            "label": "return dict(remaining=remaining,removed=removed,best=best,worst=worst)",
+            "slot": 3
+          },
+          {
+            "label": "print(dict(remaining=remaining,removed=removed,best=best,worst=worst))",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Nối mỗi key với value; chuyển tab keys/values/items và giữ highlight cùng cặp."
+          },
+          {
+            "label": "B2",
+            "text": "Xóa mã bằng pop(id,None), hiện phần bị lấy ra; xóa lại mã đó thì None."
+          },
+          {
+            "label": "B3",
+            "text": "Tìm min/max theo điểm; thử hòa điểm và công bố quy tắc phụ."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết summarize(marks,remove_id): không sửa marks; pop mã nếu có; trả {remaining:dict, removed:value_or_None, best:id_or_None,worst:id_or_None}. Nếu hòa điểm chọn mã nhỏ nhất theo thứ tự chuỗi.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Yêu cầu người học tự in keys, values, items trong guided; kiểm tra đầy đủ cặp dù cách trình bày thứ tự khác."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Ba view biểu diễn khóa, giá trị và cặp; membership mặc định kiểm tra khóa nên kết quả cuối True, False."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "def summarize(marks,remove_id):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "ties (C09-K01)",
+          "call": "(exec('m={\"B\":8,\"A\":8,\"C\":4}; r=summarize(m,\"Z\"); assert (r[\"best\"],r[\"worst\"])==(\"A\",\"C\"); assert len(m)==3\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "zero_empty (C09-K02)",
+          "call": "summarize({'A': 0}, 'A')",
+          "expect": "dict(remaining={}, removed=0, best=None, worst=None)"
+        }
+      ],
+      "solutionCode": "def summarize(marks,remove_id):\n    remaining=marks.copy()\n    removed=remaining.pop(remove_id,None)\n    best=min(remaining,key=lambda k:(-remaining[k],k)) if remaining else None\n    worst=min(remaining,key=lambda k:(remaining[k],k)) if remaining else None\n    return dict(remaining=remaining,removed=removed,best=best,worst=worst)\n"
+    }
+  }
+}

@@ -1,0 +1,215 @@
+{
+  "lesson_code": "P05",
+  "sort_order": 11,
+  "module": "Module 3: List, dict, tuple và set",
+  "title": "List và việc hai tên dùng chung dữ liệu",
+  "subtitle": "P05 · Lộ trình chính · 25 phút",
+  "estimated_minutes": 25,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "List và việc hai tên dùng chung dữ liệu",
+    "subtitle": "P05 · Lộ trình chính · 25 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P05",
+      "parser": "pe-convert/override",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Bạn muốn thử thêm một điểm mà chưa thay danh sách chính. Gán một list cho tên mới không tự sao chép nó. Cần một danh sách mới nếu thay đổi không được ảnh hưởng bản gốc."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "scores = [6, 8]\ndraft = scores.copy()\ndraft.append(9)"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "copy tạo list ngoài mới."
+        },
+        {
+          "n": 2,
+          "body": "append thay draft và trả None, không trả list vừa thay."
+        },
+        {
+          "n": 3,
+          "body": "Trong bài chỉ có các số nên bản sao nông là đủ."
+        }
+      ],
+      "predict": {
+        "question": "Nếu draft = scores thì append sẽ ảnh hưởng gì?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Cả hai tên thấy thay đổi",
+            "detail": "Đúng: hai tên cùng tham chiếu đối tượng.",
+            "correct": true
+          },
+          {
+            "id": "b",
+            "title": "Không tên nào",
+            "detail": "append thay đổi list đó.",
+            "correct": false
+          },
+          {
+            "id": "c",
+            "title": "Chỉ draft",
+            "detail": "Hai tên đang dùng chung một list.",
+            "correct": false
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu result là None: bạn có gán kết quả của append không? Nếu scores bị đổi: kiểm tra bản sao."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "scores sau ba dòng là gì?",
+          "options": [
+            {
+              "text": "[6,8,9]",
+              "correct": false,
+              "detail": "Đó là draft; scores được giữ nguyên."
+            },
+            {
+              "text": "None",
+              "correct": false,
+              "detail": "append trả None nhưng không gán nó vào scores."
+            },
+            {
+              "text": "[6,8]",
+              "correct": true,
+              "detail": "Đúng: append tác động lên bản sao."
+            }
+          ],
+          "correct": 2,
+          "explanation": "Đúng: append tác động lên bản sao."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu. Nhật ký thao tác bên dưới mô tả bản script gốc của PE; cách nghĩ giữ nguyên, chỉ khác phần vỏ hàm.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi điểm thêm thành 0; dự đoán cả scores và draft, không chỉ list sau thêm."
+      },
+      "scaffold": {
+        "template": "def with_extra(scores, extra):\n    \"\"\"Trả về bản sao scores có extra ở cuối; scores giữ nguyên.\"\"\"\n    {{slot1}}\n    {{slot2}}\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "result = scores.copy()"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "result.append(extra)"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return result"
+          }
+        ],
+        "bank": [
+          {
+            "label": "result = scores.copy()",
+            "slot": 1
+          },
+          {
+            "label": "result = scores",
+            "slot": 1
+          },
+          {
+            "label": "result.append(extra)",
+            "slot": 2
+          },
+          {
+            "label": "result.extend(extra)",
+            "slot": 2
+          },
+          {
+            "label": "return result",
+            "slot": 3
+          },
+          {
+            "label": "print(result)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Chọn khối copy thay phép gán trực tiếp; chạy: hai nút list riêng xuất hiện, cùng dữ liệu [6,8]."
+          },
+          {
+            "label": "B2",
+            "text": "Đặt append(9) lên draft; chạy: draft tăng 2 -> 3 ô; scores giữ 2 ô."
+          },
+          {
+            "label": "B3",
+            "text": "Thử nhánh minh họa draft = scores trong vùng thử; một nút list có hai mũi nối; app ghi rõ đây là lần chạy mới."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết hàm with_extra(scores, extra): trả về BẢN SAO của scores có extra ở cuối, giữ nguyên scores kể cả khi rỗng. Không có list lồng nhau.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "[result, scores] → [[6, 8, 9], [6, 8]]"
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Bạn cần bảo vệ danh sách đầu vào."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Tạo list mới rồi thêm phần tử."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "result = scores.copy(); sau đó result.append(extra)."
+        }
+      ],
+      "starterCode": "def with_extra(scores, extra):\n    \"\"\"Trả về bản sao scores có extra ở cuối; scores giữ nguyên.\"\"\"\n    # Viết lời giải của bạn ở đây\n",
+      "tests": [
+        {
+          "name": "Ca mẫu PE: thêm 9 nhưng không đổi nguồn",
+          "call": "(exec('data = [6, 8]\\nout = with_extra(data, 9)\\nassert out == [6, 8, 9], out\\nassert data == [6, 8], data\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "Hai tên không dùng chung một list",
+          "call": "(exec('data = [1]\\nout = with_extra(data, 2)\\nassert out is not data\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "List rỗng",
+          "call": "with_extra([], 5)",
+          "expect": "[5]"
+        }
+      ],
+      "solutionCode": "def with_extra(scores, extra):\n    \"\"\"Trả về bản sao scores có extra ở cuối; scores giữ nguyên.\"\"\"\n    result = scores.copy()\n    result.append(extra)\n    return result\n"
+    }
+  }
+}

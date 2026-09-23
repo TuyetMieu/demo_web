@@ -1,0 +1,187 @@
+{
+  "lesson_code": "C22",
+  "sort_order": 34,
+  "module": "Module 6: File, ngoại lệ và dữ liệu lâu dài",
+  "title": "Duyệt thư mục và thao tác file trong vùng bài tập",
+  "subtitle": "C22 · Lộ trình chính · 30 phút",
+  "estimated_minutes": 30,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Duyệt thư mục và thao tác file trong vùng bài tập",
+    "subtitle": "C22 · Lộ trình chính · 30 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#C22",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Thư mục có thể lồng nhiều tầng. Duyệt đệ quy tìm file bên trong; đường dẫn tương đối được hiểu từ working directory hiện tại."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "from pathlib import Path\nroot=Path(\"lab\")\nroot.mkdir(exist_ok=True)\n(root/\"a.txt\").write_text(\"A\",encoding=\"utf8\")\n(root/\"a.txt\").rename(root/\"b.txt\")\nprint([p.name for p in root.iterdir()])\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "mkdir tạo folder, rename đổi tên."
+        },
+        {
+          "n": 2,
+          "body": "iterdir chỉ duyệt trực tiếp; os.walk đi nhiều tầng."
+        },
+        {
+          "n": 3,
+          "body": "Bài chỉ thao tác fixture của mình."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Di chuyển file\" — File không bị di chuyển."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "os.chdir thay đổi gì?",
+          "options": [
+            {
+              "text": "Di chuyển file",
+              "correct": false,
+              "detail": "File không bị di chuyển."
+            },
+            {
+              "text": "Working directory của tiến trình",
+              "correct": true,
+              "detail": "Đúng: đường dẫn tương đối sau đó được giải từ nơi mới."
+            },
+            {
+              "text": "Tên module",
+              "correct": false,
+              "detail": "Module không tự đổi tên."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: đường dẫn tương đối sau đó được giải từ nơi mới."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thêm file .csv ở tầng sâu; bộ lọc .txt phải bỏ qua nó nhưng vẫn duyệt folder."
+      },
+      "scaffold": {
+        "template": "import os\nfrom pathlib import Path\ndef text_files(root):\n    {{slot1}}\n    result=[]\n    for folder,dirs,files in os.walk(root,followlinks=False):\n        {{slot2}}\n            if name.endswith(\".txt\"):\n                result.append((Path(folder)/name).relative_to(root).as_posix())\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "root=Path(root)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "for name in files:"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return sorted(result)"
+          }
+        ],
+        "bank": [
+          {
+            "label": "root=Path(root)",
+            "slot": 1
+          },
+          {
+            "label": "root=Path(\"lab\")",
+            "slot": 1
+          },
+          {
+            "label": "for name in files:",
+            "slot": 2
+          },
+          {
+            "label": "from pathlib import Path",
+            "slot": 2
+          },
+          {
+            "label": "return sorted(result)",
+            "slot": 3
+          },
+          {
+            "label": "return reversed(result)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Tạo cây lab/a.txt và lab/sub/b.txt; iterdir hiện sub như một mục, walk hiện b.txt ở tầng dưới."
+          },
+          {
+            "label": "B2",
+            "text": "Lưu os.getcwd, đổi sang lab, quan sát Path(\"a.txt\").resolve rồi khôi phục cwd bằng finally."
+          },
+          {
+            "label": "B3",
+            "text": "Đổi tên a.txt thành renamed.txt, unlink đúng file vừa tạo; rmdir thử folder không rỗng rồi giải thích lỗi."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết text_files(root) trả list đường dẫn tương đối dạng POSIX của mọi file .txt dưới root, sắp tăng dần; không theo symlink directory. Dùng os.walk. Nộp trace tạo, đổi tên, xóa một file thử và khôi phục cwd.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Trace cwd trở lại đường dẫn ban đầu kể cả khi thao tác lỗi; chỉ xóa fixture đã tạo, không dùng đường dẫn home hoặc thư mục nguồn."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "mkdir tạo folder, rename đổi tên. iterdir chỉ duyệt trực tiếp; os.walk đi nhiều tầng. Bài chỉ thao tác fixture của mình."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "starterCode": "import os\nfrom pathlib import Path\ndef text_files(root):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "recursive (C22-K01)",
+          "call": "(exec('from pathlib import Path\\nr=Path(\"tree\"); (r/\"sub\").mkdir(parents=True)\\n(r/\"a.txt\").write_text(\"A\"); (r/\"sub/b.txt\").write_text(\"B\"); (r/\"sub/c.csv\").write_text(\"C\")\\nassert text_files(r)==[\"a.txt\",\"sub/b.txt\"]\\n', globals()) or True)",
+          "expect": "True"
+        },
+        {
+          "name": "empty (C22-K02)",
+          "call": "(exec('from pathlib import Path\\nPath(\"empty\").mkdir(); assert text_files(\"empty\")==[]\\n', globals()) or True)",
+          "expect": "True"
+        }
+      ],
+      "solutionCode": "import os\nfrom pathlib import Path\ndef text_files(root):\n    root=Path(root)\n    result=[]\n    for folder,dirs,files in os.walk(root,followlinks=False):\n        for name in files:\n            if name.endswith(\".txt\"):\n                result.append((Path(folder)/name).relative_to(root).as_posix())\n    return sorted(result)\n"
+    }
+  }
+}

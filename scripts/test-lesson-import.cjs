@@ -166,73 +166,87 @@ async function upload(file, name, access) {
     };
 
     await page.goto(`${origin}/lesson/python?lesson=${sortOrder - 1}`);
-    await page.getByRole('heading', { name: /Ngữ cảnh/ }).waitFor({ timeout: 30000 });
+    // UI mới (LessonChrome): mỗi phần của bài là MỘT màn, thanh tiến độ trên
+    // đầu đếm theo số màn chứ không phải 4 bước S.
+    const cta = () => page.locator('footer button').last();
+    const eyebrow = () => page.locator('main [class*="eyebrow"]').first();
+    await cta().waitFor({ timeout: 30000 });
+    await eyebrow().getByText(/NGỮ CẢNH/i).waitFor({ timeout: 30000 });
     assert(
       await page.getByText('Định dạng chuỗi với f-string').first().isVisible(),
       'phải hiện tiêu đề bài vừa nhập',
     );
-    assert.equal(await page.locator('[class*="stepper"] [class*="stepMark"]').count(), 4);
+    const totalScreens = await page.locator('header [class*="track"] > *').count();
+    assert(totalScreens >= 8, `bài mẫu phải trải ra nhiều màn, đang có ${totalScreens}`);
     await snap('import-step-1');
-    console.log('Học viên mở được bài vừa nhập, đủ 4 bước: PASS');
+    console.log(`Học viên mở được bài vừa nhập, ${totalScreens} màn: PASS`);
 
-    // ---------- 6. Đi hết 4 bước ----------
-    await page.getByRole('radio').nth(1).check(); // đáp án B
-    await page.getByRole('button', { name: /Xác nhận dự đoán/ }).click();
-    await page.getByRole('button', { name: /Tiếp tục bước tiếp theo/ }).click();
+    // ---------- 6. Đi hết các màn trước sandbox ----------
+    // Đáp án lấy thẳng từ content_json của chính bài vừa nhập, nên bộ test
+    // không phải chép cứng lời giải.
+    const options = () => page.locator('main [class*="optionsList"] > button');
+    const answerMcq = async (index) => {
+      await options().nth(index).click();
+      await cta().click(); // Kiểm tra
+      await page.getByText('Chính xác!').first().waitFor({ timeout: 10000 });
+      await cta().click(); // Tiếp tục
+    };
 
-    await page.getByRole('heading', { name: /Phân loại thao tác/ }).waitFor();
-    await page.getByRole('radio').nth(1).check(); // trắc nghiệm đáp án B
-    await page.getByRole('button', { name: /Xác nhận phân tích/ }).click();
-    const bins = page.locator('[class*="binGrid"] > div');
-    for (const token of lesson.step_2.classify.tokens) {
-      const target = lesson.step_2.classify.bins.findIndex((b) => b.key === token.bin);
-      const chip = page
-        .locator('[class*="tokenQueue"] [class*="tokens"] button')
-        .filter({ hasText: token.label })
-        .first();
-      await chip.dragTo(bins.nth(target));
+    for (let guard = 0; guard < 24; guard += 1) {
+      const label = (await eyebrow().textContent()) || '';
+      if (/THỬ THÁCH ĐỘC LẬP/i.test(label)) break;
+
+      if (/DỰ ĐOÁN KẾT QUẢ/i.test(label)) {
+        await answerMcq(lesson.step_1.predict.options.findIndex((o) => o.correct));
+      } else if (/TRẮC NGHIỆM/i.test(label)) {
+        const q = lesson.step_2.mcq[0];
+        await answerMcq(q.correct ?? q.options.findIndex((o) => o.correct));
+      } else if (/TÁI DỰ ĐOÁN/i.test(label)) {
+        await answerMcq(lesson.step_3.counter.options.indexOf(lesson.step_3.counter.correct));
+      } else if (/PHÂN LOẠI/i.test(label)) {
+        for (const token of lesson.step_2.classify.tokens) {
+          await page.getByRole('button', { name: token.label, exact: true }).first().click();
+          const bin = lesson.step_2.classify.bins.find((b) => b.key === token.bin);
+          await page.getByRole('button', { name: new RegExp(bin.title) }).first().click();
+        }
+        await cta().click();
+        await page.getByText('Chính xác!').first().waitFor({ timeout: 10000 });
+        await snap('import-step-2');
+        await cta().click();
+      } else if (/TỰ GIẢI THÍCH/i.test(label)) {
+        await page
+          .locator('main textarea')
+          .first()
+          .fill('f-string gọi format của đối tượng nên nhận được format spec :.2f khi định dạng.');
+        await cta().click();
+        await cta().click();
+      } else if (/LẮP GHÉP/i.test(label)) {
+        for (const slot of lesson.step_3.scaffold.slots) {
+          await page.getByRole('button', { name: slot.answer, exact: true }).first().click();
+          await page.locator('main [class*="codeBody"] button').nth(slot.n - 1).click();
+        }
+        await cta().click();
+        await page.getByText('Chính xác!').first().waitFor({ timeout: 10000 });
+        await snap('import-step-3');
+        await cta().click();
+      } else {
+        await cta().click(); // màn chỉ để đọc
+      }
+      await page.waitForTimeout(400);
     }
-    await page.getByRole('button', { name: /Kiểm tra phân loại/ }).click();
-    await page
-      .locator('textarea')
-      .first()
-      .fill('f-string gọi format của đối tượng nên nhận được format spec :.2f khi định dạng.');
-    await page.getByRole('button', { name: /Gửi lời giải thích/ }).click();
-    await snap('import-step-2');
-    await page.getByRole('button', { name: /Tiếp tục bước tiếp theo/ }).click();
-
-    await page.getByRole('heading', { name: /Khung lắp ghép/ }).waitFor();
-    await page
-      .locator('[class*="tokenBank"] button')
-      .filter({ hasText: lesson.step_3.scaffold.slots[0].answer })
-      .first()
-      .click();
-    await page.getByRole('button', { name: /Kiểm tra khung mã/ }).click();
-    await page
-      .getByRole('radio', { name: lesson.step_3.counter.correct })
-      .check();
-    await snap('import-step-3');
-    await page.getByRole('button', { name: /Tiếp tục bước tiếp theo/ }).click();
+    console.log('Đi hết các màn hỏi–đáp, chấm đúng từng màn: PASS');
 
     // ---------- 7. Sandbox chạy Python thật ----------
     const editor = page.locator('textarea[aria-label="Trình soạn mã Python"]');
     await editor.waitFor();
     await editor.fill('def format_scores(rows):\n    return ["sai"]');
     await page.getByRole('button', { name: /Nộp & Chấm điểm/ }).click();
-    await page.getByText(/đạt$/).first().waitFor({ timeout: 90000 });
-    const failing = await page.locator('[class*="testResult"]').count();
-    assert(failing > 0, 'phải hiện kết quả từng test case');
-    assert(
-      (await page.getByText('✕').count()) > 0,
-      'lời giải sai phải có test trượt',
-    );
+    await page.getByText('✕ Chưa đạt').first().waitFor({ timeout: 90000 });
     console.log('Bộ chấm theo test của bài từ chối lời giải sai: PASS');
 
     await editor.fill(SOLUTION);
     await page.getByRole('button', { name: /Nộp & Chấm điểm/ }).click();
-    await page
-      .getByText('Đã lưu hoàn thành bài học.')
-      .waitFor({ timeout: 90000 });
+    await page.getByText('Đã lưu hoàn thành bài học.').waitFor({ timeout: 90000 });
     await snap('import-step-4');
     console.log('Lời giải đúng chạy qua Pyodide và lưu hoàn thành: PASS');
 
@@ -273,7 +287,7 @@ async function upload(file, name, access) {
     if (blank) {
       await page.setViewportSize({ width: 1280, height: 1000 });
       await page.goto(`${origin}/lesson/python?lesson=${blank.sortOrder - 1}`);
-      await page.getByText('ĐANG BIÊN SOẠN').waitFor({ timeout: 20000 });
+      await page.getByText('Đang biên soạn').first().waitFor({ timeout: 20000 });
       console.log('Bài chưa có nội dung hiện trạng thái rỗng tử tế: PASS');
     }
   } finally {

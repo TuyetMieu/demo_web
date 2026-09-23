@@ -1,0 +1,166 @@
+{
+  "lesson_code": "X04",
+  "sort_order": 90,
+  "module": "Module 13: Capstone PW2–PW9",
+  "title": "PW7: shell có chuyển hướng và pipeline",
+  "subtitle": "X04 · Nâng cao · 90 phút",
+  "estimated_minutes": 90,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "PW7: shell có chuyển hướng và pipeline",
+    "subtitle": "X04 · Nâng cao · 90 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#X04",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Shell đọc lệnh, tách argument và nối các luồng. Một pipeline chạy các process đồng thời và đóng các pipe không còn dùng để bên đọc nhận EOF."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "producer | consumer\ncommand < input.txt\ncommand > output.txt\n# POSIX ví dụ nguồn: ls -la; ls -la > out.txt; bc < input.txt; ps aux | grep term\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "Bài định nghĩa grammar nhỏ: argument có quote, nhiều stage phân cách |, < chỉ ở đầu và > chỉ ở cuối."
+        },
+        {
+          "n": 2,
+          "body": "Không yêu cầu biến môi trường/glob/&&/background job."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Luôn nhanh hơn\" — Giữ handle thừa có thể làm treo."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Parent giữ đầu ghi pipe sau khi producer kết thúc có thể gây gì?",
+          "options": [
+            {
+              "text": "Consumer chưa thấy EOF",
+              "correct": true,
+              "detail": "Đúng: mọi đầu ghi phải đóng mới có EOF."
+            },
+            {
+              "text": "Luôn nhanh hơn",
+              "correct": false,
+              "detail": "Giữ handle thừa có thể làm treo."
+            },
+            {
+              "text": "Tự xóa file",
+              "correct": false,
+              "detail": "Pipe không là thao tác xóa file."
+            }
+          ],
+          "correct": 0,
+          "explanation": "Đúng: mọi đầu ghi phải đóng mới có EOF."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thử lệnh không tồn tại và pipe trống như cmd |: báo lỗi có ngữ cảnh, không thoát cả shell tương tác."
+      },
+      "scaffold": {
+        "template": "import shlex,subprocess,time,contextlib\ndef parse(line):\n    lexer=shlex.shlex(line,posix=True,punctuation_chars=\"|<>\"); lexer.whitespace_split=True; lexer.commenters=\"\"\n    {{slot1}}\n    while i<len(tokens):\n        token=tokens[i]\n        if token==\"|\":\n            if not stages[-1] or target is not None: raise ValueError(\"pipe\")\n            stages.append([])\n        elif token in (\"<\",\">\"):\n            if i+1>=len(tokens) or tokens[i+1] in (\"|\",\"<\",\">\"): raise ValueError(\"redirect\")\n            i+=1\n            if token==\"<\":\n                if len(stages)!=1 or source is not None: raise ValueError(\"input\")\n                source=tokens[i]\n            else:\n                if target is not None: raise ValueError(\"output\")\n                target=tokens[i]\n        elif token in (\"<<\",\">>\",\"||\",\"&&\",\"&\",\";\"): raise ValueError(\"unsupported operator\")\n        else: stages[-1].append(token)\n        i+=1\n    if not stages[-1]: raise ValueError(\"empty command\")\n    return stages,source,target\ndef run_line(line,timeout=5):\n    stages,source,target=parse(line); processes=[]; deadline=time.monotonic()+timeout\n    with contextlib.ExitStack() as stack:\n        incoming=stack.enter_context(open(source,\"rb\")) if source else subprocess.DEVNULL\n        outgoing=stack.enter_context(open(target,\"wb\")) if target else subprocess.PIPE\n        try:\n            {{slot2}}\n                last=i==len(stages)-1\n                process=subprocess.Popen(args,stdin=incoming,stdout=outgoing if last else subprocess.PIPE,shell=False)\n                processes.append(process)\n                if i>0: incoming.close()\n                incoming=process.stdout\n            output,_=processes[-1].communicate(timeout=max(.01,deadline-time.monotonic()))\n            for process in processes[:-1]: process.wait(timeout=max(.01,deadline-time.monotonic()))\n            return dict(stdout=(output or b\"\").decode(\"utf8\"),returncodes=[p.returncode for p in processes])\n        finally:\n            for process in processes:\n                if process.poll() is None: process.kill()\n            for process in processes:\n                process.wait()\n                if process.stdout is not None: process.stdout.close()\ndef main():\n    while True:\n        try: line=input(\"pe> \")\n        except EOFError: break\n        if line.strip()==\"exit\": break\n        if not line.strip(): continue\n        try: print(run_line(line)[\"stdout\"],end=\"\")\n        except (ValueError,OSError,subprocess.SubprocessError) as error: print(type(error).__name__,error)\n{{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "tokens=list(lexer); stages=[[]]; source=target=None; i=0"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "for i,args in enumerate(stages):"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "if __name__==\"__main__\": main()"
+          }
+        ],
+        "bank": [
+          {
+            "label": "tokens=list(lexer); stages=[[]]; source=target=None; i=0",
+            "slot": 1
+          },
+          {
+            "label": "for i,args in enumerate(stages):",
+            "slot": 2
+          },
+          {
+            "label": "producer | consumer",
+            "slot": 2
+          },
+          {
+            "label": "if __name__==\"__main__\": main()",
+            "slot": 3
+          },
+          {
+            "label": "if __name__!=\"__main__\": main()",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Parse lệnh có quoted argument thành argv, không split bằng khoảng trắng đơn giản."
+          },
+          {
+            "label": "B2",
+            "text": "Mở file input/output trong context; stdout producer nối stdin consumer; parent đóng bản sao pipe đã chuyển."
+          },
+          {
+            "label": "B3",
+            "text": "Chạy pipeline hai stage, thu returncode; timeout thu dọn mọi child."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết run_line(line,timeout=5) cho grammar trên, trả {stdout,returncodes}. stderr của mỗi stage chuyển về terminal (không capture để tránh deadlock); shell=False. Có <,> thì chỉ nhận một tên file sau mỗi toán tử; syntax khác raise ValueError. main lặp input, exit thoát, lỗi hiển thị rồi tiếp tục. Lab POSIX chạy đủ bốn lệnh nguồn; test portable dùng Python fixture.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "POSIX gate: ls -la; output redirect; bc input (cài bc trong lab); ps aux | grep term. Cú pháp giới hạn đã công bố; không gọi bài này là shell đầy đủ của OS. Chạy lệnh child ngủ với timeout, kiểm tra không còn process con."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Bài định nghĩa grammar nhỏ: argument có quote, nhiều stage phân cách |, < chỉ ở đầu và > chỉ ở cuối. Không yêu cầu biến môi trường/glob/&&/background job."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import shlex,subprocess,time,contextlib\ndef parse(line):\n    lexer=shlex.shlex(line,posix=True,punctuation_chars=\"|<>\"); lexer.whitespace_split=True; lexer.commenters=\"\"\n    tokens=list(lexer); stages=[[]]; source=target=None; i=0\n    while i<len(tokens):\n        token=tokens[i]\n        if token==\"|\":\n            if not stages[-1] or target is not None: raise ValueError(\"pipe\")\n            stages.append([])\n        elif token in (\"<\",\">\"):\n            if i+1>=len(tokens) or tokens[i+1] in (\"|\",\"<\",\">\"): raise ValueError(\"redirect\")\n            i+=1\n            if token==\"<\":\n                if len(stages)!=1 or source is not None: raise ValueError(\"input\")\n                source=tokens[i]\n            else:\n                if target is not None: raise ValueError(\"output\")\n                target=tokens[i]\n        elif token in (\"<<\",\">>\",\"||\",\"&&\",\"&\",\";\"): raise ValueError(\"unsupported operator\")\n        else: stages[-1].append(token)\n        i+=1\n    if not stages[-1]: raise ValueError(\"empty command\")\n    return stages,source,target\ndef run_line(line,timeout=5):\n    stages,source,target=parse(line); processes=[]; deadline=time.monotonic()+timeout\n    with contextlib.ExitStack() as stack:\n        incoming=stack.enter_context(open(source,\"rb\")) if source else subprocess.DEVNULL\n        outgoing=stack.enter_context(open(target,\"wb\")) if target else subprocess.PIPE\n        try:\n            for i,args in enumerate(stages):\n                last=i==len(stages)-1\n                process=subprocess.Popen(args,stdin=incoming,stdout=outgoing if last else subprocess.PIPE,shell=False)\n                processes.append(process)\n                if i>0: incoming.close()\n                incoming=process.stdout\n            output,_=processes[-1].communicate(timeout=max(.01,deadline-time.monotonic()))\n            for process in processes[:-1]: process.wait(timeout=max(.01,deadline-time.monotonic()))\n            return dict(stdout=(output or b\"\").decode(\"utf8\"),returncodes=[p.returncode for p in processes])\n        finally:\n            for process in processes:\n                if process.poll() is None: process.kill()\n            for process in processes:\n                process.wait()\n                if process.stdout is not None: process.stdout.close()\ndef main():\n    while True:\n        try: line=input(\"pe> \")\n        except EOFError: break\n        if line.strip()==\"exit\": break\n        if not line.strip(): continue\n        try: print(run_line(line)[\"stdout\"],end=\"\")\n        except (ValueError,OSError,subprocess.SubprocessError) as error: print(type(error).__name__,error)\nif __name__==\"__main__\": main()\n"
+    }
+  }
+}

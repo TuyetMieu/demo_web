@@ -1,0 +1,209 @@
+{
+  "lesson_code": "P24",
+  "sort_order": 44,
+  "module": "Module 8: GUI cơ bản, biểu đồ, test và capstone nhỏ",
+  "title": "Capstone: Sổ học tập USTH",
+  "subtitle": "P24 · Lộ trình chính · 75 phút",
+  "estimated_minutes": 75,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Capstone: Sổ học tập USTH",
+    "subtitle": "P24 · Lộ trình chính · 75 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P24",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Bạn nhận ticket hoàn thiện sổ học tập: thêm sinh viên, tạo môn, nhập điểm và xem báo cáo. Dữ liệu phải nhất quán dù người dùng nhập sai, bấm lại hoặc mở ứng dụng lần sau. Hãy xây từng checkpoint và kiểm tra trước khi nối màn hình."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "state = {\"students\": {\"S01\": \"An\"},\n         \"courses\": {\"PY\": \"Python\"}, \"marks\": {}}\n# Sau hành động hợp lệ ghi điểm 8:\nstate[\"marks\"][\"S01\"] = {\"PY\": 8}"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "marks lồng dict tránh key tuple khi lưu JSON."
+        },
+        {
+          "n": 2,
+          "body": "Chỉ ghi điểm nếu cả mã sinh viên và mã môn đã có."
+        },
+        {
+          "n": 3,
+          "body": "Core xử lý action độc lập GUI giúp test dễ hơn."
+        }
+      ],
+      "predict": {
+        "question": "Mã môn PY tồn tại, nhập điểm mới cho cùng sinh viên/PY thì sao?",
+        "options": [
+          {
+            "id": "a",
+            "title": "Tạo một môn thứ hai",
+            "detail": "Không tạo bản ghi trùng cặp.",
+            "correct": false
+          },
+          {
+            "id": "b",
+            "title": "Cấm mọi thay đổi",
+            "detail": "Bài có chức năng sửa điểm.",
+            "correct": false
+          },
+          {
+            "id": "c",
+            "title": "Cập nhật điểm cũ",
+            "detail": "Đúng: cùng cặp định danh thì cập nhật theo hợp đồng.",
+            "correct": true
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu lỗi vẫn để lại điểm đã ghi: kiểm tra thứ tự validate và commit trạng thái. Nếu mất điểm0: tránh dùng truthiness cho điểm."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "Nhập điểm cho S99 chưa có nên làm gì?",
+          "options": [
+            {
+              "text": "Tự tạo sinh viên vô danh",
+              "correct": false,
+              "detail": "Đề yêu cầu sinh viên tồn tại trước."
+            },
+            {
+              "text": "Từ chối, giữ nguyên state",
+              "correct": true,
+              "detail": "Đúng: không tạo bản ghi mồ côi."
+            },
+            {
+              "text": "Ghi điểm rồi báo lỗi",
+              "correct": false,
+              "detail": "Báo lỗi sau khi ghi vẫn làm dữ liệu sai."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng: không tạo bản ghi mồ côi."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi tên hiển thị thành An Nguyen, mã giữS01; điểm vẫn theo mã. Thử sửa8 thành0 phải giữ0 hợp lệ."
+      },
+      "scaffold": {
+        "template": "from copy import deepcopy\n\ndef apply_action(state, action):\n    {{slot1}}\n    kind = action.get(\"type\")\n    if kind in (\"add_student\", \"add_course\"):\n        key = \"students\" if kind == \"add_student\" else \"courses\"\n        ident, name = action.get(\"id\"), action.get(\"name\")\n        if not isinstance(ident, str) or not ident.strip():\n            raise ValueError(\"invalid id\")\n        if not isinstance(name, str) or not name.strip():\n            raise ValueError(\"invalid name\")\n        if ident in new_state[key]:\n            raise ValueError(\"duplicate id\")\n        {{slot2}}\n    elif kind == \"set_mark\":\n        sid, cid = action.get(\"student_id\"), action.get(\"course_id\")\n        score = action.get(\"score\")\n        if not isinstance(sid, str) or not isinstance(cid, str):\n            raise ValueError(\"invalid reference\")\n        if sid not in new_state[\"students\"] or cid not in new_state[\"courses\"]:\n            raise ValueError(\"unknown reference\")\n        if type(score) not in (int, float) or not (0 <= score <= 10):\n            raise ValueError(\"invalid score\")\n        new_state[\"marks\"].setdefault(sid, {})[cid] = score\n    else:\n        raise ValueError(\"unknown action\")\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "new_state = deepcopy(state)"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "new_state[key][ident] = name"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return new_state"
+          }
+        ],
+        "bank": [
+          {
+            "label": "new_state = deepcopy(state)",
+            "slot": 1
+          },
+          {
+            "label": "state = {\"students\": {\"S01\": \"An\"},",
+            "slot": 1
+          },
+          {
+            "label": "new_state[key][ident] = name",
+            "slot": 2
+          },
+          {
+            "label": "state[\"marks\"][\"S01\"] = {\"PY\": 8}",
+            "slot": 2
+          },
+          {
+            "label": "return new_state",
+            "slot": 3
+          },
+          {
+            "label": "print(new_state)",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Checkpoint A: chạy action add_student S01/An -> students từ{} thành{\"S01\":\"An\"}; feedback success; thử trùng mã -> state giữ nguyên."
+          },
+          {
+            "label": "B2",
+            "text": "Checkpoint B: add_course PY/Python rồi set_mark S01/PY/8 -> một cặp điểm; gọi sai mã -> ValueError, không ghi một phần."
+          },
+          {
+            "label": "B3",
+            "text": "Checkpoint C: UI đọc state từ service, gọi save_state; mở lại file và dựng report/biểu đồ; test lỗi JSON báo rõ, không thay dữ liệu bằng rỗng."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Lõi bắt buộc: apply_action(state, action) trả state mới, không sửa đầu vào. state gồm students:dict id->name; courses:dict id->name; marks:dict sid->dict cid->score. action type add_student/add_course có id,name; set_mark có student_id,course_id,score. ID/tên non-empty str, không chỉ trắng; ID trùng bị ValueError; set_mark đòi hai mã có sẵn và score số hữu hạn0-10 (không bool). Action sai/thiếu trường báo ValueError. Capstone gồm3 phiên: core, persistence, GUI; lõi mẫu bên dưới là hợp đồng service, phần tích hợp nghiệm thu riêng.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "apply_action(empty_state(), {\"type\":\"add_student\",\"id\":\"S01\",\"name\":\"An\"}) → {\"students\": {\"S01\": \"An\"}, \"courses\": {}, \"marks\": {}}"
+          },
+          {
+            "label": "Người chấm xem 1",
+            "value": "CAP24-1: một chuỗi thao tác thêm2 sinh viên,2 môn, nhập/sửa điểm; báo cáo từng môn đúng mã và giữ điểm0."
+          },
+          {
+            "label": "Người chấm xem 2",
+            "value": "CAP24-2: lưu UTF-8 JSON, đóng/mở lại; state bằng nhau. File hỏng hiện lỗi có thể xử lý, không tự mất dữ liệu."
+          },
+          {
+            "label": "Người chấm xem 3",
+            "value": "CAP24-3: form gọi service; một click tạo một action; sai không ghi; bảng/biểu đồ cập nhật đúng; test màn hình nhỏ và bàn phím."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Tách cập nhật state khỏi đọc ô nhập và vẽ giao diện."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Xác thực toàn bộ action trước khi tạo thay đổi có hiệu lực."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Dùng bản sao state; kiểm tra mã tồn tại rồi mới setdefault(sid,{})[cid]=score."
+        }
+      ],
+      "solutionCode": "from copy import deepcopy\n\ndef apply_action(state, action):\n    new_state = deepcopy(state)\n    kind = action.get(\"type\")\n    if kind in (\"add_student\", \"add_course\"):\n        key = \"students\" if kind == \"add_student\" else \"courses\"\n        ident, name = action.get(\"id\"), action.get(\"name\")\n        if not isinstance(ident, str) or not ident.strip():\n            raise ValueError(\"invalid id\")\n        if not isinstance(name, str) or not name.strip():\n            raise ValueError(\"invalid name\")\n        if ident in new_state[key]:\n            raise ValueError(\"duplicate id\")\n        new_state[key][ident] = name\n    elif kind == \"set_mark\":\n        sid, cid = action.get(\"student_id\"), action.get(\"course_id\")\n        score = action.get(\"score\")\n        if not isinstance(sid, str) or not isinstance(cid, str):\n            raise ValueError(\"invalid reference\")\n        if sid not in new_state[\"students\"] or cid not in new_state[\"courses\"]:\n            raise ValueError(\"unknown reference\")\n        if type(score) not in (int, float) or not (0 <= score <= 10):\n            raise ValueError(\"invalid score\")\n        new_state[\"marks\"].setdefault(sid, {})[cid] = score\n    else:\n        raise ValueError(\"unknown action\")\n    return new_state"
+    }
+  }
+}

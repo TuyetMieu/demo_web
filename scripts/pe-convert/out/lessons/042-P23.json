@@ -1,0 +1,205 @@
+{
+  "lesson_code": "P23",
+  "sort_order": 42,
+  "module": "Module 8: GUI cơ bản, biểu đồ, test và capstone nhỏ",
+  "title": "Chuyển giao: báo cáo thời gian bơi",
+  "subtitle": "P23 · Lộ trình chính · 45 phút",
+  "estimated_minutes": 45,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "Chuyển giao: báo cáo thời gian bơi",
+    "subtitle": "P23 · Lộ trình chính · 45 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#P23",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "Câu lạc bộ bơi ghi thời gian dưới dạng m:ss.hh. Chuỗi này tiện đọc nhưng không thể lấy trung bình trực tiếp. Ta đổi tất cả sang đơn vị một phần trăm giây, tính toán rồi đổi lại để hiển thị."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "time_text = \"1:02.50\"\nminutes, rest = time_text.split(\":\")\nseconds, hundredths = rest.split(\".\")\nvalue = int(minutes)*6000 + int(seconds)*100 + int(hundredths)"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "1 phút=6000 phần trăm giây, 2 giây=200, cộng50 cho6250."
+        },
+        {
+          "n": 2,
+          "body": "Tính bằng số nguyên giúp tránh ghép sai đơn vị."
+        },
+        {
+          "n": 3,
+          "body": "Dữ liệu bài là mới, không dùng lại dữ liệu vận động viên trong sách."
+        }
+      ],
+      "predict": {
+        "question": "6000 phần trăm giây phải định dạng gì?",
+        "options": [
+          {
+            "id": "a",
+            "title": "1:00.00",
+            "detail": "Đúng: giây và phần trăm có hai chữ số.",
+            "correct": true
+          },
+          {
+            "id": "b",
+            "title": "1:0.0",
+            "detail": "Thiếu số0 theo định dạng đề.",
+            "correct": false
+          },
+          {
+            "id": "c",
+            "title": "0:60.00",
+            "detail": "Cần chuyển đủ60 giây thành1 phút.",
+            "correct": false
+          }
+        ]
+      },
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "Nếu 0:59.99 và1:00.01 không cho1:00.00: kiểm tra chuyển đơn vị, phần dư và carry qua phút."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "1:02.50 đổi thành bao nhiêu?",
+          "options": [
+            {
+              "text": "10250",
+              "correct": false,
+              "detail": "Phút không bằng100 giây."
+            },
+            {
+              "text": "62.50 phút",
+              "correct": false,
+              "detail": "Đơn vị mục tiêu là phần trăm giây."
+            },
+            {
+              "text": "6250",
+              "correct": true,
+              "detail": "Đúng: 6000+200+50."
+            }
+          ],
+          "correct": 2,
+          "explanation": "Đúng: 6000+200+50."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Vì sao chương trình cho kết quả này? Chỉ ra một bước xử lý và điều gì thay đổi khi dữ liệu đổi như trong phần luyện.",
+        "placeholder": "Nối đúng dữ liệu, xử lý và kết quả; nhận ra trường hợp biên của bài."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Thử [\"0:59.99\",\"1:00.01\"]; dự đoán trung bình đúng1:00.00 trước chạy."
+      },
+      "scaffold": {
+        "template": "def swim_report(line):\n    {{slot1}}\n        return {\"count\": 0, \"mean\": None}\n    values = []\n    for part in line.split(\",\"):\n        minutes, rest = part.strip().split(\":\")\n        seconds, hundredths = rest.split(\".\")\n        {{slot2}}\n    n = len(values)\n    average = (2*sum(values) + n) // (2*n)\n    minutes, remainder = divmod(average, 6000)\n    seconds, hundredths = divmod(remainder, 100)\n    {{slot3}}\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "if not line.strip():"
+          },
+          {
+            "n": 2,
+            "placeholder": "[Slot 2]",
+            "answer": "values.append(int(minutes)*6000 + int(seconds)*100 + int(hundredths))"
+          },
+          {
+            "n": 3,
+            "placeholder": "[Slot 3]",
+            "answer": "return {\"count\": n, \"mean\": f\"{minutes}:{seconds:02d}.{hundredths:02d}\"}"
+          }
+        ],
+        "bank": [
+          {
+            "label": "if not line.strip():",
+            "slot": 1
+          },
+          {
+            "label": "if not line.rstrip():",
+            "slot": 1
+          },
+          {
+            "label": "values.append(int(minutes)*6000 + int(seconds)*100 + int(hundredths))",
+            "slot": 2
+          },
+          {
+            "label": "values.extend(int(minutes)*6000 + int(seconds)*100 + int(hundredths))",
+            "slot": 2
+          },
+          {
+            "label": "return {\"count\": n, \"mean\": f\"{minutes}:{seconds:02d}.{hundredths:02d}\"}",
+            "slot": 3
+          },
+          {
+            "label": "print({\"count\": n, \"mean\": f\"{minutes}:{seconds:02d}.{hundredths:02d}\"})",
+            "slot": 3
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Checkpoint1: đặt split theo : rồi .; chạy: \"1:02.50\" -> [\"1\",\"02\",\"50\"], nhãn đơn vị từng phần."
+          },
+          {
+            "label": "B2",
+            "text": "Checkpoint2: đặt nhân6000/100 và cộng; chạy từng phép:6000+200+50 ->6250."
+          },
+          {
+            "label": "B3",
+            "text": "Checkpoint3: với [6000,6250], tổng12250/count2 ->6125; định dạng integer divmod ->\"1:01.25\"."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết swim_report(line). line là chuỗi các m:ss.hh phân cách dấu phẩy, có khoảng trắng ngoài mỗi mục; m nguyên>=0, ss00-59, hh00-99. Dữ liệu sai định dạng ngoài phạm vi; chuỗi rỗng/trắng trả {\"count\":0,\"mean\":None}. Trung bình làm tròn half-up tới phần trăm giây; trả dict count và mean m:ss.hh. Bài45 phút chia hai phiên; không buộc làm một lần trên mobile.",
+        "io": [
+          {
+            "label": "Ví dụ",
+            "value": "swim_report(\"1:00.00,1:02.50\") → {\"count\": 2, \"mean\": \"1:01.25\"}"
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "Thống nhất một đơn vị số trước khi tính trung bình."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Dùng phần trăm giây; tách lại bằng chia nguyên và phần dư."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Làm tròn half-up với (2*total+n)//(2*n); dùng divmod và :02d khi định dạng."
+        }
+      ],
+      "starterCode": "def swim_report(line):\n    # Viết lời giải của bạn ở đây\n    pass\n",
+      "tests": [
+        {
+          "name": "Ca mẫu P23-a",
+          "call": "swim_report(\"1:00.00,1:02.50\")",
+          "expect": "{'count': 2, 'mean': '1:01.25'}"
+        }
+      ],
+      "solutionCode": "def swim_report(line):\n    if not line.strip():\n        return {\"count\": 0, \"mean\": None}\n    values = []\n    for part in line.split(\",\"):\n        minutes, rest = part.strip().split(\":\")\n        seconds, hundredths = rest.split(\".\")\n        values.append(int(minutes)*6000 + int(seconds)*100 + int(hundredths))\n    n = len(values)\n    average = (2*sum(values) + n) // (2*n)\n    minutes, remainder = divmod(average, 6000)\n    seconds, hundredths = divmod(remainder, 100)\n    return {\"count\": n, \"mean\": f\"{minutes}:{seconds:02d}.{hundredths:02d}\"}"
+    }
+  }
+}

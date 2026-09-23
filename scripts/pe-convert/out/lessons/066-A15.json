@@ -1,0 +1,144 @@
+{
+  "lesson_code": "A15",
+  "sort_order": 66,
+  "module": "Module 10: Nâng cao — OOP, NumPy, pandas và biểu đồ",
+  "title": "DataFrame từ CSV, Excel và database",
+  "subtitle": "A15 · Nâng cao · 60 phút",
+  "estimated_minutes": 60,
+  "content_json": {
+    "schema": "studio-lesson/v1",
+    "title": "DataFrame từ CSV, Excel và database",
+    "subtitle": "A15 · Nâng cao · 60 phút",
+    "source": {
+      "kind": "pe-bank",
+      "filename": "lesson_bank.json#A15",
+      "parser": "pe-convert",
+      "importedAt": "2026-09-23T05:00:01+00:00"
+    },
+    "step_1": {
+      "context": {
+        "title": "Ngữ cảnh",
+        "body": "DataFrame giữ nhãn cột và index cho dữ liệu bảng. Cùng schema có thể đến từ CSV, sheet Excel hoặc câu SELECT, nhưng cần kiểm tra kiểu và giá trị thiếu."
+      },
+      "code": {
+        "filename": "example.py",
+        "version": "Python 3.12",
+        "source": "frame=pd.read_csv(\"scores.csv\",na_values=[\"\"])\nprint(frame.head(),frame.tail(),frame.columns)\nframe.info()\nwith pd.ExcelFile(\"scores.xlsx\") as book:\n    print(book.sheet_names)\n"
+      },
+      "explain": [
+        {
+          "n": 1,
+          "body": "head/tail xem mẫu, info xem kiểu và số ô không thiếu."
+        },
+        {
+          "n": 2,
+          "body": "Tên sheet khác với vị trí sheet; read_sql_query trả bảng từ DB."
+        }
+      ],
+      "misconception": {
+        "title": "Ngộ nhận bài này hay bắt được",
+        "body": "\"Có\" — Không dùng kết quả info để thay frame."
+      }
+    },
+    "step_2": {
+      "mcq": [
+        {
+          "question": "DataFrame.info() có trả một DataFrame mới không?",
+          "options": [
+            {
+              "text": "Có",
+              "correct": false,
+              "detail": "Không dùng kết quả info để thay frame."
+            },
+            {
+              "text": "Không, chủ yếu in thông tin và trả None",
+              "correct": true,
+              "detail": "Đúng."
+            },
+            {
+              "text": "Trả list điểm",
+              "correct": false,
+              "detail": "Đó không phải phép tổng hợp điểm."
+            }
+          ],
+          "correct": 1,
+          "explanation": "Đúng."
+        }
+      ],
+      "selfExplain": {
+        "prompt": "Giải thích một quyết định trong bài của bạn và một trường hợp làm cách giải sai thường gặp thất bại.",
+        "placeholder": "Nối đúng đầu vào, thao tác, đầu ra và giải thích được trường hợp biên."
+      }
+    },
+    "step_3": {
+      "task": {
+        "title": "Luyện có hỗ trợ",
+        "body": "Đặt các khối mã còn thiếu vào đúng vị trí để dựng lại lời giải tham chiếu.",
+        "rule": "Sau khi khung mã đúng, hãy tự thử: Đổi thứ tự sheet: cách đọc theo tên Scores vẫn đúng; so với đọc sheet0."
+      },
+      "scaffold": {
+        "template": "import pandas as pd\nfrom sqlalchemy import text\n{{slot1}}\ndef read_excel_scores(path): return pd.read_excel(path,sheet_name=\"Scores\",usecols=[\"id\",\"score\"])\ndef read_database(engine):\n    with engine.connect() as connection:\n        return pd.read_sql_query(text(\"SELECT id,score FROM scores ORDER BY id\"),connection)\n",
+        "slots": [
+          {
+            "n": 1,
+            "placeholder": "[Slot 1]",
+            "answer": "def read_csv_scores(path): return pd.read_csv(path,na_values=[\"\"])"
+          }
+        ],
+        "bank": [
+          {
+            "label": "def read_csv_scores(path): return pd.read_csv(path,na_values=[\"\"])",
+            "slot": 1
+          },
+          {
+            "label": "print(frame.head(),frame.tail(),frame.columns)",
+            "slot": 1
+          }
+        ]
+      },
+      "trace": {
+        "steps": [
+          {
+            "label": "B1",
+            "text": "Đọc CSV, xem head/tail/index/columns/info và to_numpy; đánh dấu ô thiếu."
+          },
+          {
+            "label": "B2",
+            "text": "Tạo workbook có sheet Scores/Notes; chọn Scores bằng tên, chỉ lấy id,score."
+          },
+          {
+            "label": "B3",
+            "text": "Tạo SQLite lab bằng SQLAlchemy, inspect(engine).get_table_names; text SELECT và pandas.read_sql_query, đóng connection bằng with."
+          }
+        ]
+      }
+    },
+    "step_4": {
+      "task": {
+        "title": "Thử thách độc lập",
+        "body": "Viết read_csv_scores(path) với cột id,score, dòng score thiếu giữ NaN; read_excel_scores(path) lấy sheet Scores và cột id,score; read_database(engine) SELECT id,score FROM scores ORDER BY id qua SQLAlchemy text và pandas. Nộp bản khám phá head/tail/info; không dùng engine.table_names API cũ.",
+        "io": [
+          {
+            "label": "Người chấm xem",
+            "value": "Chia hai phiên30phút: CSV/Excel rồi DB. Người học phải nộp output khám phá kiểu/index, không chỉ DataFrame cuối."
+          }
+        ]
+      },
+      "hints": [
+        {
+          "title": "Nguyên lý",
+          "body": "head/tail xem mẫu, info xem kiểu và số ô không thiếu. Tên sheet khác với vị trí sheet; read_sql_query trả bảng từ DB."
+        },
+        {
+          "title": "Cấu trúc",
+          "body": "Quay lại ví dụ và đối chiếu đầu vào, kiểu dữ liệu, trạng thái trước/sau."
+        },
+        {
+          "title": "Lời giải từng phần",
+          "body": "Mở lời giải từng phần sau khi đã nộp một lần; ghi lượt này là có hỗ trợ."
+        }
+      ],
+      "solutionCode": "import pandas as pd\nfrom sqlalchemy import text\ndef read_csv_scores(path): return pd.read_csv(path,na_values=[\"\"])\ndef read_excel_scores(path): return pd.read_excel(path,sheet_name=\"Scores\",usecols=[\"id\",\"score\"])\ndef read_database(engine):\n    with engine.connect() as connection:\n        return pd.read_sql_query(text(\"SELECT id,score FROM scores ORDER BY id\"),connection)\n"
+    }
+  }
+}
