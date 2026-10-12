@@ -19,7 +19,7 @@
 body {
     background:
         radial-gradient(640px 420px at 12% -5%, rgba(59, 130, 246, 0.10), transparent 62%),
-        radial-gradient(720px 480px at 92% 108%, rgba(139, 92, 246, 0.10), transparent 62%),
+        radial-gradient(720px 480px at 92% 108%, rgba(88,145,250,0.10), transparent 62%),
         var(--bg, #07090F);
     color: var(--t1, #E2E8F0);
     display: flex;
@@ -54,7 +54,7 @@ body {
     background: linear-gradient(90deg,
         transparent,
         rgba(96, 165, 250, 0.55),
-        rgba(139, 92, 246, 0.55),
+        rgba(88,145,250,0.55),
         transparent);
     pointer-events: none;
 }
@@ -70,7 +70,7 @@ body {
 }
 
 .logo-text {
-    background: linear-gradient(90deg, var(--blue-light, #60A5FA), var(--purple, #8B5CF6));
+    background: linear-gradient(90deg, var(--blue-light, #60A5FA), var(--purple, #5891FA));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -91,7 +91,7 @@ body {
     height: 100%;
     width: 0%;
     border-radius: 999px;
-    background: linear-gradient(90deg, var(--blue, #3B82F6), var(--purple, #8B5CF6));
+    background: linear-gradient(90deg, var(--blue, #3B82F6), var(--purple, #5891FA));
     box-shadow: 0 0 12px rgba(59, 130, 246, 0.55);
     transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -308,7 +308,7 @@ body {
     padding: 0 30px;
     border: none;
     color: #fff;
-    background: linear-gradient(135deg, var(--blue, #3B82F6), var(--purple, #8B5CF6));
+    background: linear-gradient(135deg, var(--blue, #3B82F6), var(--purple, #5891FA));
     box-shadow: 0 8px 22px rgba(59, 130, 246, 0.30);
 }
 
@@ -350,14 +350,14 @@ body {
     border: none;
     color: #fff;
     font-size: 1rem;
-    background: linear-gradient(135deg, var(--blue, #3B82F6), var(--purple, #8B5CF6));
-    box-shadow: 0 10px 26px rgba(139, 92, 246, 0.35);
+    background: linear-gradient(135deg, var(--blue, #3B82F6), var(--purple, #5891FA));
+    box-shadow: 0 10px 26px rgba(88,145,250,0.35);
 }
 
 .submit-btn:hover {
     transform: translateY(-1px);
     filter: brightness(1.08);
-    box-shadow: 0 12px 32px rgba(139, 92, 246, 0.45);
+    box-shadow: 0 12px 32px rgba(88,145,250,0.45);
 }
 
 /* --- 8. LỖI VALIDATION (JS chèn .step-error trước .btn-group) --- */
@@ -476,7 +476,7 @@ body {
     font-weight: 700;
     font-size: 0.95rem;
     color: #fff;
-    background: linear-gradient(135deg, var(--blue, #3B82F6), var(--purple, #8B5CF6));
+    background: linear-gradient(135deg, var(--blue, #3B82F6), var(--purple, #5891FA));
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }

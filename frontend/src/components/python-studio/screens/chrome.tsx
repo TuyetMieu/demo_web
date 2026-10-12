@@ -61,8 +61,10 @@ export function paragraphs(text?: string): React.ReactNode {
 /** Nhãn nhỏ trên mỗi thẻ: "S2 · Bẫy ngộ nhận". */
 export function eyebrowOf(scr: LessonScreen): { icon: React.ReactNode; label: string } {
   const map: Record<string, { icon: React.ReactNode; label: string }> = {
+    recall: { icon: ICON.swap, label: 'Nhắc lại bài trước' },
     brief: { icon: ICON.book, label: 'Tổng quan bài' },
     context: { icon: ICON.book, label: 'Ngữ cảnh' },
+    motion: { icon: ICON.play, label: 'Code chạy từng bước' },
     explain: { icon: ICON.code, label: 'Giải thích từng dòng' },
     memory: { icon: ICON.swap, label: 'Mô hình bộ nhớ' },
     misconception: { icon: ICON.bulb, label: 'Ngộ nhận' },

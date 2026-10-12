@@ -40,7 +40,7 @@
 
 /* ── Hero ── */
 .edu-cd-hero {
-  border-radius: 24px;
+  border-radius: 16px;
   background: var(--edu-card-bg);
   border: 1px solid var(--edu-card-border);
   box-shadow: var(--edu-card-shadow);
@@ -70,16 +70,16 @@
 }
 .edu-cd-btn.primary {
   background: var(--edu-accent-grad); color: #fff;
-  box-shadow: 0 10px 24px rgba(185,63,240,.3);
+  box-shadow: 0 10px 24px rgba(59,124,244,.3);
 }
-.edu-cd-btn.primary:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.06); box-shadow: 0 14px 30px rgba(185,63,240,.4); }
+.edu-cd-btn.primary:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.06); box-shadow: 0 14px 30px rgba(59,124,244,.4); }
 .edu-cd-btn.primary:disabled { opacity: .65; cursor: default; transform: none; }
 .edu-cd-hero-art {
   width: 220px; height: 158px; flex: none; border-radius: 16px; overflow: hidden;
-  background-color: #221c36;
+  background-color: #1c2536;
   background-image:
     repeating-linear-gradient(115deg, rgba(255,255,255,.07) 0 2px, transparent 2px 9px),
-    linear-gradient(160deg,#2e2554,#181426);
+    linear-gradient(160deg,#273652,#141a26);
   display: flex; align-items: center; justify-content: center;
 }
 /* Ảnh bìa là ảnh thật tỉ lệ 3:2 (13/08/2026), không còn là icon SVG nhỏ —
@@ -115,7 +115,7 @@
   transition: background .15s ease, border-color .15s ease;
 }
 .edu-cd-lesson[data-clickable="1"] { cursor: pointer; }
-.edu-cd-lesson[data-clickable="1"]:hover { border-color: rgba(185,63,240,.3); }
+.edu-cd-lesson[data-clickable="1"]:hover { border-color: rgba(59,124,244,.3); }
 .edu-cd-lesson-icon {
   width: 34px; height: 34px; border-radius: 999px; flex: none;
   display: flex; align-items: center; justify-content: center;
@@ -137,7 +137,7 @@
 
 /* ── Sidebar: Tiến độ của bạn / đăng ký ── */
 .edu-cd-card {
-  border-radius: 22px;
+  border-radius: 14px;
   background: var(--edu-card-bg);
   border: 1px solid var(--edu-card-border);
   box-shadow: var(--edu-card-shadow);

@@ -669,8 +669,8 @@ function skSkillToggle(row) {
   var _hoverPrefetchSetup = false;
 
   var CAT_LABELS = { question: '❓ Câu hỏi', share: '💡 Chia sẻ', discuss: '💬 Thảo luận' };
-  var CAT_COLORS = { question: '#F87171', share: '#FCD34D', discuss: '#A78BFA' };
-  var CAT_BG = { question: 'rgba(248,113,113,0.1)', share: 'rgba(252,211,77,0.1)', discuss: 'rgba(167,139,250,0.1)' };
+  var CAT_COLORS = { question: '#F87171', share: '#FCD34D', discuss: '#88B1FD' };
+  var CAT_BG = { question: 'rgba(248,113,113,0.1)', share: 'rgba(252,211,77,0.1)', discuss: 'rgba(136,177,253,0.1)' };
 
   var REACT_EMOJIS = { like: '👍', love: '❤️', haha: '😂', wow: '😮', sad: '😢', angry: '😡' };
   var REACT_LABELS = { like: 'Thích', love: 'Yêu thích', haha: 'Haha', wow: 'Wow', sad: 'Buồn', angry: 'Phẫn nộ' };
@@ -1028,7 +1028,7 @@ function skSkillToggle(row) {
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
-  var _AVATAR_COLORS = ['#3B82F6', '#8B5CF6', '#F97316', '#10B981', '#EC4899', '#06B6D4', '#F59E0B', '#EF4444'];
+  var _AVATAR_COLORS = ['#3B82F6', '#5891FA', '#F97316', '#10B981', '#EC485E', '#06B6D4', '#F59E0B', '#EF4444'];
   function avatarColor(name) {
     var s = String(name || '?');
     var h = 0;

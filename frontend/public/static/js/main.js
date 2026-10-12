@@ -27,11 +27,8 @@ var levelSuggestions = ["Phù hợp người mới", "Trung cấp", "Nâng cao"]
 
 // Bảng liên kết khóa học → trang bài học
 var COURSE_URLS = {
-  cpp: "/interface",
   python: "/lesson/python",
   python_advanced: "/lesson/python_advanced",
-  java: "/lesson/java",
-  htmlcss: "/lesson/htmlcss",
   db_design: "/lesson/db_design",
   // Hai khoá này ĐÃ có trang học (route động /lesson/[courseId] xử lý cả ba khoá
   // db_design*), nhưng trước đây thiếu ở bảng này nên nút "Tiếp tục học" không
@@ -125,9 +122,9 @@ function _getMermaidTheme() {
                 secondaryColor:        '#011C0E',
                 secondaryBorderColor:  '#4ADE80',
                 secondaryTextColor:    '#BBF7D0',
-                tertiaryColor:         '#0F0520',
-                tertiaryBorderColor:   '#A78BFA',
-                tertiaryTextColor:     '#DDD6FE',
+                tertiaryColor:         '#040E21',
+                tertiaryBorderColor:   '#88B1FD',
+                tertiaryTextColor:     '#D5E4FF',
                 lineColor:             '#475569',
                 edgeLabelBackground:   '#1E293B',
                 clusterBkg:            '#1E293B',
@@ -148,9 +145,9 @@ function _getMermaidTheme() {
             secondaryColor:        '#F0FDF4',
             secondaryBorderColor:  '#34D399',
             secondaryTextColor:    '#065F46',
-            tertiaryColor:         '#F5F3FF',
-            tertiaryBorderColor:   '#A78BFA',
-            tertiaryTextColor:     '#5B21B6',
+            tertiaryColor:         '#F3F7FF',
+            tertiaryBorderColor:   '#88B1FD',
+            tertiaryTextColor:     '#1D54BA',
             lineColor:             '#94A3B8',
             edgeLabelBackground:   '#F8FAFC',
             clusterBkg:            '#FAFAFA',
@@ -336,7 +333,7 @@ function _rmVRenderArrows() {
         + '<marker id="rmva" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">'
         + '<polygon points="0 0,9 3.5,0 7" fill="#38BDF8"/></marker>'
         + '<marker id="rmva-del" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">'
-        + '<polygon points="0 0,9 3.5,0 7" fill="#F472B6"/></marker>'
+        + '<polygon points="0 0,9 3.5,0 7" fill="#F47283"/></marker>'
         + '</defs>';
 
     _rmV.edges.forEach(function(e, ei) {

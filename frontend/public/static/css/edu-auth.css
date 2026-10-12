@@ -16,7 +16,7 @@ html, body {
   font-family: var(--edu-font);
   color: var(--edu-t1);
   background: var(--edu-bg-solid);
-  background-image: var(--edu-bg-image);
+  background-image: var(--edu-bg-image); background-size: var(--edu-bg-size, auto);
   background-attachment: fixed;
 }
 
@@ -28,24 +28,24 @@ html, body {
 .bg-canvas { background: transparent; }
 .grid-overlay, .particles { display: none; }
 .bg-blob { opacity: .22; filter: blur(120px); }
-.bg-blob.b1 { background: radial-gradient(circle, rgba(226,178,250,.9), rgba(226,178,250,0)); }
+.bg-blob.b1 { background: radial-gradient(circle, rgba(176,203,252,.9), rgba(176,203,252,0)); }
 .bg-blob.b2 { background: radial-gradient(circle, rgba(186,210,250,.85), rgba(186,210,250,0)); }
-.bg-blob.b3 { background: radial-gradient(circle, rgba(250,247,190,.8), rgba(250,247,190,0)); }
-.bg-blob.b4 { background: radial-gradient(circle, rgba(214,240,240,.9), rgba(214,240,240,0)); }
+.bg-blob.b3 { background: radial-gradient(circle, rgba(229,51,75,.55), rgba(229,51,75,0)); }
+.bg-blob.b4 { background: radial-gradient(circle, rgba(37,99,235,.6), rgba(37,99,235,0)); }
 
 /* ── Form card ───────────────────────────────────────────────── */
 .card {
   background: var(--edu-card-bg);
   border: 1px solid var(--edu-card-border);
-  border-radius: 24px;
+  border-radius: 16px;
   box-shadow: var(--edu-card-shadow);
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
 }
 
 .logo-icon {
   border-radius: 14px;
-  background: linear-gradient(140deg, #c04af5, #e396fb);
-  box-shadow: 0 8px 20px rgba(185, 63, 240, .32);
+  background: linear-gradient(140deg,#1d4ed8 0%,#2f6df0 55%,#e5334b 135%);
+  box-shadow: 0 8px 20px rgba(37,99,235,.32);
   animation: none;
 }
 .logo-text {
@@ -71,7 +71,7 @@ html, body {
 .field input:focus {
   border-color: var(--edu-accent);
   background: var(--edu-accent-soft);
-  box-shadow: 0 0 0 3px rgba(185, 63, 240, .16);
+  box-shadow: 0 0 0 3px rgba(59,124,244,.16);
 }
 .field.has-error input { border-color: #f0526b; background: rgba(240, 82, 107, .08); }
 .field-icon { color: var(--edu-t5); }
@@ -89,12 +89,12 @@ html, body {
   font-family: var(--edu-font);
   font-weight: 600;
   letter-spacing: 0;
-  box-shadow: 0 10px 24px rgba(185, 63, 240, .3);
+  box-shadow: 0 10px 24px rgba(59,124,244,.3);
 }
 /* the two stacked <span> layers login.inline.js leaves untouched */
 .btn-bg { background: var(--edu-accent-grad); }
-.btn-bg-hover { background: linear-gradient(135deg, #a92fe0, #d97cf2); }
-.btn-main:hover { box-shadow: 0 14px 30px rgba(185, 63, 240, .42); }
+.btn-bg-hover { background: linear-gradient(135deg, #2b6ce4, #79a4f5); }
+.btn-main:hover { box-shadow: 0 14px 30px rgba(59,124,244,.42); }
 
 /* ── Divider + social ────────────────────────────────────────── */
 .divider::before, .divider::after { background: var(--edu-card-border); }
@@ -108,7 +108,7 @@ html, body {
 }
 .btn-social:hover {
   background: var(--edu-accent-soft);
-  border-color: rgba(185, 63, 240, .34);
+  border-color: rgba(59,124,244,.34);
   color: var(--edu-accent-text);
 }
 
@@ -127,19 +127,19 @@ html, body {
 .brand-canvas {
   background: var(--edu-card-bg);
   border: 1px solid var(--edu-card-border);
-  border-radius: 28px;
+  border-radius: 18px;
   box-shadow: var(--edu-card-shadow);
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
 }
 .brand-glow { opacity: .22; }
-.brand-glow--amber { background: #e08cf9; }
-.brand-glow--indigo { background: #7b8ff5; }
-.brand-glow--emerald { background: #9fe0c4; opacity: .16; }
+.brand-glow--amber { background: #ff5a6e; opacity: .14; }
+.brand-glow--indigo { background: #3b82f6; }
+.brand-glow--emerald { background: #2563eb; opacity: .16; }
 
 .brand-canvas-eyebrow {
   color: var(--edu-accent-text);
   background: var(--edu-accent-soft);
-  border: 1px solid rgba(185, 63, 240, .28);
+  border: 1px solid rgba(37,99,235,.28);
 }
 .brand-canvas-dot { background: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, .7); }
 .brand-canvas-title { color: var(--edu-t1); font-weight: 800; letter-spacing: -.03em; }
@@ -156,3 +156,61 @@ html, body {
   background: var(--edu-pill-bg);
   border: 1px solid var(--edu-pill-border);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   ĐỔI CHỖ ĐĂNG NHẬP ⇄ ĐĂNG KÝ
+   /login: form trái · brand phải.  /register: form PHẢI · brand trái
+   (.auth-split--flip). Bấm link sang trang kia: edu-fx.js cho hai khung trượt đổi
+   chỗ (.auth-leaving, khoảng cách đo thật vào --dx) rồi mới chuyển trang. Trang
+   đích đã dựng sẵn ở nền (speculation rules prerender, xem login/register page.tsx)
+   và hai khung ở ĐÚNG chỗ chúng vừa trượt tới, không có hoạt ảnh vào/mờ dần nào —
+   nên lúc đổi trang chỉ là một cú "nhảy" liền mạch, không có nhịp trống.
+   (Đã thử View Transition liên-tài-liệu: làm khung hình đứng yên → bỏ.)
+   ══════════════════════════════════════════════════════════════ */
+.auth-split { align-items: stretch; min-height: 780px; }
+.auth-form-side { display: flex; align-items: center; justify-content: center; position: relative; z-index: 2; }
+/* hai thẻ cao bằng nhau để lúc đổi trang khung không giật chiều cao */
+.auth-form-side .card { width: 100%; min-height: 780px; display: flex; flex-direction: column; justify-content: center; }
+.auth-brand-side { display: flex; }
+.brand-canvas { width: 100%; }
+
+.auth-split--flip { grid-template-columns: minmax(0, 1fr) minmax(0, 500px); }
+.auth-split--flip .auth-brand-side { order: 1; }
+.auth-split--flip .auth-form-side { order: 2; }
+
+/* login.css/register.css có hoạt ảnh vào-trang riêng → tắt để không chớp lúc đổi */
+.card, .brand-canvas { animation: none; }
+
+/* trượt RA (do edu-fx.js bật): đổi chỗ cho nhau, giữ nguyên độ đặc */
+.auth-split.auth-leaving .auth-form-side,
+.auth-split.auth-leaving .auth-brand-side { transition: transform .42s cubic-bezier(.65, 0, .35, 1); }
+.auth-split.auth-leaving .auth-form-side  { transform: translateX(var(--dx, 0px)); }
+.auth-split.auth-leaving .auth-brand-side { transform: translateX(calc(var(--dx, 0px) * -1)); }
+
+@media (max-width: 1023px) {
+  .auth-split { min-height: 0; }
+  .auth-form-side .card { min-height: 0; }
+  .auth-split--flip .auth-form-side { order: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-split.auth-leaving .auth-form-side, .auth-split.auth-leaving .auth-brand-side { transition: none; }
+}
+
+/* ── Logo / tên thương hiệu (bấm để về trang chủ) ─────────────────────────────
+   "Programming" xanh chuyển sắc, "Edu" đỏ — đúng cặp màu chủ đạo, hai cụm tách
+   biệt nên đọc ra tên hai nửa thay vì một dải gradient nhoè. */
+a.logo { text-decoration: none; cursor: pointer; transition: transform .2s ease; }
+a.logo:hover { transform: translateY(-1px); }
+a.logo:hover .logo-icon { box-shadow: 0 10px 26px rgba(37,99,235,.42); }
+a.logo:focus-visible { outline: 2px solid var(--edu-accent); outline-offset: 6px; border-radius: 12px; }
+.logo-text { -webkit-text-fill-color: initial; background: none; letter-spacing: -.025em; font-weight: 800; }
+.logo-text .lt-a {
+  background: linear-gradient(90deg, #1d4ed8 0%, #3b82f6 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.logo-text .lt-b {
+  background: linear-gradient(90deg, #e5334b 0%, #ff5a6e 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+body.dark .logo-text .lt-a { background-image: linear-gradient(90deg, #5b9bff 0%, #8fbcff 100%); }
+body.dark .logo-text .lt-b { background-image: linear-gradient(90deg, #ff5a6e 0%, #ff8a99 100%); }

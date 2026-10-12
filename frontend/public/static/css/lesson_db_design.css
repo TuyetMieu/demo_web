@@ -19,7 +19,7 @@
 
   /* Module accent colors (override per module from JS)
      Module 1 (B1-B6) ER Mapping       → Amber  #F59E0B
-     Module 2 (B7-B13) Normalization   → Indigo #8B5CF6
+     Module 2 (B7-B13) Normalization   → Indigo #5891FA
      Module 3 (B14-B18) App Design     → Emerald #10B981
      Default = primary (cyan) until JS sets the real value */
   --module-accent: var(--primary);
@@ -58,7 +58,7 @@
 
   --streak: #F97316;
 
-  --t-keyword: #C678DD;
+  --t-keyword: #759BE0;
   --t-function: #61AFEF;
   --t-string: #98C379;
   --t-number: #D19A66;
@@ -532,7 +532,7 @@ body.lesson-focus-mode::before {
 
 /* Theory extended (Step 1) — thêm lý thuyết sâu hơn sau primer */
 .theory-extended {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(139, 92, 246, 0.06));
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(88,145,250,0.06));
   border-radius: var(--radius-lg);
   padding: var(--space-4) var(--space-5);
   margin: 20px 0;
@@ -547,7 +547,7 @@ body.lesson-focus-mode::before {
   top: 0;
   bottom: 0;
   width: 3px;
-  background: linear-gradient(180deg, var(--primary), #8B5CF6);
+  background: linear-gradient(180deg, var(--primary), #5891FA);
 }
 
 .theory-extended-label {
@@ -591,7 +591,7 @@ body.lesson-focus-mode::before {
 
 /* Syntax example (Step 1) — 1 ví dụ SQL cụ thể trước MCQ/drag */
 .syntax-example {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.10), rgba(236, 72, 153, 0.06));
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.10), rgba(236,72,94,0.06));
   border-radius: var(--radius-lg);
   padding: var(--space-4) var(--space-5);
   margin: 20px 0;
@@ -606,7 +606,7 @@ body.lesson-focus-mode::before {
   top: 0;
   bottom: 0;
   width: 3px;
-  background: linear-gradient(180deg, var(--warning), #EC4899);
+  background: linear-gradient(180deg, var(--warning), #EC485E);
 }
 
 .syntax-example-label {
@@ -641,7 +641,7 @@ body.lesson-focus-mode::before {
 }
 
 .syntax-example-code .sk-str {
-  color: #F472B6;
+  color: #F47283;
 }
 
 .syntax-example-code .sk-comment {
@@ -1909,8 +1909,8 @@ body.lesson-focus-mode::before {
 }
 
 .drop-line[data-zone="on-line"] {
-  --zone-color: #A855F7;
-  --zone-color-soft: rgba(168, 85, 247, 0.12);
+  --zone-color: #518CFB;
+  --zone-color-soft: rgba(81,140,251,0.12);
 }
 
 .drop-line[data-zone="where-line"] {
@@ -1920,8 +1920,8 @@ body.lesson-focus-mode::before {
 
 .drop-line[data-zone="groupby-line"],
 .drop-line[data-zone="group-line"] {
-  --zone-color: #8B5CF6;
-  --zone-color-soft: rgba(139, 92, 246, 0.12);
+  --zone-color: #5891FA;
+  --zone-color-soft: rgba(88,145,250,0.12);
 }
 
 .drop-line[data-zone="having-line"] {
@@ -1931,8 +1931,8 @@ body.lesson-focus-mode::before {
 
 .drop-line[data-zone="orderby-line"],
 .drop-line[data-zone="order-line"] {
-  --zone-color: #EC4899;
-  --zone-color-soft: rgba(236, 72, 153, 0.12);
+  --zone-color: #EC485E;
+  --zone-color-soft: rgba(236,72,94,0.12);
 }
 
 .drop-line[data-zone="limit-line"] {
@@ -3295,8 +3295,8 @@ body.lesson-focus-mode::before {
   line-height: 1.55;
 }
 .codecademy-layout .instructions-block .context-steps {
-  border-left-color: #8B5CF6;  /* indigo để phân biệt */
-  background: rgba(139, 92, 246, 0.05);
+  border-left-color: #5891FA;  /* indigo để phân biệt */
+  background: rgba(88,145,250,0.05);
 }
 .codecademy-layout .instructions-block .context-example {
   border-left-color: #F59E0B;  /* amber */
@@ -3345,8 +3345,8 @@ body.lesson-focus-mode::before {
   color: var(--primary);
 }
 .codecademy-layout .instructions-block .ctx-tag-steps {
-  background: rgba(139, 92, 246, 0.18);
-  color: #C4B5FD;
+  background: rgba(88,145,250,0.18);
+  color: #B3CEFF;
 }
 .codecademy-layout .instructions-block .ctx-tag-example {
   background: rgba(245, 158, 11, 0.18);
@@ -3983,7 +3983,7 @@ body.lesson-focus-mode::before {
   font-size: 80px;
   z-index: 10004;
   pointer-events: none;
-  filter: drop-shadow(0 0 24px rgba(139, 92, 246, 0.9));
+  filter: drop-shadow(0 0 24px rgba(88,145,250,0.9));
   animation: graduation-bounce 1s var(--ease-out-quart) forwards;
 }
 
@@ -3995,7 +3995,7 @@ body.lesson-focus-mode::before {
   font-size: 20px;
   font-weight: 800;
   white-space: nowrap;
-  background: linear-gradient(90deg, #06B6D4, #8B5CF6, #EC4899);
+  background: linear-gradient(90deg, #06B6D4, #5891FA, #EC485E);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -4052,7 +4052,7 @@ body.lesson-focus-mode::before {
 }
 
 /* Reuse .t-* syntax highlight classes outside .ide-content for MCQ code options */
-.mcq-option .t-keyword { color: #C084FC; font-weight: 600; }
+.mcq-option .t-keyword { color: #81ADFF; font-weight: 600; }
 .mcq-option .t-string  { color: #86EFAC; }
 .mcq-option .t-number  { color: #FCD34D; }
 .mcq-option .t-operator{ color: #94A3B8; }
@@ -4060,7 +4060,7 @@ body.lesson-focus-mode::before {
 
 body.light .mcq-option .mcq-code-option,
 body.light .mcq-option .mcq-diagram-option { background: #F8FAFC; border-color: #E2E8F0; color: #0F172A; }
-body.light .mcq-option .t-keyword { color: #7C3AED; }
+body.light .mcq-option .t-keyword { color: #3677F1; }
 body.light .mcq-option .t-string  { color: #15803D; }
 body.light .mcq-option .t-number  { color: #B45309; }
 
@@ -5016,7 +5016,7 @@ body.light .mcq-option .t-number  { color: #B45309; }
 
   35% {
     transform: scale(1.18);
-    box-shadow: inset 0 0 0 1px rgba(198, 120, 221, 0.9), 0 0 18px rgba(198, 120, 221, 0.7);
+    box-shadow: inset 0 0 0 1px rgba(117,155,224,0.9), 0 0 18px rgba(117,155,224,0.7);
   }
 
   100% {
@@ -6410,7 +6410,7 @@ body.light .mcq-option .t-number  { color: #B45309; }
   gap: 10px;
   margin: 4px auto 12px;
   padding: 6px 14px;
-  background: linear-gradient(90deg, rgba(6, 182, 212, 0.12), rgba(168, 85, 247, 0.12));
+  background: linear-gradient(90deg, rgba(6, 182, 212, 0.12), rgba(81,140,251,0.12));
   border: 1px solid rgba(6, 182, 212, 0.3);
   border-radius: 999px;
   max-width: max-content;
@@ -7685,13 +7685,13 @@ a:focus:not(:focus-visible) {
    showToast dùng .pe-toast class thay thế — xem CSS class ở đầu file) */
 
 /* B2 — Flagship mini-game state classes (used via classList.add/remove) */
-.flagship-match-card{background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;padding:10px var(--space-3);border-radius:6px;cursor:grab;font-size:12px;line-height:1.4;user-select:none}
+.flagship-match-card{background:linear-gradient(135deg,#518cfb,#ec485e);color:#fff;padding:10px var(--space-3);border-radius:6px;cursor:grab;font-size:12px;line-height:1.4;user-select:none}
 .flagship-split-chip{background:#1f2937;border:1px solid #22c55e;border-radius:5px;padding:5px var(--space-2);font-size:12px;cursor:pointer}
 .flagship-flash-tip{position:absolute;bottom:var(--space-3);right:var(--space-3);background:var(--warning);color:#1A1A1A;padding:6px var(--space-3);border-radius:6px;font-size:12px;font-weight:600;z-index:10}
 .flagship-panel-hidden{display:none}
 .flagship-zone-correct{background:rgba(34,197,94,0.15);border:1px solid #22c55e}
 .flagship-zone-wrong{background:rgba(239,68,68,0.15);border:1px solid #ef4444}
-.flagship-hover-purple{background:rgba(168,85,247,0.15)}
+.flagship-hover-purple{background:rgba(81,140,251,0.15)}
 .flagship-hover-green{background:rgba(34,197,94,0.15)}
 .flagship-hover-dark{background:#0e1424}
 .flagship-placed-correct{background:rgba(34,197,94,0.2);border:1px solid #22c55e}
@@ -8665,8 +8665,8 @@ a:focus:not(:focus-visible) {
   padding: 1px;
   background: linear-gradient(135deg,
     rgba(6, 182, 212, 0.45),
-    rgba(168, 85, 247, 0.35) 40%,
-    rgba(236, 72, 153, 0.25) 70%,
+    rgba(81,140,251,0.35) 40%,
+    rgba(236,72,94,0.25) 70%,
     rgba(6, 182, 212, 0.45));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
@@ -8751,7 +8751,7 @@ body.module-1 .lesson-hero::after {
 body.module-2 .lesson-hero::after {
   background: linear-gradient(135deg,
     rgba(99, 102, 241, 0.50),
-    rgba(168, 85, 247, 0.30) 40%,
+    rgba(81,140,251,0.30) 40%,
     rgba(99, 102, 241, 0.50));
   background-size: 200% 200%;
 }
@@ -9251,9 +9251,9 @@ body.module-3 .drop-line { --zone-color-default: #10B981; }
 
 /* v2: tô màu cú pháp query.sql như Step 4 (keyword tím, số hồng, string xanh) — dễ nhìn + "trông như editor thật" */
 .step3-ide .ide-content { color: #dbe4f0; }
-.step3-ide .ide-content .t-keyword  { color: #C084FC; font-weight: 700; }
+.step3-ide .ide-content .t-keyword  { color: #81ADFF; font-weight: 700; }
 .step3-ide .ide-content .t-string   { color: #86EFAC; }
-.step3-ide .ide-content .t-number   { color: #F9A8D4; }
+.step3-ide .ide-content .t-number   { color: #F9A8B3; }
 .step3-ide .ide-content .t-operator { color: #93C5FD; }
 .step3-ide .ide-content .t-comment  { color: #6b7a90; font-style: italic; }
 
@@ -9794,8 +9794,8 @@ body.module-3 .drop-line { --zone-color-default: #10B981; }
 .town-station[data-zone="from-line"] .town-station-tag { color: #fde68a; }
 .town-station[data-zone="where-line"] .town-station-tag { color: #a7f3d0; }
 .town-station[data-zone="select-line"] .town-station-tag { color: #a5f3fc; }
-.town-station[data-zone="group-line"] .town-station-tag { color: #c4b5fd; }
-.town-station[data-zone="order-line"] .town-station-tag { color: #fbcfe8; }
+.town-station[data-zone="group-line"] .town-station-tag { color: #b3ceff; }
+.town-station[data-zone="order-line"] .town-station-tag { color: #fbcfd5; }
 .town-station[data-zone="having-line"] .town-station-tag { color: #fdba74; }
 .town-station:not([data-zone]) .town-station-tag { color: #cbd5e1; }
 
@@ -9979,8 +9979,8 @@ body.module-3 .drop-line { --zone-color-default: #10B981; }
 .town-station[data-zone="from-line"].active .qnode-hex   { color: #FBBF24; }
 .town-station[data-zone="where-line"].active .qnode-hex  { color: #34D399; }
 .town-station[data-zone="select-line"].active .qnode-hex { color: #22D3EE; }
-.town-station[data-zone="group-line"].active .qnode-hex  { color: #A78BFA; }
-.town-station[data-zone="order-line"].active .qnode-hex   { color: #F472B6; }
+.town-station[data-zone="group-line"].active .qnode-hex  { color: #88B1FD; }
+.town-station[data-zone="order-line"].active .qnode-hex   { color: #F47283; }
 .town-station[data-zone="having-line"].active .qnode-hex { color: #FB923C; }
 .town-station.active .town-station-bldg { transform: scale(1.15); }
 .town-station.done .town-station-bldg { opacity: 0.85; }
@@ -10418,8 +10418,8 @@ body.module-3 .drop-line { --zone-color-default: #10B981; }
 .pv-node--scan    .pv-op { color: #fcd34d; }
 .pv-node--filter  { border-color: rgba(52, 211, 153, .5);  background: rgba(52, 211, 153, .08); }
 .pv-node--filter  .pv-op { color: #6ee7b7; }
-.pv-node--project { border-color: rgba(167, 139, 250, .5); background: rgba(167, 139, 250, .08); }
-.pv-node--project .pv-op { color: #c4b5fd; }
+.pv-node--project { border-color: rgba(136,177,253,.5); background: rgba(136,177,253,.08); }
+.pv-node--project .pv-op { color: #b3ceff; }
 .pv-node--join    { border-color: rgba(56, 189, 248, .5);  background: rgba(56, 189, 248, .08); }
 .pv-node--join    .pv-op { color: #7dd3fc; }
 .pv-edge {

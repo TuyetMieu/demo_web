@@ -155,7 +155,7 @@ body.dark .lang-select { background: var(--bg); border-color: var(--card-border)
 }
 .prof-hero-bg {
   height: 90px;
-  background: linear-gradient(110deg, #2563EB 0%, #7C3AED 45%, #DC2626 100%);
+  background: linear-gradient(110deg, #2563EB 0%, #3677F1 45%, #DC2626 100%);
 }
 .prof-hero-body {
   display: flex; align-items: flex-end; gap: 20px;

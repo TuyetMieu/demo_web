@@ -24,25 +24,25 @@
   --st-info-line:   rgba(2,132,199,.40);
 
   /* ── khối code (tối ở cả hai chế độ) ──────────────────────── */
-  --st-code-bg:     #221c36;
+  --st-code-bg:     #0d1424;
   --st-code-radius: 16px;
   --st-code-gutter: rgba(255,255,255,.28);
-  --st-syn-keyword: #c792ea;
+  --st-syn-keyword: #ff6b81;
   --st-syn-string:  #ecc48d;
   --st-syn-number:  #f78c6c;
-  --st-syn-comment: #6b6880;
-  --st-syn-plain:   #e6e3f0;
+  --st-syn-comment: #6d7b99;
+  --st-syn-plain:   #e3e8f0;
 
   /* ── kéo thả — dẫn xuất từ tầng 1, không viết lại hex ─────── */
   --st-chip-bg:     var(--edu-pill-bg);
   --st-chip-border: var(--edu-pill-border);
   --st-slot-bg:     var(--edu-accent-soft);
-  --st-slot-border: rgba(185,63,240,.40);
-  --st-drag-shadow: 0 12px 28px rgba(185,63,240,.28);
+  --st-slot-border: rgba(59,124,244,.40);
+  --st-drag-shadow: 0 12px 28px rgba(59,124,244,.28);
 
   /* ── bóng đổ nội bộ Studio ────────────────────────────────── */
-  --st-shadow-sm:   0 2px 6px rgba(34,29,51,.08);
-  --st-shadow-md:   0 6px 18px rgba(34,29,51,.10);
+  --st-shadow-sm:   0 2px 6px rgba(29,37,51,.08);
+  --st-shadow-md:   0 6px 18px rgba(29,37,51,.10);
 
   /* ── kích thước khung màn học ─────────────────────────────── */
   --st-chrome-h:    56px;
@@ -51,12 +51,12 @@
   --st-card-radius: 22px;
 
   /* ── khung bài học PE v3 (Figma "B01–B20 bản một màn") ────── */
-  --st-page-bg:     #f5f3fa;   /* nền phẳng của màn học */
-  --st-track:       #ddd7e9;   /* rãnh thanh tiến độ */
-  --st-streak-bg:   #f6e6fd;
-  --st-predict-bg:  #f1e8fb;   /* thẻ DỰ ĐOÁN */
-  --st-code-bar:    #302842;   /* thanh tên file trên khối code */
-  --st-code-meta:   #c8beda;   /* chữ main.py / PYTHON 3 */
+  --st-page-bg:     #eaeff6;   /* nền phẳng của màn học */
+  --st-track:       #d3dcec;   /* rãnh thanh tiến độ */
+  --st-streak-bg:   #e4ecfb;
+  --st-predict-bg:  #e8effb;   /* thẻ DỰ ĐOÁN */
+  --st-code-bar:    #16213a;   /* thanh tên file trên khối code */
+  --st-code-meta:   #bec8da;   /* chữ main.py / PYTHON 3 */
   --st-reflect-bg:  #e9f7f0;   /* thẻ GIẢI THÍCH TRƯỚC KHI XEM ĐÁP ÁN */
   --st-reflect-text:#314a3a;
   --st-code-edge:   transparent; /* viền khối code, chỉ cần ở chế độ tối */
@@ -67,17 +67,17 @@ body.dark {
   --st-err-bg:      rgba(240,82,107,.18);
   --st-warn-bg:     rgba(245,158,11,.18);
   --st-info-bg:     rgba(2,132,199,.18);
-  --st-code-bg:     #16121f;
-  --st-syn-plain:   #cfcbdd;
+  --st-code-bg:     #080d18;
+  --st-syn-plain:   #cbd1dd;
   --st-shadow-sm:   0 2px 6px rgba(0,0,0,.40);
   --st-shadow-md:   0 6px 18px rgba(0,0,0,.45);
 
   --st-page-bg:     var(--edu-bg-solid);
   --st-track:       rgba(255,255,255,.12);
-  --st-streak-bg:   rgba(185,63,240,.20);
-  --st-predict-bg:  rgba(185,63,240,.14);
-  --st-code-bar:    #221a31;
-  --st-code-meta:   #a79fbd;
+  --st-streak-bg:   rgba(79,141,255,.18);
+  --st-predict-bg:  rgba(79,141,255,.12);
+  --st-code-bar:    #0f1830;
+  --st-code-meta:   #9faabd;
   --st-reflect-bg:  rgba(34,197,94,.14);
   --st-reflect-text:#bfe6cc;
   --st-code-edge:   rgba(255,255,255,.10);

@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { apiFetch, asList, findEnrollment } from '@/lib/api';
+import { fetchMotion, motionFor, recallFor, type MotionFile } from '@/lib/lesson-motion';
 import { buildScreens, type StudioLesson as Lesson } from '@/lib/studio-lesson';
 
 export type Award = { name?: string | null; description?: string | null; icon?: string | null };
@@ -19,6 +20,7 @@ export type LessonMeta = { title: string; xpReward: number };
 
 export type LessonData = {
   lesson: Lesson | null;
+  motionFile: MotionFile | null;
   meta: LessonMeta | null;
   user: LessonUser | null;
   streak: number;
@@ -58,6 +60,8 @@ export function useLessonData({
   const [streak, setStreak] = useState(0);
   const [totalLessons, setTotalLessons] = useState(0);
   const [enrolled, setEnrolled] = useState(false);
+  /** Hoạt hình sinh từ ví dụ minh hoạ (scripts/pe-v3/motion.py). Thiếu file thì bài chạy như cũ. */
+  const [motionFile, setMotionFile] = useState<MotionFile | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [empty, setEmpty] = useState(false);
@@ -93,6 +97,8 @@ export function useLessonData({
     setLoading(true);
     setLoadError('');
     setEmpty(false);
+    // Tải song song với bài; lỗi thì fetchMotion trả null chứ không ném.
+    const motionPromise = fetchMotion(courseId);
     try {
       const [profile, enrollments] = await Promise.all([json('/api/user'), json('/api/enrolled')]);
       const enrollment = findEnrollment(asList(enrollments, 'enrolled'), courseId);
@@ -124,12 +130,18 @@ export function useLessonData({
 
       // A lesson row can exist with no studio content yet (or only the legacy
       // {text} wrapper). Say so plainly instead of rendering an empty shell.
-      const list = content ? buildScreens(content) : [];
-      if (!content || !list.length) {
+      // Bài "rỗng" xét trên nội dung thật: màn nhắc lại bài trước không được che việc này.
+      if (!content || !buildScreens(content).length) {
         setEmpty(true);
         setLoading(false);
         return;
       }
+      const loadedMotion = await motionPromise;
+      setMotionFile(loadedMotion);
+      const list = buildScreens(content, {
+        motion: Boolean(motionFor(loadedMotion, lessonNo, content.step_1?.code?.source)),
+        recall: Boolean(recallFor(loadedMotion, lessonNo)),
+      });
       setLesson(content);
       onDraftReady?.(content, Number(profile.id), list.length);
     } catch (error) {
@@ -202,6 +214,7 @@ export function useLessonData({
 
   return {
     lesson,
+    motionFile,
     meta,
     user,
     streak,

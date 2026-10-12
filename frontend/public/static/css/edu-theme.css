@@ -16,50 +16,56 @@
 :root {
   --edu-font: 'Poppins', system-ui, sans-serif;
 
-  /* accent — identical in light & dark */
-  --edu-accent: #b93ff0;
-  --edu-accent-2: #c04af5;
-  --edu-accent-3: #e08cf9;
-  --edu-accent-grad: linear-gradient(90deg, var(--edu-accent-2), var(--edu-accent-3));
-  --edu-accent-text: #a34fd0;
+  /* accent — xanh công nghệ (chủ đạo) + đỏ (nhấn phụ). Cùng một bộ ở sáng & tối */
+  --edu-accent: #2563eb;
+  --edu-accent-2: #1f5fe0;
+  --edu-accent-3: #4f8dff;
+  --edu-accent-grad: linear-gradient(90deg, #1d4ed8, #3b82f6);
+  --edu-accent-text: #1d4ed8;
+  --edu-red: #e5334b;
+  --edu-red-2: #ff5a6e;
+  --edu-red-soft: rgba(229,51,75,.10);
+  /* lớp bóng phủ lên card: vệt sáng góc trên-trái + ám xanh/đỏ rất nhạt góc dưới-phải */
+  --edu-sheen:
+    linear-gradient(145deg, rgba(255,255,255,.95) 0%, rgba(255,255,255,0) 52%),
+    linear-gradient(325deg, rgba(37,99,235,.08) 0%, rgba(229,51,75,.04) 100%);
+  --edu-spot-rgb: 37,99,235;
 
   /* light theme (default) */
+  /* nền: lưới kỹ thuật mảnh + hai quầng sáng rất nhạt (xanh dưới-trái, đỏ trên-phải) */
   --edu-bg-image:
-    radial-gradient(70% 55% at 78% 12%, rgba(250,247,190,.75) 0%, rgba(250,247,190,0) 60%),
-    radial-gradient(55% 45% at 96% 78%, rgba(226,178,250,.85) 0%, rgba(226,178,250,0) 62%),
-    radial-gradient(50% 40% at 52% 88%, rgba(186,210,250,.7) 0%, rgba(186,210,250,0) 65%),
-    radial-gradient(60% 60% at 6% 20%, rgba(214,240,240,.9) 0%, rgba(214,240,240,0) 70%),
-    linear-gradient(120deg,#e7f4f4 0%,#eef1fa 42%,#f4ecfa 72%,#f6e9f8 100%);
-  --edu-bg-solid: #eef3f6;
-  --edu-t1: #221d33;
-  --edu-t2: #4b4661;
-  --edu-t3: #6b6880;
-  --edu-t4: #6b677f;
-  --edu-t5: #6e6a85;
-  --edu-t6: #5d5875;
-  --edu-card-bg: rgba(255,255,255,.55);
-  --edu-card-border: rgba(255,255,255,.85);
-  --edu-card-shadow: 0 10px 30px rgba(120,110,170,.10);
-  --edu-pill-bg: rgba(255,255,255,.55);
-  --edu-pill-border: rgba(255,255,255,.85);
-  --edu-panel-bg: rgba(255,255,255,.96);
-  /* Đặc 100% (không alpha) — cùng tông --edu-panel-bg nhưng KHÔNG còn mờ dù
-     1 chút. Dùng cho panel `position:fixed` đè thẳng lên nội dung trang (bảng
-     thông báo/menu người dùng ở khổ điện thoại): đã đo thật — 96% mờ tưởng
-     như đặc nhưng vẫn đủ cho chữ tiêu đề ĐẬM/LỚN phía sau lộ ra mờ mờ, lẫn
-     vào chữ thông báo. Test cô lập (tô panel màu đỏ 100%) xác nhận: hễ còn
-     alpha<1 dù chỉ 4% là còn lộ trên nền tương phản cao. */
+    radial-gradient(60% 55% at 6% 100%, rgba(37,99,235,.22) 0%, rgba(37,99,235,0) 70%),
+    radial-gradient(48% 46% at 100% 0%, rgba(229,51,75,.14) 0%, rgba(229,51,75,0) 72%),
+    radial-gradient(42% 40% at 62% 38%, rgba(96,150,255,.12) 0%, rgba(96,150,255,0) 72%),
+    linear-gradient(160deg,#f5f8fd 0%,#e6ecf8 100%);
+  --edu-bg-size: auto;
+  --edu-bg-solid: #eaeff6;
+  --edu-t1: #0f1b33;
+  --edu-t2: #2b3a57;
+  --edu-t3: #55637f;
+  --edu-t4: #5a6783;
+  --edu-t5: #62708b;
+  --edu-t6: #3e4d6b;
+  --edu-card-bg: rgba(255,255,255,.82);
+  --edu-card-border: rgba(20,50,110,.13);
+  --edu-card-shadow: 0 1px 2px rgba(15,35,80,.06), 0 8px 24px rgba(15,35,80,.07);
+  --edu-pill-bg: rgba(255,255,255,.8);
+  --edu-pill-border: rgba(20,50,110,.14);
+  --edu-panel-bg: rgba(255,255,255,.98);
+  /* Đặc 100% (không alpha) — dùng cho panel `position:fixed` đè lên nội dung
+     (bảng thông báo/menu người dùng ở khổ điện thoại): còn alpha<1 dù 4% là còn
+     lộ chữ phía sau. */
   --edu-panel-bg-solid: #ffffff;
-  --edu-panel-border: rgba(255,255,255,.9);
-  --edu-panel-shadow: 0 20px 50px rgba(90,80,140,.24);
-  --edu-track-bg: rgba(140,130,180,.2);
-  --edu-sidebar-bg: rgba(255,255,255,.5);
-  --edu-sidebar-border: rgba(160,150,190,.28);
-  --edu-nav-bg: rgba(255,255,255,.72);
-  --edu-accent-soft: rgba(185,63,240,.10);
-  --edu-accent-soft-strong: rgba(185,63,240,.14);
-  --edu-input-bg: rgba(255,255,255,.6);
-  --edu-input-border: rgba(255,255,255,.9);
+  --edu-panel-border: rgba(20,50,110,.16);
+  --edu-panel-shadow: 0 18px 44px rgba(15,35,80,.20);
+  --edu-track-bg: rgba(37,99,235,.14);
+  --edu-sidebar-bg: rgba(255,255,255,.78);
+  --edu-sidebar-border: rgba(20,50,110,.14);
+  --edu-nav-bg: rgba(255,255,255,.88);
+  --edu-accent-soft: rgba(37,99,235,.10);
+  --edu-accent-soft-strong: rgba(37,99,235,.16);
+  --edu-input-bg: rgba(255,255,255,.9);
+  --edu-input-border: rgba(20,50,110,.18);
 
   /* ── Bridge to theme.css ──────────────────────────────────────
      theme.css declares its surface/text tokens dark-first on :root
@@ -120,7 +126,7 @@
    overriding its own light rule further up the file */
 .mini-rm-canvas {
   background-color: rgba(255,255,255,.42);
-  background-image: radial-gradient(circle, rgba(150,140,190,.42) 1.2px, transparent 1.2px);
+  background-image: radial-gradient(circle, rgba(140,158,190,.42) 1.2px, transparent 1.2px);
   background-size: 20px 20px;
   border: 1.5px solid var(--edu-card-border);
   border-radius: 14px;
@@ -140,35 +146,42 @@ body.dark .mini-rm-canvas {
 
 body.dark {
   --edu-bg-image:
-    radial-gradient(70% 55% at 78% 10%, rgba(120,70,190,.28) 0%, rgba(120,70,190,0) 62%),
-    radial-gradient(55% 45% at 96% 80%, rgba(185,63,240,.20) 0%, rgba(185,63,240,0) 64%),
-    radial-gradient(50% 40% at 46% 92%, rgba(60,90,190,.20) 0%, rgba(60,90,190,0) 66%),
-    radial-gradient(60% 60% at 4% 18%, rgba(40,90,110,.28) 0%, rgba(40,90,110,0) 70%),
-    linear-gradient(120deg,#141220 0%,#171525 44%,#1b1526 74%,#1d1424 100%);
-  --edu-bg-solid: #131019;
-  --edu-t1: #ece9f5;
-  --edu-t2: #c7c3d6;
-  --edu-t3: #9a96ac;
-  --edu-t4: #918ca5;
-  --edu-t5: #8a85a0;
-  --edu-t6: #a8a4bb;
-  --edu-card-bg: rgba(255,255,255,.045);
-  --edu-card-border: rgba(255,255,255,.09);
-  --edu-card-shadow: 0 10px 30px rgba(0,0,0,.42);
-  --edu-pill-bg: rgba(255,255,255,.045);
-  --edu-pill-border: rgba(255,255,255,.09);
-  --edu-panel-bg: rgba(32,28,46,.97);
-  --edu-panel-bg-solid: #201c2e;
-  --edu-panel-border: rgba(255,255,255,.10);
-  --edu-panel-shadow: 0 20px 50px rgba(0,0,0,.55);
-  --edu-track-bg: rgba(255,255,255,.13);
-  --edu-sidebar-bg: rgba(255,255,255,.03);
-  --edu-sidebar-border: rgba(255,255,255,.09);
-  --edu-nav-bg: rgba(19,16,25,.82);
-  --edu-accent-soft: rgba(185,63,240,.14);
-  --edu-accent-soft-strong: rgba(185,63,240,.18);
-  --edu-input-bg: rgba(255,255,255,.05);
-  --edu-input-border: rgba(255,255,255,.09);
+    radial-gradient(60% 55% at 6% 100%, rgba(40,100,255,.26) 0%, rgba(40,100,255,0) 70%),
+    radial-gradient(48% 46% at 100% 0%, rgba(255,70,95,.17) 0%, rgba(255,70,95,0) 72%),
+    radial-gradient(42% 40% at 62% 38%, rgba(60,110,255,.10) 0%, rgba(60,110,255,0) 72%),
+    linear-gradient(160deg,#0b1120 0%,#060910 100%);
+  --edu-sheen:
+    linear-gradient(145deg, rgba(130,175,255,.13) 0%, rgba(130,175,255,0) 50%),
+    linear-gradient(325deg, rgba(79,141,255,.10) 0%, rgba(255,90,110,.07) 100%);
+  --edu-spot-rgb: 100,160,255;
+  --edu-bg-solid: #080c15;
+  --edu-accent: #4f8dff;
+  --edu-accent-grad: linear-gradient(90deg, #2f6df0, #6aa5ff);
+  --edu-accent-text: #7db0ff;
+  --edu-red-soft: rgba(255,90,110,.14);
+  --edu-t1: #e8eefb;
+  --edu-t2: #c3cde3;
+  --edu-t3: #93a1bf;
+  --edu-t4: #8d9bb9;
+  --edu-t5: #8593b2;
+  --edu-t6: #a9b6d1;
+  --edu-card-bg: rgba(16,24,40,.78);
+  --edu-card-border: rgba(120,160,255,.15);
+  --edu-card-shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.38);
+  --edu-pill-bg: rgba(22,32,52,.8);
+  --edu-pill-border: rgba(120,160,255,.17);
+  --edu-panel-bg: rgba(14,21,36,.98);
+  --edu-panel-bg-solid: #0e1524;
+  --edu-panel-border: rgba(120,160,255,.2);
+  --edu-panel-shadow: 0 20px 50px rgba(0,0,0,.6);
+  --edu-track-bg: rgba(120,160,255,.18);
+  --edu-sidebar-bg: rgba(10,16,28,.82);
+  --edu-sidebar-border: rgba(120,160,255,.14);
+  --edu-nav-bg: rgba(8,12,21,.88);
+  --edu-accent-soft: rgba(79,141,255,.15);
+  --edu-accent-soft-strong: rgba(79,141,255,.22);
+  --edu-input-bg: rgba(18,28,48,.85);
+  --edu-input-border: rgba(120,160,255,.2);
 
   /* The theme.css bridge must be restated here, not only on :root. A custom
      property's var() is substituted on the element that DECLARES it and only
@@ -203,13 +216,14 @@ body.dark {
 body {
   font-family: var(--edu-font);
   background: var(--edu-bg-solid);
-  background-image: var(--edu-bg-image);
+  background-image: var(--edu-bg-image); background-size: var(--edu-bg-size, auto);
+  background-size: var(--edu-bg-size, auto);
   background-attachment: fixed;
   color: var(--edu-t1);
 }
-body.dark { background: var(--edu-bg-solid); background-image: var(--edu-bg-image); }
+body.dark { background: var(--edu-bg-solid); background-image: var(--edu-bg-image); background-size: var(--edu-bg-size, auto); background-size: var(--edu-bg-size, auto); }
 a { color: var(--edu-accent); }
-a:hover { color: #8e2bc0; }
+a:hover { color: #275ec4; }
 
 /* ══════════════════════════════════════════════════════════════
    SIDEBAR — .topbar is repurposed from a fixed 50px top strip into
@@ -255,10 +269,10 @@ a:hover { color: #8e2bc0; }
 .edu-sidebar-shell .brand-always::before {
   content: 'P';
   width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0;
-  background: linear-gradient(140deg,#c04af5,#e396fb);
+  background: linear-gradient(140deg,#1d4ed8 0%,#2f6df0 55%,#e5334b 135%);
   color: #fff; font-weight: 800; font-size: 20px;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 8px 20px rgba(185,63,240,.32);
+  box-shadow: 0 8px 20px rgba(37,99,235,.32);
 }
 
 .edu-sidebar-shell .topbar-nav {
@@ -390,11 +404,11 @@ body.dark .edu-header-bar .suggestion-pill.active { background: var(--edu-accent
   box-shadow: var(--edu-panel-shadow);
   border-radius: 18px;
 }
-.edu-header-bar .bell-panel-header, .edu-header-bar .user-dropdown-divider { border-color: rgba(160,150,190,.2); }
+.edu-header-bar .bell-panel-header, .edu-header-bar .user-dropdown-divider { border-color: rgba(150,164,190,.2); }
 body.dark .edu-header-bar .bell-panel-header, body.dark .edu-header-bar .user-dropdown-divider { border-color: rgba(255,255,255,.09); }
 .edu-header-bar .bell-panel-title, .edu-header-bar .udh-name { color: var(--edu-t1); }
 .edu-header-bar .bell-mark-all { color: var(--edu-accent-text); }
-.edu-header-bar .bell-item { border-color: rgba(160,150,190,.14); }
+.edu-header-bar .bell-item { border-color: rgba(150,164,190,.14); }
 body.dark .edu-header-bar .bell-item { border-color: rgba(255,255,255,.07); }
 /* dark-mode.css có `body.dark .bell-item.unread:hover { background: rgba(59,130,246,.2) }`
    và `body.dark .bell-item-icon { background: var(--card-border) }` /
@@ -403,9 +417,9 @@ body.dark .edu-header-bar .bell-item { border-color: rgba(255,255,255,.07); }
    nâng specificity vượt qua các rule 2-class phía trên, nên icon chuông hiện
    màu xanh cũ thay vì tím accent. Thêm bản body.dark cho cả ba. */
 .edu-header-bar .bell-item.unread,
-body.dark .edu-header-bar .bell-item.unread { background: rgba(185,63,240,.055); }
+body.dark .edu-header-bar .bell-item.unread { background: rgba(59,124,244,.055); }
 .edu-header-bar .bell-item.unread:hover,
-body.dark .edu-header-bar .bell-item.unread:hover { background: rgba(185,63,240,.09); }
+body.dark .edu-header-bar .bell-item.unread:hover { background: rgba(59,124,244,.09); }
 .edu-header-bar .bell-item-icon,
 body.dark .edu-header-bar .bell-item-icon,
 body.dark .edu-header-bar .bell-item.unread .bell-item-icon { background: var(--edu-accent-soft); }
@@ -427,13 +441,13 @@ body.dark .edu-header-bar .user-chip:hover,
 body.dark .edu-header-bar .user-chip.open { background: transparent; border-color: transparent; }
 .edu-header-bar .chip-avatar {
   width: 52px; height: 52px; font-size: 16px;
-  background: linear-gradient(140deg,#c9a7f5,#a8d5f2);
+  background: linear-gradient(140deg,#a5c2f7,#a8d5f2);
   border: 2px solid rgba(255,255,255,.9);
 }
 body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
 .edu-header-bar .user-chip .chip-name { display: none; }
 .edu-header-bar .user-chip #chip-arrow { color: var(--edu-t1); }
-.edu-header-bar .udh-avatar { width: 40px; height: 40px; font-size: 15px; background: linear-gradient(140deg,#c9a7f5,#a8d5f2); }
+.edu-header-bar .udh-avatar { width: 40px; height: 40px; font-size: 15px; background: linear-gradient(140deg,#a5c2f7,#a8d5f2); }
 .edu-header-bar .user-dropdown-item { color: var(--edu-t3); }
 .edu-header-bar .user-dropdown-item:hover { background: var(--edu-accent-soft); color: var(--edu-accent-text); }
 .edu-header-bar .user-dropdown-item.danger:hover { background: rgba(240,82,107,.12); color: #f0526b; }
@@ -454,13 +468,69 @@ body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
   background: var(--edu-card-bg) !important;
   border: 1px solid var(--edu-card-border) !important;
   box-shadow: var(--edu-card-shadow) !important;
-  border-radius: 22px !important;
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-radius: 14px !important;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+
+/* Bóng phủ gradient + đốm sáng theo chuột trên card. --cx/--cy do edu-fx.js đặt khi
+   rê chuột; --spot-a là số đã đăng ký (@property) nên chuyển 0 → .16 mượt khi hover. */
+@property --spot-a { syntax: '<number>'; inherits: false; initial-value: 0; }
+.section-card, .dash-hero, .study-cal-card, .mini-rm-card, .lb-card, .dash-progress-card,
+.edu-lb-teaser, .edu-leader-side, .settings-section, .sec-lang-card,
+.prof-section, .prof-xp-card, .cd-block, .cd-card,
+.stat-card, .prof-stat-card, .cd-cs, .course-card, .sk-set,
+.forum-post-card, .forum-create-box {
+  background-image:
+    radial-gradient(260px circle at var(--cx, 50%) var(--cy, 50%), rgba(var(--edu-spot-rgb), var(--spot-a)) 0%, transparent 70%),
+    var(--edu-sheen) !important;
+  transition: --spot-a .3s ease, transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease, border-color .3s ease;
+}
+.section-card:hover, .study-cal-card:hover, .mini-rm-card:hover, .lb-card:hover, .dash-progress-card:hover,
+.edu-lb-teaser:hover, .cd-block:hover, .cd-card:hover, .stat-card:hover, .prof-stat-card:hover,
+.course-card:hover, .sk-set:hover, .forum-post-card:hover { --spot-a: .16; border-color: rgba(var(--edu-spot-rgb), .38) !important; }
+body.dark .section-card:hover, body.dark .course-card:hover, body.dark .stat-card:hover { --spot-a: .2; }
+.dash-hero { background-image: none !important; }
+
+/* course card: nâng nhẹ + nghiêng 3D theo chuột (edu-fx.js đặt --rx/--ry) */
+.course-card {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--ty, 0px));
+  will-change: transform;
+}
+.course-card:hover { --ty: -4px; box-shadow: 0 18px 40px rgba(var(--edu-spot-rgb), .20) !important; }
+
+/* nút chính: hiệu ứng "hút" nhẹ về phía chuột (--mx/--my) + ánh sáng quét khi hover */
+.fx-magnet { transform: translate(var(--tx, 0px), var(--ty2, 0px)); transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease; }
+.fx-magnet:active { transform: translate(var(--tx, 0px), var(--ty2, 0px)) scale(.97); }
+
+/* đốm sáng toàn trang đi theo chuột: xanh lớn + đỏ nhỏ, trễ nhịp nhau.
+   Vẽ bằng html::before/::after (không chèn DOM → không gây lệch hydration);
+   edu-fx.js chỉ cập nhật --ax/--ay/--bx/--by trên <html>. z-index:-1 = nằm trên
+   nền, dưới mọi nội dung. */
+html::before, html::after {
+  content: ''; position: fixed; left: 0; top: 0; pointer-events: none; z-index: -1;
+  border-radius: 50%; opacity: 0; transition: opacity .35s ease; will-change: transform;
+}
+html::before {
+  width: 440px; height: 440px;
+  transform: translate3d(calc(var(--ax, 50vw) - 220px), calc(var(--ay, 30vh) - 220px), 0);
+  background: radial-gradient(circle, rgba(37,99,235,.42) 0%, rgba(37,99,235,.16) 38%, rgba(37,99,235,0) 70%);
+}
+html::after {
+  width: 300px; height: 300px;
+  transform: translate3d(calc(var(--bx, 50vw) - 150px), calc(var(--by, 30vh) - 150px), 0);
+  background: radial-gradient(circle, rgba(229,51,75,.36) 0%, rgba(229,51,75,.13) 40%, rgba(229,51,75,0) 70%);
+}
+html.fx-on::before, html.fx-on::after { opacity: 1; }
+html:has(body.dark)::before { background: radial-gradient(circle, rgba(70,130,255,.5) 0%, rgba(70,130,255,.2) 38%, rgba(70,130,255,0) 70%); }
+html:has(body.dark)::after { background: radial-gradient(circle, rgba(255,80,105,.44) 0%, rgba(255,80,105,.16) 40%, rgba(255,80,105,0) 70%); }
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  html::before, html::after { display: none; }
+  .course-card { transform: none; }
 }
 
 /* ── Dashboard hero + leaderboard teaser ─────────────────────── */
 .dash-hero { color: #fff !important; }
-.dash-hero-overlay { background: linear-gradient(120deg, rgba(185,63,240,.85), rgba(91,141,239,.75)) !important; }
+.dash-hero-overlay { background: linear-gradient(120deg, rgba(20,60,170,.94) 0%, rgba(37,99,235,.88) 55%, rgba(229,51,75,.86) 130%) !important; }
 .dash-hero-btn { background: #fff !important; color: var(--edu-accent-text) !important; border-radius: 999px !important; box-shadow: 0 10px 24px rgba(0,0,0,.18) !important; }
 
 .edu-lb-teaser { display: flex; flex-direction: column; gap: 10px; padding: 26px 28px; text-decoration: none; cursor: pointer; transition: transform .15s ease; }
@@ -477,7 +547,7 @@ body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
 .lb-tab { border-radius: 999px !important; background: var(--edu-pill-bg); border: 1px solid var(--edu-pill-border); color: var(--edu-t3); }
 .lb-tab.active { background: var(--edu-accent-grad) !important; color: #fff !important; border-color: transparent !important; }
 .lb-row, .lb-me { border-radius: 16px !important; }
-.lb-row-me, .lb-me { background: var(--edu-accent-soft) !important; border: 1px solid rgba(185,63,240,.32) !important; }
+.lb-row-me, .lb-me { background: var(--edu-accent-soft) !important; border: 1px solid rgba(37,99,235,.32) !important; }
 .lb-name { color: var(--edu-t1); }
 .lb-rank-num, .lb-value { color: var(--edu-accent-text); }
 .lb-meta { color: var(--edu-t4); }
@@ -508,7 +578,7 @@ body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
 .cd-enroll-btn.continue, .quiz-btn.primary {
   background: var(--edu-accent-grad) !important; color: #fff !important;
   border: none !important; border-radius: 999px !important;
-  box-shadow: 0 10px 24px rgba(185,63,240,.28) !important;
+  box-shadow: 0 10px 24px rgba(37,99,235,.28) !important;
 }
 .change-pw-btn, .cd-enroll-btn.continue { box-shadow: none !important; }
 .dash-prog-bar-fill, .prog-bar-fill, .cd-prog-fill, .prof-ci-fill, .prof-xp-bar-fill,
@@ -528,7 +598,7 @@ body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
 }
 .filter-btn.active, .pill-btn.active {
   background: var(--edu-accent-grad) !important; color: #fff !important; border-color: transparent !important;
-  box-shadow: 0 8px 22px rgba(185,63,240,.28) !important;
+  box-shadow: 0 8px 22px rgba(37,99,235,.28) !important;
 }
 .sort-dropdown-wrap .sort-select, .lang-select {
   background: var(--edu-pill-bg) !important; border: 1px solid var(--edu-pill-border) !important;
@@ -544,7 +614,7 @@ body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
 .filter-chip { background: var(--edu-accent-soft) !important; color: var(--edu-accent-text) !important; }
 
 .course-card {
-  border-radius: 22px !important; background: var(--edu-card-bg) !important;
+  border-radius: 14px !important; background: var(--edu-card-bg) !important;
   border: 1px solid var(--edu-card-border) !important; box-shadow: var(--edu-card-shadow) !important;
 }
 .badge-level { background: var(--edu-accent-grad) !important; }
@@ -566,12 +636,12 @@ body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
 .rm-save-btn, .rm-ai-btn {
   background: var(--edu-accent-grad) !important; color: #fff !important;
   border: none !important; border-radius: 999px !important;
-  box-shadow: 0 8px 20px rgba(185,63,240,.26) !important;
+  box-shadow: 0 8px 20px rgba(59,124,244,.26) !important;
 }
-.rm-ai-btn { background: var(--edu-pill-bg) !important; color: var(--edu-accent-text) !important; border: 1px solid rgba(185,63,240,.32) !important; box-shadow: none !important; }
+.rm-ai-btn { background: var(--edu-pill-bg) !important; color: var(--edu-accent-text) !important; border: 1px solid rgba(37,99,235,.32) !important; box-shadow: none !important; }
 .rmv-toolbar { background: transparent !important; border-bottom: 1px solid var(--edu-card-border) !important; }
 .rmv-btn, .rmv-zoom-btn { background: var(--edu-pill-bg) !important; border: 1px solid var(--edu-pill-border) !important; color: var(--edu-t2) !important; border-radius: 999px !important; }
-.rmv-btn:hover, .rmv-zoom-btn:hover { background: var(--edu-accent-soft) !important; border-color: rgba(185,63,240,.35) !important; color: var(--edu-accent-text) !important; }
+.rmv-btn:hover, .rmv-zoom-btn:hover { background: var(--edu-accent-soft) !important; border-color: rgba(59,124,244,.35) !important; color: var(--edu-accent-text) !important; }
 .rmv-zoom-wrap { border-left-color: var(--edu-card-border) !important; }
 .rmv-zoom-label, .rmv-hint { color: var(--edu-t4) !important; }
 
@@ -580,7 +650,7 @@ body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
    ══════════════════════════════════════════════════════════════ */
 .sk-tab { border-radius: 14px !important; background: var(--edu-pill-bg) !important; }
 .sk-tab.active { background: var(--edu-accent-soft) !important; color: var(--edu-accent-text) !important; }
-.sk-set { background: var(--edu-card-bg) !important; border: 1px solid var(--edu-card-border) !important; box-shadow: var(--edu-card-shadow) !important; border-radius: 20px !important; }
+.sk-set { background: var(--edu-card-bg) !important; border: 1px solid var(--edu-card-border) !important; box-shadow: var(--edu-card-shadow) !important; border-radius: 14px !important; }
 .sk-skill-fill { background: var(--edu-accent-grad) !important; }
 .sk-badge.achieved { background: rgba(34,197,94,.16) !important; color: #1f9d59 !important; }
 .sk-badge.new { background: var(--edu-accent-soft) !important; color: var(--edu-accent-text) !important; }
@@ -590,7 +660,7 @@ body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
    ══════════════════════════════════════════════════════════════ */
 .forum-create-box, .fpc-cmt-input-row .fpc-cmt-compose, .fpc-reply-input-row .fpc-cmt-compose {
   background: var(--edu-card-bg) !important; border: 1px solid var(--edu-card-border) !important;
-  border-radius: 20px !important; box-shadow: var(--edu-card-shadow) !important;
+  border-radius: 14px !important; box-shadow: var(--edu-card-shadow) !important;
 }
 .fcb-textarea, .fpc-cmt-input { background: var(--edu-input-bg) !important; border: 1px solid var(--edu-input-border) !important; color: var(--edu-t1) !important; border-radius: 14px !important; }
 .fcb-type-btn { background: var(--edu-pill-bg) !important; color: var(--edu-t3) !important; border-radius: 999px !important; }
@@ -598,7 +668,7 @@ body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
 .fcb-submit-btn, .fpc-cmt-send { background: var(--edu-accent-grad) !important; color: #fff !important; border: none !important; border-radius: 999px !important; }
 .forum-post-card, .fpc-comments {
   background: var(--edu-card-bg) !important; border: 1px solid var(--edu-card-border) !important;
-  border-radius: 20px !important; box-shadow: var(--edu-card-shadow) !important;
+  border-radius: 14px !important; box-shadow: var(--edu-card-shadow) !important;
 }
 .fpc-react-btn.liked, .fpc-react-btn:hover { color: var(--edu-accent-text) !important; }
 /* …nhưng khi đã chọn một react CỤ THỂ thì giữ màu riêng của nó, nếu không
@@ -615,8 +685,8 @@ body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
 /* ══════════════════════════════════════════════════════════════
    PROFILE ("Trang của tôi")
    ══════════════════════════════════════════════════════════════ */
-.prof-hero-bg { background: linear-gradient(120deg, rgba(185,63,240,.85), rgba(91,141,239,.75)) !important; }
-.prof-avatar { background: linear-gradient(140deg,#c9a7f5,#a8d5f2) !important; }
+.prof-hero-bg { background: linear-gradient(120deg, rgba(20,60,170,.94) 0%, rgba(37,99,235,.88) 55%, rgba(229,51,75,.86) 130%) !important; }
+.prof-avatar { background: linear-gradient(140deg,#a5c2f7,#a8d5f2) !important; }
 .prof-edit-btn { border: 1.5px solid var(--edu-accent-3) !important; color: var(--edu-accent-text) !important; border-radius: 999px !important; background: transparent !important; }
 .prof-course-item, .prof-post-card { background: var(--edu-pill-bg) !important; border: 1px solid var(--edu-pill-border) !important; border-radius: 16px !important; }
 .prof-xp-row-icon { color: var(--edu-accent); }
@@ -629,10 +699,10 @@ body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
   color: var(--edu-t1) !important; border-radius: 12px !important;
 }
 .toggle.on { background: var(--edu-accent-grad) !important; }
-.un-overlay, .cp-overlay, .streak-overlay { background: rgba(20,16,32,.55) !important; backdrop-filter: blur(6px); }
+.un-overlay, .cp-overlay, .streak-overlay { background: rgba(16,22,32,.55) !important; backdrop-filter: blur(6px); }
 .un-card, .cp-modal, .streak-card {
   background: var(--edu-panel-bg) !important; border: 1px solid var(--edu-panel-border) !important;
-  box-shadow: var(--edu-panel-shadow) !important; border-radius: 22px !important;
+  box-shadow: var(--edu-panel-shadow) !important; border-radius: 14px !important;
 }
 .un-btn-confirm { background: linear-gradient(90deg,#f0526b,#f0788e) !important; border: none !important; border-radius: 999px !important; }
 .un-btn-cancel, .cp-btn-cancel { background: var(--edu-pill-bg) !important; border: 1px solid var(--edu-pill-border) !important; border-radius: 999px !important; color: var(--edu-t2) !important; }
@@ -656,3 +726,103 @@ body.dark .edu-header-bar .chip-avatar { border-color: rgba(255,255,255,.22); }
   .edu-header-bar { padding: 20px 20px 0; flex-wrap: wrap; }
   .edu-header-bar .search-wrap input { width: 220px; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   POLISH — điểm nhấn để giao diện bớt phẳng nhưng không rối.
+   Nguyên tắc: một "chữ ký" lặp lại (vạch xanh→đỏ), màu chỉ dùng để dẫn mắt
+   (mục đang chọn, tiến độ, chuỗi ngày), mỗi trang vào chỉ có MỘT nhịp xuất
+   hiện nhẹ — không có thứ gì chuyển động liên tục ngoài ngọn lửa streak.
+   ══════════════════════════════════════════════════════════════ */
+:root { --fx-blue: #2563eb; --fx-red: #e5334b; --fx-sky: #0b86c9; }
+body.dark { --fx-blue: #6aa5ff; --fx-red: #ff6b81; --fx-sky: #4cc2ff; }
+
+/* thanh bên: nền hơi chuyển màu + mục đang chọn có vạch dọc và vệt sáng */
+.topbar.edu-sidebar-shell {
+  background-image: linear-gradient(180deg, rgba(var(--edu-spot-rgb), .09) 0%, rgba(var(--edu-spot-rgb), 0) 38%, rgba(229,51,75,.06) 100%);
+}
+.edu-sidebar-shell .topbar-nav .nav-btn, .sidebar-bottom-links .nav-btn, .sidebar-bottom-links .edu-bottom-link {
+  position: relative; transition: background .2s ease, color .2s ease;
+}
+.edu-sidebar-shell .topbar-nav .nav-btn .nav-icon, .sidebar-bottom-links svg { transition: transform .2s ease; }
+.edu-sidebar-shell .topbar-nav .nav-btn:hover .nav-icon { transform: translateX(3px); }
+.edu-sidebar-shell .topbar-nav .nav-btn.active {
+  background: linear-gradient(90deg, var(--edu-accent-soft-strong) 0%, var(--edu-accent-soft) 55%, transparent 100%);
+}
+.edu-sidebar-shell .topbar-nav .nav-btn.active::before {
+  content: ''; position: absolute; left: -20px; top: 12px; bottom: 12px; width: 4px; border-radius: 0 4px 4px 0;
+  background: linear-gradient(180deg, var(--edu-accent), var(--edu-red));
+  box-shadow: 0 0 14px rgba(var(--edu-spot-rgb), .55);
+}
+
+/* chuỗi ngày: pill đỏ + ngọn lửa phập phồng chậm (chuyển động duy nhất chạy liên tục) */
+.edu-streak { color: var(--fx-red); padding: 5px 12px 5px 10px; border-radius: 999px; background: var(--edu-red-soft); border: 1px solid rgba(229,51,75,.25); }
+.edu-streak-num { color: var(--fx-red); }
+.edu-streak svg { transform-origin: 50% 90%; animation: fxFlame 2.8s ease-in-out infinite; }
+@keyframes fxFlame { 0%, 100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.14) rotate(-4deg); } }
+
+/* tiến độ: thanh xanh có quầng sáng, chạy từ 0 khi vào trang */
+.dash-prog-bar-fill, .prog-bar-fill, .cd-prog-fill, .prof-ci-fill, .prof-xp-bar-fill,
+.rm-my-header-bar-fill, .rm-drawer-course-fill {
+  background: linear-gradient(90deg, #1d4ed8, #3b82f6 75%, #60a5fa) !important;
+  box-shadow: 0 0 12px rgba(37,99,235,.40);
+  transform-origin: left center;
+  animation: fxFill .9s cubic-bezier(.2,.8,.2,1) .15s backwards;
+}
+@keyframes fxFill { from { transform: scaleX(0); } }
+
+/* mỗi trang vào: các card hiện lần lượt (một nhịp, không lặp) */
+@keyframes fxRise { from { opacity: 0; transform: translateY(14px); } }
+.page.active .edu-d-card, .page.active .course-card, .page.active .sk-set, .page.active .stat-card,
+.page.active .forum-post-card, .page.active .lb-card {
+  animation: fxRise .55s cubic-bezier(.2,.8,.2,1) backwards;
+}
+.page.active .course-card:nth-child(2), .page.active .edu-d-col > :nth-child(2) { animation-delay: .06s; }
+.page.active .course-card:nth-child(3), .page.active .edu-d-col > :nth-child(3) { animation-delay: .12s; }
+.page.active .course-card:nth-child(4) { animation-delay: .18s; }
+.page.active .course-card:nth-child(5) { animation-delay: .24s; }
+.page.active .course-card:nth-child(n+6) { animation-delay: .30s; }
+
+/* thẻ khóa học: ảnh có lớp tối dần ở đáy cho chữ nổi, nhãn lĩnh vực có chấm đỏ */
+.card-img-wrap { position: relative; }
+.card-img-wrap::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 55%; pointer-events: none;
+  background: linear-gradient(180deg, rgba(8,14,32,0) 0%, rgba(8,14,32,.5) 100%);
+}
+.card-tag::before {
+  content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 8px;
+  vertical-align: middle; background: var(--edu-red); box-shadow: 0 0 8px rgba(229,51,75,.6);
+}
+
+/* popup chuỗi ngày: vạch trên cùng theo bảng màu mới */
+.streak-card::before { background: linear-gradient(90deg, var(--edu-accent), var(--edu-red)) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .edu-streak svg, .page.active .edu-d-card, .page.active .course-card, .page.active .sk-set,
+  .page.active .stat-card, .page.active .forum-post-card, .page.active .lb-card,
+  .dash-prog-bar-fill, .prog-bar-fill, .cd-prog-fill, .prof-ci-fill, .prof-xp-bar-fill,
+  .rm-my-header-bar-fill, .rm-drawer-course-fill { animation: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BRAND — bộ gradient dùng chung cho logo, tiêu đề, biểu tượng, viền.
+   Xanh chiếm phần lớn, đỏ là điểm nhấn; đoạn chuyển xanh→đỏ để RẤT ngắn
+   (52%→64%) để không ra một dải tím nhoè ở giữa.
+   ══════════════════════════════════════════════════════════════ */
+:root {
+  --edu-g-blue: linear-gradient(135deg, #1e40af 0%, #2563eb 48%, #4f8dff 100%);
+  --edu-g-red: linear-gradient(135deg, #be123c 0%, #e5334b 52%, #ff6b81 100%);
+  --edu-g-brand: linear-gradient(120deg, #1d4ed8 0%, #3b82f6 52%, #e5334b 64%, #ff5a6e 100%);
+  --edu-brand-glow: rgba(37,99,235,.35);
+}
+body.dark {
+  --edu-g-blue: linear-gradient(135deg, #3b6fe0 0%, #5b9bff 55%, #9cc2ff 100%);
+  --edu-g-red: linear-gradient(135deg, #f0405a 0%, #ff6b81 55%, #ff9aa8 100%);
+  --edu-g-brand: linear-gradient(120deg, #4f8dff 0%, #8fbcff 52%, #ff5a6e 64%, #ff9aa8 100%);
+  --edu-brand-glow: rgba(79,141,255,.45);
+}
+::selection { background: rgba(37,99,235,.28); }
+body.dark ::selection { background: rgba(79,141,255,.4); }
+html { scrollbar-color: rgba(37,99,235,.45) transparent; }
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(37,99,235,.55), rgba(229,51,75,.45)); border-radius: 8px; border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-track { background: transparent; }

@@ -1,0 +1,393 @@
+/* Code chạy từng bước. Chỉ dùng token (--edu-*, --st-*) — `npm run lint:tokens` cấm mã hex trong
+   *.module.css. Cặp sáng/tối đổi theo token nên không cần media query màu.
+
+   Màu: nền khối code = --st-code-bg (luôn tối, như CodeBlock); dòng đang chạy = --edu-accent-soft-strong
+   + thanh trái; ô vừa đổi = viền --edu-accent + nhãn "mới". Chữ thường dùng --edu-t1/t2/t3, KHÔNG dùng
+   --edu-accent-text / --st-ok-text làm chữ nhỏ vì hai biến đó đang trượt WCAG AA (xem báo cáo đo). */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  outline: none;
+  --cm-dur: 320ms;
+  --cm-move: 14px; /* dịch chuyển tối đa 24px */
+}
+.root:focus-visible {
+  box-shadow: 0 0 0 2px var(--edu-accent);
+  border-radius: 14px;
+}
+
+.stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+@media (max-width: 560px) {
+  .stage {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- khối code */
+.code {
+  background: var(--st-code-bg);
+  border-radius: 12px;
+  padding: 10px 0;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--st-syn-plain);
+}
+.line {
+  display: flex;
+  gap: 10px;
+  padding: 0 12px;
+  border-left: 3px solid transparent;
+  white-space: pre;
+  transition: background var(--cm-dur) ease, border-color var(--cm-dur) ease;
+}
+.lineOn {
+  background: var(--edu-accent-soft-strong);
+  border-left-color: var(--edu-accent-3);
+}
+.num {
+  width: 18px;
+  flex-shrink: 0;
+  text-align: right;
+  color: var(--st-code-gutter);
+  user-select: none;
+}
+.text :global(.kw) {
+  color: var(--st-syn-keyword);
+}
+.text :global(.str) {
+  color: var(--st-syn-string);
+}
+.text :global(.num) {
+  color: var(--st-syn-number);
+}
+.text :global(.cm) {
+  color: var(--st-syn-comment);
+}
+
+/* ---- bộ nhớ */
+.memory {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.title,
+.outTitle {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--edu-t3);
+}
+.frame {
+  background: var(--edu-panel-bg-solid);
+  border: 1px solid var(--edu-sidebar-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  animation: cm-in var(--cm-dur) ease both;
+}
+.frameName {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--edu-t2);
+}
+.vars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--edu-sidebar-border);
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  background: var(--edu-input-bg);
+}
+.chipName {
+  padding: 4px 8px;
+  color: var(--edu-t3);
+  border-right: 1px solid var(--edu-sidebar-border);
+}
+.chipValue {
+  padding: 4px 8px;
+  color: var(--edu-t1);
+  font-weight: 700;
+}
+.ref {
+  color: var(--edu-t1);
+}
+.empty,
+.outEmpty {
+  font-size: 12px;
+  color: var(--edu-t3);
+}
+
+/* Vừa đổi: viền đậm + nhãn chữ + nảy lên (không chỉ đổi màu) */
+.changed {
+  border-color: var(--edu-accent);
+  border-width: 2px;
+  background: var(--edu-accent-soft);
+  animation: cm-pop var(--cm-dur) cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.badge {
+  align-self: center;
+  margin: 0 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-family: var(--edu-font);
+  font-size: 10.5px;
+  font-weight: 700;
+  background: var(--edu-accent);
+  color: var(--edu-panel-bg-solid);
+}
+
+/* ---- đối tượng trong heap */
+.heap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.heapCard {
+  background: var(--edu-panel-bg-solid);
+  border: 1px dashed var(--edu-panel-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  animation: cm-in var(--cm-dur) ease both;
+}
+.heapCard.changed {
+  border: 2px solid var(--edu-accent);
+  background: var(--edu-accent-soft);
+  animation: cm-pop var(--cm-dur) cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.heapHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+.heapType {
+  font-weight: 700;
+  color: var(--edu-t1);
+}
+.heapId {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--edu-t3);
+}
+.heapHead .badge {
+  margin: 0 0 0 auto;
+}
+.cells {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 36px;
+  border: 1px solid var(--edu-sidebar-border);
+  border-radius: 6px;
+  overflow: hidden;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+.cellIndex {
+  width: 100%;
+  text-align: center;
+  font-size: 10px;
+  color: var(--edu-t3);
+  background: var(--edu-track-bg);
+}
+.cellValue {
+  padding: 4px 8px;
+  color: var(--edu-t1);
+  font-weight: 700;
+}
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  color: var(--edu-t1);
+}
+
+/* ---- console */
+.out {
+  background: var(--st-code-bg);
+  border-radius: 12px;
+  padding: 8px 12px;
+  min-height: 44px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  color: var(--st-syn-plain);
+}
+.out .outTitle {
+  color: var(--st-code-meta);
+  margin-bottom: 4px;
+}
+.out .outEmpty {
+  color: var(--st-code-meta);
+}
+.outNew {
+  animation: cm-in var(--cm-dur) ease both;
+  border-left: 3px solid var(--edu-accent-3);
+  padding-left: 6px;
+  margin-left: -9px;
+}
+
+/* ---- chú thích một câu + điều khiển */
+.caption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--edu-accent-soft);
+  color: var(--edu-t1);
+  font-size: 14px;
+  font-weight: 600;
+  animation: cm-in var(--cm-dur) ease both;
+}
+.glyph {
+  flex-shrink: 0;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--edu-accent);
+  color: var(--edu-panel-bg-solid);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.btn {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid var(--edu-panel-border);
+  background: var(--edu-panel-bg-solid);
+  color: var(--edu-t1);
+  font-family: var(--edu-font);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn:hover:not(:disabled) {
+  border-color: var(--edu-accent);
+}
+.btn:focus-visible {
+  outline: 2px solid var(--edu-accent);
+  outline-offset: 2px;
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.btn[aria-pressed='true'] {
+  background: var(--edu-accent-soft);
+  border-color: var(--edu-accent);
+}
+.btnPrimary {
+  background: var(--edu-accent);
+  border-color: var(--edu-accent);
+  color: var(--edu-panel-bg-solid);
+}
+.counter {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--edu-t2);
+}
+
+.compact .code {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.compact .frame,
+.compact .heapCard {
+  padding: 8px 10px;
+}
+
+@keyframes cm-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--cm-move));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes cm-pop {
+  0% {
+    opacity: 0.4;
+    transform: translateY(var(--cm-move)) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    --cm-dur: 0ms;
+    --cm-move: 0px;
+  }
+  .line,
+  .frame,
+  .heapCard,
+  .changed,
+  .caption,
+  .outNew {
+    animation: none;
+    transition: none;
+  }
+}

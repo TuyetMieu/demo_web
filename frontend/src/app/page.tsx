@@ -36,8 +36,8 @@ export default function HomePage() {
                     — xem comment trong courses/[courseId]/page.tsx). */}
                 {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
                 <a className={styles.tile} href={`/courses/${course.id}`}>
-                  <span className={styles.icon}>
-                    <CourseGlyph color={course.color} accent={course.accent} mark={course.mark} />
+                  <span className={styles.icon} data-fx="tilt">
+                    <CourseGlyph color={course.color} accent={course.accent} kind={course.icon} />
                   </span>
                   <span className={styles.label}>{course.label}</span>
                 </a>

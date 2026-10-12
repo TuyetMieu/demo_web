@@ -19,6 +19,7 @@ cd frontend && npm run dev # cổng 3000
 py scripts/pe-v3/build.py              # dựng lại 40 bài -> scripts/pe-v3/out/
 npm i --no-save pyodide@0.27.7         # cần cho bước dưới
 node scripts/pe-v3/check-pyodide.mjs   # chấm thử 233 ca bằng chính bộ chấm của trình duyệt
+py scripts/pe-v3/motion.py              # sinh hoạt hình "code chạy từng bước" -> frontend/public/static/motion/*.json
 ```
 
 Trên Windows dùng `py`, không dùng `python` — `python` là stub của Microsoft Store.
@@ -34,7 +35,7 @@ Trên Windows dùng `py`, không dùng `python` — `python` là stub của Micr
 | Backend lint | 527 lỗi — **mốc trần trong CI là 600, chỉ được hạ** |
 | Frontend typecheck | sạch |
 | Frontend lint | 0 lỗi, ~180 cảnh báo |
-| Frontend unit test | `cd frontend && npm run test:unit` → 32 ca đạt |
+| Frontend unit test | `cd frontend && npm run test:unit` → 40 ca đạt |
 
 ## Ràng buộc không được phá
 
@@ -69,6 +70,13 @@ Ghi lại để không ai vấp lại. Mỗi dòng là một lỗi có thật đ
 - **Pyodide tải lại mỗi lần chạy.** Mỗi lần bấm Chạy/Nộp tạo Worker mới và nạp lại ~10 MB từ
   CDN. Giới hạn 5 giây hiện dựa vào `worker.terminate()`; nếu dùng lại worker thì phải giữ
   được khả năng cắt vòng lặp vô hạn.
+- **Hoạt hình lý thuyết là file SINH RA, dễ cũ.** `frontend/public/static/motion/*.json` do
+  `scripts/pe-v3/motion.py` chạy thử ví dụ minh hoạ (`step_1.code`) của từng bài. Sửa ví dụ
+  minh hoạ (hoặc dựng lại bài) mà quên chạy lại script thì `npm run test:unit` đỏ ở ca "khớp ví
+  dụ minh hoạ hiện tại"; còn ở trình duyệt, `motionFor()` tự bỏ hoạt hình khi code lệch. Bài có
+  `import`/`open(`/`input(`/thread/fork không có hoạt hình (chủ ý — không chạy từng dòng được).
+  Màn "Nhắc lại bài trước" và "Code chạy từng bước" chèn thêm vào đầu luồng nên bản nháp lưu theo
+  chỉ số màn của người đang học dở sẽ lệch 1–2 màn (khoá màn `done`/`games` thì ổn định).
 - **Hai nguồn danh sách bài.** Trang khoá học đọc `frontend/src/lib/curricula.json` (file tĩnh,
   chép tay từ `scripts/pe-v3/out/curriculum-python.json`), còn nội dung bài đọc từ DB. Sau mỗi
   lần seed phải kiểm hai nguồn có lệch không.

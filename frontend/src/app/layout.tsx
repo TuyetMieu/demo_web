@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import { ALL_PRECEDENCES } from '@/components/PageStyles';
+import { withAssetVersion } from '@/lib/assetVersion';
 
 // Root layout TỐI THIỂU — không import CSS global nào ở đây.
 // Mỗi page/layout con tự import ĐÚNG tổ hợp CSS của template gốc
@@ -144,6 +145,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
         {children}
+        {/* hiệu ứng tương tác dùng chung (đốm sáng theo chuột, nghiêng thẻ, nút hút) */}
+        <script src={withAssetVersion('/static/js/edu-fx.js')} defer />
       </body>
     </html>
   );

@@ -11,6 +11,8 @@ import type {
   StudioLesson as Lesson,
 } from '@/lib/studio-lesson';
 
+import type { motionFor, recallFor } from '@/lib/lesson-motion';
+
 import type { RunResult } from '../runner/types';
 import type { ScreenVerdict } from './chrome';
 
@@ -19,6 +21,10 @@ export type LessonScreenProps = {
   scr: LessonScreen;
   /** Toàn bộ danh sách màn — màn tổng kết cần để đếm. */
   screens: LessonScreen[];
+  /** Hoạt hình ví dụ minh hoạ của bài (màn 'motion'); null nếu không có. */
+  motion?: ReturnType<typeof motionFor>;
+  /** Bài trước để nhắc lại (màn 'recall'); null nếu không có. */
+  recall?: ReturnType<typeof recallFor>;
   /** Tên bài, hiện mờ ở góc thẻ. */
   metaLabel?: string;
   draft: LessonDraft;

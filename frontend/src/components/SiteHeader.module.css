@@ -12,12 +12,33 @@
 
 .brand {
   display: inline-flex;
-  gap: 6px;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  align-items: center;
+  gap: 8px;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
   text-decoration: none;
 }
+
+/* Dấu logo: ô bo góc gradient thương hiệu, chữ P trắng, quầng sáng nhẹ. */
+.mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin-right: 4px;
+  border-radius: 12px;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0;
+  color: white;
+  background: var(--edu-g-brand);
+  background-size: 160% 160%;
+  box-shadow: 0 8px 20px var(--edu-brand-glow), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 0.25s ease, background-position 0.5s ease;
+}
+.brand:hover .mark { transform: rotate(-6deg) scale(1.06); background-position: 100% 50%; }
 .brand:focus-visible,
 .theme:focus-visible {
   outline: 2px solid var(--edu-accent);
@@ -25,8 +46,32 @@
   border-radius: 8px;
 }
 
-.brandName { color: var(--edu-t1); }
-.brandAccent { color: var(--edu-accent-text); }
+/* Hai nửa tên hai màu: "Programming" xanh chuyển sắc, "EDU" đỏ chuyển sắc. */
+.brandName,
+.brandAccent {
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  transition: background-position 0.5s ease;
+}
+.brandName { background-image: var(--edu-g-blue); }
+.brandAccent { background-image: var(--edu-g-red); }
+.brand:hover .brandName,
+.brand:hover .brandAccent { background-position: 100% 0; }
+
+/* Đường chân header: vạch gradient mờ thay cho viền phẳng. */
+.bar { position: relative; }
+.bar::after {
+  content: '';
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--edu-brand-glow), transparent 60%);
+}
 
 .theme {
   display: inline-flex;
@@ -42,7 +87,11 @@
   cursor: pointer;
   transition: color 0.15s ease, border-color 0.15s ease;
 }
-.theme:hover { color: var(--edu-accent-text); border-color: var(--edu-accent); }
+.theme:hover {
+  color: var(--edu-accent-text);
+  border-color: var(--edu-accent);
+  box-shadow: 0 6px 18px var(--edu-brand-glow);
+}
 
 /* Hành động sẽ xảy ra khi bấm: đang sáng → hiện trăng, đang tối → hiện mặt trời. */
 .sun { display: none; }

@@ -34,6 +34,7 @@ import LessonOverlays from './LessonOverlays';
 import { answerKeyFor } from './answer-key';
 import { firstUnfinished, primaryCta, type Action, type Cta } from './cta';
 import { useLessonRun } from './useCodeRunner';
+import { motionFor, recallFor } from '@/lib/lesson-motion';
 import { useLessonData } from './useLessonData';
 import { useLessonDraft } from './useLessonDraft';
 import { useLessonProgress } from './useLessonProgress';
@@ -87,7 +88,16 @@ export default function StudioLesson({
   const update = draftState.update;
   const saveStatus = draftState.saveStatus;
 
-  const screens = useMemo(() => (lesson ? buildScreens(lesson) : []), [lesson]);
+  const motionFile = data.motionFile;
+  const motionEntry = useMemo(
+    () => motionFor(motionFile, lessonNo, lesson?.step_1?.code?.source),
+    [motionFile, lessonNo, lesson],
+  );
+  const recall = useMemo(() => recallFor(motionFile, lessonNo), [motionFile, lessonNo]);
+  const screens = useMemo(
+    () => (lesson ? buildScreens(lesson, { motion: Boolean(motionEntry), recall: Boolean(recall) }) : []),
+    [lesson, motionEntry, recall],
+  );
   const scr: LessonScreen | undefined = screens[d.step - 1];
   const play = lesson?.play;
   const boss = Boolean(play?.boss);
@@ -351,6 +361,8 @@ export default function StudioLesson({
           lesson={lesson}
           scr={scr}
           screens={screens}
+          motion={motionEntry}
+          recall={recall}
           metaLabel={meta?.title}
           draft={d}
           update={update}
