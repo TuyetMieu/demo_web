@@ -152,7 +152,7 @@ export default function LandingPage() {
               <span className="project-tag">Database Design · 20 bài</span>
             </article>
             <article className="project-card neon-card">
-              <div className="project-thumb" style={{ background: 'linear-gradient(135deg, #FF4D6D 0%, #C9184A 100%)' }}>
+              <div className="project-thumb" style={{ background: 'linear-gradient(135deg, #FF4D6D 0%, #C91830 100%)' }}>
                 <div className="project-thumb-icon">🏆</div>
               </div>
               <strong>Mạng Xã Hội Gamers</strong>
@@ -176,7 +176,7 @@ export default function LandingPage() {
               <span className="project-tag">Security · bcrypt · SQLi</span>
             </article>
             <article className="project-card neon-card">
-              <div className="project-thumb" style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)' }}>
+              <div className="project-thumb" style={{ background: 'linear-gradient(135deg, #5891FA 0%, #2465DD 100%)' }}>
                 <div className="project-thumb-icon">📍</div>
               </div>
               <strong>App bản đồ tìm tiệm game</strong>

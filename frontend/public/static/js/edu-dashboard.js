@@ -29,10 +29,10 @@
 
   var AVATARS = [
     'linear-gradient(140deg,#8fb8f0,#6f8ee0)',
-    'linear-gradient(140deg,#c9a7f5,#a8d5f2)',
+    'linear-gradient(140deg,#a5c2f7,#a8d5f2)',
     'linear-gradient(140deg,#f0b48f,#e08f6f)',
     'linear-gradient(140deg,#9fe0c4,#6fc9a4)',
-    'linear-gradient(140deg,#f0a7c4,#e07fa4)'
+    'linear-gradient(140deg,#f0a7b1,#e07f8c)'
   ];
   var MEDALS = ['#d4a017', '#a8a8b8', '#c08552'];
 
@@ -316,7 +316,7 @@
     check: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',
     book: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5b8def" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>',
     award: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></svg>',
-    brain: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>',
+    brain: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#88b1fd" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>',
     zap: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>'
   };
 
@@ -348,7 +348,7 @@
       mini.innerHTML = [
         { icon: 'book', bg: 'rgba(91,141,239,.12)', val: enrolledVal, lbl: 'Khóa học đang học' },
         { icon: 'award', bg: 'rgba(245,158,11,.16)', val: s.achievements || 0, lbl: 'Thành tích đạt được' },
-        { icon: 'brain', bg: 'rgba(167,139,250,.16)', val: s.skills || 0, lbl: 'Kỹ năng' },
+        { icon: 'brain', bg: 'rgba(136,177,253,.16)', val: s.skills || 0, lbl: 'Kỹ năng' },
         { icon: 'zap', bg: 'rgba(34,197,94,.14)', val: s.xp || 0, lbl: 'Điểm XP' }
       ].map(function (x) {
         return (

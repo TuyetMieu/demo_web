@@ -7,7 +7,7 @@
                     },
                     colors: {
                         // Đồng bộ brand với toàn app: accent tím của edu-theme.css.
-                        brand: { primary: '#b93ff0', secondary: '#e08cf9', accent: '#34D399', dark: '#4B4B4B' }
+                        brand: { primary: '#3b7cf4', secondary: '#89b1fc', accent: '#34D399', dark: '#4B4B4B' }
                     }
                 }
             }

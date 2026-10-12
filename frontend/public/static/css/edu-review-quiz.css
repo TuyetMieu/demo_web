@@ -14,7 +14,7 @@
   position: fixed; inset: 0; z-index: 1200;
   display: flex; align-items: center; justify-content: center;
   padding: 24px;
-  background: rgba(20,16,32,.55);
+  background: rgba(16,22,32,.55);
   backdrop-filter: blur(6px);
   opacity: 0; visibility: hidden;
   transition: opacity .2s ease, visibility .2s ease;
@@ -81,7 +81,7 @@
   background: var(--edu-accent-grad); color: #fff;
   font-family: var(--edu-font); font-size: 15px; font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(185,63,240,.3);
+  box-shadow: 0 10px 24px rgba(59,124,244,.3);
   transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
 }
 .edu-rq-btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.06); }

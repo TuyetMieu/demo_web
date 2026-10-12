@@ -122,7 +122,7 @@ export default function DashboardPage() {
             <div className="edu-d-col">
               <section>
                 <div className="edu-d-sec-head">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#b93ff0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3b7cf4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
                   <span className="edu-d-sec-title">Bảng xếp hạng</span>
                 </div>
                 <div className="edu-d-card edu-d-lb" id="edu-d-lb"></div>
@@ -488,7 +488,7 @@ export default function DashboardPage() {
                 <div className="prof-stat-lbl">Thành tích đạt được</div>
               </div>
               <div className="prof-stat-card prof-stat-card--link fx-fade-up" style={{ animationDelay: '.25s' }} onClick={() => W().navigateToSkills()} title="Xem kỹ năng">
-                <div className="prof-stat-icon" data-icon="sparkles" data-size="22" data-color="#A78BFA"></div>
+                <div className="prof-stat-icon" data-icon="sparkles" data-size="22" data-color="#88B1FD"></div>
                 <div className="prof-stat-val" id="prof-skills">—</div>
                 <div className="prof-stat-lbl">Kỹ năng</div>
               </div>

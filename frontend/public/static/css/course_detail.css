@@ -77,9 +77,9 @@
 .quiz-btn:disabled { opacity: 0.6; cursor: default; }
 .quiz-btn.primary {
   background: var(--edu-accent-grad); color: #fff;
-  box-shadow: 0 10px 24px rgba(185,63,240,.3);
+  box-shadow: 0 10px 24px rgba(59,124,244,.3);
 }
-.quiz-btn.primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(185,63,240,.4); }
+.quiz-btn.primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(59,124,244,.4); }
 .quiz-btn.secondary { background: var(--edu-input-bg); color: var(--edu-t2); border: 1px solid var(--edu-input-border); }
 .quiz-btn.secondary:hover { filter: brightness(0.97); }
 

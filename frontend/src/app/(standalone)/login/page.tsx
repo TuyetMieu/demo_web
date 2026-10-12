@@ -27,6 +27,8 @@ export default function LoginPage() {
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
       />
 
+      {/* Chrome/Edge dựng sẵn trang kia ở nền → bấm chuyển là có ngay, không chờ tải. Trình duyệt khác bỏ qua. */}
+      <script type="speculationrules" dangerouslySetInnerHTML={{ __html: '{"prerender":[{"source":"list","urls":["/register"]}]}' }} />
       <div className="bg-canvas">
         <div className="bg-blob b1"></div>
         <div className="bg-blob b2"></div>
@@ -41,7 +43,7 @@ export default function LoginPage() {
           {/* LEFT 50%: Form */}
           <div className="auth-form-side">
             <div className="card">
-              <div className="logo">
+              <a className="logo" href="/" aria-label="Về trang chủ Programming Edu" onMouseOver={() => W().prefetchRoute?.('/')}>
                 <div className="logo-icon">
                   <svg viewBox="0 0 24 24" fill="white">
                     <circle cx="12" cy="12" r="4" />
@@ -50,8 +52,8 @@ export default function LoginPage() {
                       stroke="white" strokeWidth="1.8" fill="none" strokeLinecap="round" />
                   </svg>
                 </div>
-                <span className="logo-text">Programming Edu</span>
-              </div>
+                <span className="logo-text"><span className="lt-a">Programming</span> <span className="lt-b">Edu</span></span>
+              </a>
 
               <p className="form-title">Chào mừng trở lại!</p>
               <p className="form-subtitle">Tiếp tục hành trình lập trình của bạn 💡</p>

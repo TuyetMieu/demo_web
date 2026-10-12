@@ -254,7 +254,7 @@ body.light .cd-outcomes li strong { color: #0e2a3a; }
 
 /* Module accent colors */
 .cd-skill-item[data-module="1"] { --module-color: #F59E0B; --module-color-rgb: 245, 158, 11; }
-.cd-skill-item[data-module="2"] { --module-color: #8B5CF6; --module-color-rgb: 139, 92, 246; }
+.cd-skill-item[data-module="2"] { --module-color: #5891FA; --module-color-rgb: 139, 92, 246; }
 .cd-skill-item[data-module="3"] { --module-color: #10B981; --module-color-rgb: 16, 185, 129; }
 
 .cd-skill-item:hover:not(.is-locked) {
@@ -366,7 +366,7 @@ body.light .cd-skill-item.is-unlocked { background: #FFFFFF; }
 
 /* ── C8: Difficulty gradient text (hero meta) ───────────────────── */
 .cd-difficulty-gradient {
-  background: linear-gradient(90deg, #10B981 0%, #F59E0B 50%, #8B5CF6 100%);
+  background: linear-gradient(90deg, #10B981 0%, #F59E0B 50%, #5891FA 100%);
   -webkit-background-clip: text;
           background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -375,7 +375,7 @@ body.light .cd-skill-item.is-unlocked { background: #FFFFFF; }
   letter-spacing: 0.01em;
 }
 body.light .cd-difficulty-gradient {
-  background: linear-gradient(90deg, #059669 0%, #D97706 50%, #7C3AED 100%);
+  background: linear-gradient(90deg, #059669 0%, #D97706 50%, #3677F1 100%);
   -webkit-background-clip: text;
           background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -881,7 +881,7 @@ body.light .cd-progress-label { color: #64748B; }
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
 }
 .cd-roadmap-module[data-module="1"] { --module-color: #F59E0B; --module-color-rgb: 245, 158, 11; }
-.cd-roadmap-module[data-module="2"] { --module-color: #8B5CF6; --module-color-rgb: 139, 92, 246; }
+.cd-roadmap-module[data-module="2"] { --module-color: #5891FA; --module-color-rgb: 139, 92, 246; }
 .cd-roadmap-module[data-module="3"] { --module-color: #10B981; --module-color-rgb: 16, 185, 129; }
 
 .cd-roadmap-module::before {
@@ -1172,7 +1172,7 @@ body.light .cd-progress-label { color: #64748B; }
   height: 3px;
   background: linear-gradient(90deg,
     var(--module-amber, #F59E0B) 0%,
-    var(--module-indigo, #8B5CF6) 50%,
+    var(--module-indigo, #5891FA) 50%,
     var(--module-emerald, #10B981) 100%);
   border-radius: 0 0 4px 4px;
   z-index: 1;
@@ -1180,7 +1180,7 @@ body.light .cd-progress-label { color: #64748B; }
 
 /* Course title — gradient text (matches dashboard brand text) */
 .course-title {
-  background: linear-gradient(135deg, #F8FAFC 0%, #06B6D4 60%, #A855F7 100%);
+  background: linear-gradient(135deg, #F8FAFC 0%, #06B6D4 60%, #518CFB 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1225,7 +1225,7 @@ body.light .cd-progress-label { color: #64748B; }
   padding: 1px;
   background: linear-gradient(135deg,
     rgba(6, 182, 212, 0.35),
-    rgba(168, 85, 247, 0.25) 50%,
+    rgba(81,140,251,0.25) 50%,
     rgba(16, 185, 129, 0.30));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
@@ -1256,7 +1256,7 @@ body.light .cd-progress-label { color: #64748B; }
   font-family: 'Sora', sans-serif;
   font-size: 22px;
   font-weight: 800;
-  background: linear-gradient(135deg, #06B6D4, #A855F7);
+  background: linear-gradient(135deg, #06B6D4, #518CFB);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1298,7 +1298,7 @@ body.light .cd-progress-label { color: #64748B; }
   width: 3px;
   background: linear-gradient(180deg,
     var(--module-amber, #F59E0B),
-    var(--module-indigo, #8B5CF6));
+    var(--module-indigo, #5891FA));
   border-radius: 2px;
   opacity: 0.5;
   transition: opacity var(--anim-fast, 200ms);

@@ -743,7 +743,7 @@ body {
 }
 
 .brand-canvas-grad {
-    background: linear-gradient(90deg, #60a5fa, #c084fc, #f472b6);
+    background: linear-gradient(90deg, #60a5fa, #81adff, #f47283);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;

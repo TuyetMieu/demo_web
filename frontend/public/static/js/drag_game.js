@@ -222,8 +222,8 @@
   var EXEC_ORDER = ['from-line', 'where-line', 'group-line', 'having-line', 'select-line', 'order-line'];
   var ZONE_STROKE = {
     'from-line':'#FBBF24','where-line':'#34D399',
-    'group-line':'#A78BFA','having-line':'#FB923C',
-    'select-line':'#22D3EE','order-line':'#F472B6',
+    'group-line':'#88B1FD','having-line':'#FB923C',
+    'select-line':'#22D3EE','order-line':'#F47283',
   };
 
   /* PHASE 3.8-F5: sinh route CONG hữu cơ từ container W×H + station count.

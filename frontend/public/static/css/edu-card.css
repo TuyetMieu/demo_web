@@ -8,11 +8,11 @@
    .cc-quiz-opt / .is-correct / .is-wrong hooks.
    ══════════════════════════════════════════════════════════════ */
 
-:root { --cc-accent: #b93ff0; }
+:root { --cc-accent: #3b7cf4; }
 
 body {
   background: var(--edu-bg-solid);
-  background-image: var(--edu-bg-image);
+  background-image: var(--edu-bg-image); background-size: var(--edu-bg-size, auto);
   background-attachment: fixed;
   color: var(--edu-t1);
   font-family: var(--edu-font);
@@ -25,7 +25,7 @@ body {
   background: var(--edu-card-bg);
   border: 1px solid var(--edu-card-border);
   border-top: 3px solid var(--cc-accent);
-  border-radius: 22px;
+  border-radius: 14px;
   box-shadow: var(--edu-card-shadow);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
 }
@@ -42,7 +42,7 @@ body {
 
 .cc-source {
   background: rgba(255, 255, 255, .5);
-  border-left-color: rgba(185, 63, 240, .35);
+  border-left-color: rgba(59,124,244,.35);
   color: var(--edu-t4);
 }
 
@@ -50,7 +50,7 @@ body {
   background: var(--edu-accent-grad);
   color: #fff;
   border-radius: 999px;
-  box-shadow: 0 10px 24px rgba(185, 63, 240, .3);
+  box-shadow: 0 10px 24px rgba(59,124,244,.3);
 }
 .cc-cta:focus-visible { outline-color: var(--edu-accent); }
 
@@ -66,5 +66,5 @@ body {
 }
 .cc-quiz-opt:hover {
   background: var(--edu-accent-soft);
-  border-color: rgba(185, 63, 240, .34);
+  border-color: rgba(59,124,244,.34);
 }
