@@ -22,6 +22,7 @@ import Assemble from '@/components/lesson-chrome/exercises/Assemble';
 import Classify from '@/components/lesson-chrome/exercises/Classify';
 import CodeAnnotated from '@/components/lesson-chrome/exercises/CodeAnnotated';
 import CodeBlock from '@/components/lesson-chrome/exercises/CodeBlock';
+import CodeMotion from '@/components/lesson-chrome/exercises/CodeMotion';
 import Console, { ConsoleLine } from '@/components/lesson-chrome/exercises/Console';
 import FeedbackBanner from '@/components/lesson-chrome/exercises/FeedbackBanner';
 import HintSheet from '@/components/lesson-chrome/exercises/HintSheet';
@@ -38,6 +39,7 @@ import SpotError from '@/components/lesson-chrome/exercises/SpotError';
 import TraceTable from '@/components/lesson-chrome/exercises/TraceTable';
 import TrueFalse from '@/components/lesson-chrome/exercises/TrueFalse';
 import Visual from '@/components/lesson-chrome/exercises/Visual';
+import { fetchMotion, motionFor, recallFor, type MotionFile } from '@/lib/lesson-motion';
 import { toCodeLines } from '@/lib/py-highlight';
 import c from './studio-chrome.module.css';
 import {
@@ -122,8 +124,10 @@ function paragraphs(text?: string): React.ReactNode {
 /** Nhãn nhỏ trên mỗi thẻ: "S2 · Bẫy ngộ nhận". */
 function eyebrowOf(scr: LessonScreen): { icon: React.ReactNode; label: string } {
   const map: Record<string, { icon: React.ReactNode; label: string }> = {
+    recall: { icon: ICON.swap, label: 'Nhắc lại bài trước' },
     brief: { icon: ICON.book, label: 'Tổng quan bài' },
     context: { icon: ICON.book, label: 'Ngữ cảnh' },
+    motion: { icon: ICON.play, label: 'Code chạy từng bước' },
     explain: { icon: ICON.code, label: 'Giải thích từng dòng' },
     memory: { icon: ICON.swap, label: 'Mô hình bộ nhớ' },
     misconception: { icon: ICON.bulb, label: 'Ngộ nhận' },
@@ -207,7 +211,17 @@ export default function StudioLesson({
   const worker = useRef<Worker | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const screens = useMemo(() => (lesson ? buildScreens(lesson) : []), [lesson]);
+  /** Hoạt hình sinh từ ví dụ minh hoạ (scripts/pe-v3/motion.py). Thiếu file thì bài chạy như cũ. */
+  const [motionFile, setMotionFile] = useState<MotionFile | null>(null);
+  const motionEntry = useMemo(
+    () => motionFor(motionFile, lessonNo, lesson?.step_1?.code?.source),
+    [motionFile, lessonNo, lesson],
+  );
+  const recall = useMemo(() => recallFor(motionFile, lessonNo), [motionFile, lessonNo]);
+  const screens = useMemo(
+    () => (lesson ? buildScreens(lesson, { motion: Boolean(motionEntry), recall: Boolean(recall) }) : []),
+    [lesson, motionEntry, recall],
+  );
   const scr: LessonScreen | undefined = screens[d.step - 1];
   const play = lesson?.play;
   const boss = Boolean(play?.boss);
@@ -241,6 +255,8 @@ export default function StudioLesson({
     setLoading(true);
     setLoadError('');
     setEmpty(false);
+    // Tải song song với bài; lỗi thì fetchMotion trả null chứ không ném.
+    const motionPromise = fetchMotion(courseId);
     try {
       const [profile, enrollments] = await Promise.all([
         json('/api/user'),
@@ -275,12 +291,18 @@ export default function StudioLesson({
 
       // A lesson row can exist with no studio content yet (or only the legacy
       // {text} wrapper). Say so plainly instead of rendering an empty shell.
-      const list = content ? buildScreens(content) : [];
-      if (!content || !list.length) {
+      // Bài "rỗng" xét trên nội dung thật: màn nhắc lại bài trước không được che việc này.
+      if (!content || !buildScreens(content).length) {
         setEmpty(true);
         setLoading(false);
         return;
       }
+      const loadedMotion = await motionPromise;
+      setMotionFile(loadedMotion);
+      const list = buildScreens(content, {
+        motion: Boolean(motionFor(loadedMotion, lessonNo, content.step_1?.code?.source)),
+        recall: Boolean(recallFor(loadedMotion, lessonNo)),
+      });
       setLesson(content);
 
       let restored = initialLessonDraft(content);
@@ -1358,6 +1380,39 @@ export default function StudioLesson({
         </>,
         { title: ctx?.title || lesson.title || 'Ngữ cảnh', description: paragraphs(ctx?.body) },
       );
+    }
+
+    // Nhắc lại bài trước: mục tiêu một dòng + hoạt hình của chính bài đó (tự chạy, có nút dừng).
+    if (scr.kind === 'recall' && recall) {
+      const prev = recall.lesson;
+      return shell(
+        <>
+          <dl className={c.facts}>
+            <div>
+              <dt>Bài {recall.no}</dt>
+              <dd>{prev.goal || prev.title}</dd>
+            </div>
+            {prev.myth && (
+              <div>
+                <dt>Hay nhầm</dt>
+                <dd>{prev.myth}</dd>
+              </div>
+            )}
+          </dl>
+          {prev.code && prev.steps?.length ? (
+            <CodeMotion code={prev.code} steps={prev.steps} autoPlay compact label={`Nhắc lại bài ${recall.no}`} />
+          ) : null}
+        </>,
+        { title: `Nhắc lại: ${prev.title}`, description: 'Xem nhanh bài trước chạy ra sao — bài này xây tiếp lên đó.' },
+      );
+    }
+
+    // Ví dụ minh hoạ chạy từng bước: thay vì đọc đoạn văn, bấm Tiếp để xem biến đổi.
+    if (scr.kind === 'motion' && motionEntry?.code && motionEntry.steps) {
+      return shell(<CodeMotion code={motionEntry.code} steps={motionEntry.steps} />, {
+        title: 'Xem code chạy từng bước',
+        description: 'Bấm Tiếp (hoặc phím →) để chạy từng dòng và nhìn biến thay đổi.',
+      });
     }
 
     if (scr.kind === 'explain') {

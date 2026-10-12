@@ -404,8 +404,12 @@ export function initialLessonDraft(lesson: StudioLesson): LessonDraft {
 // một màn… Thanh tiến độ trên đầu đếm theo số màn này.
 
 export type ScreenKind =
+  /** Nhắc lại bài trước bằng hoạt hình — màn đầu tiên của bài (src/lib/lesson-motion.ts). */
+  | 'recall'
   | 'brief'
   | 'context'
+  /** Ví dụ minh hoạ chạy từng bước (hoạt hình sinh từ code ví dụ), đặt trước 'explain'. */
+  | 'motion'
   | 'explain'
   | 'memory'
   | 'misconception'
@@ -456,12 +460,14 @@ function screen(
  *   brief → giải thích (+ ngộ nhận) → dự đoán → các mini-game → sandbox → tổng kết.
  * Boss bỏ giải thích/dự đoán: chỉ game và sandbox.
  */
-function buildPlayScreens(lesson: StudioLesson, play: Play): LessonScreen[] {
+function buildPlayScreens(lesson: StudioLesson, play: Play, extras: ScreenExtras): LessonScreen[] {
   const out: LessonScreen[] = [];
   const one = lesson.step_1;
+  if (extras.recall) out.push(screen('s0-recall', 'recall', 1));
   if (one?.brief?.task) out.push(screen('s1-brief', 'brief', 1));
   else if (one?.context?.body) out.push(screen('s1-context', 'context', 1));
   if (!play.boss) {
+    if (extras.motion && one?.explain?.length) out.push(screen('s1-motion', 'motion', 1));
     if (one?.explain?.length) out.push(screen('s1-explain', 'explain', 1));
     if ((one?.predict?.options?.length ?? 0) >= 2) out.push(screen('s1-predict', 'predict', 1));
   }
@@ -482,13 +488,26 @@ export function gameOf(lesson: StudioLesson, scr: LessonScreen | undefined): Pla
   return lesson.play?.games.find((g) => g.id === scr.gameId);
 }
 
+/**
+ * Màn thêm vào từ dữ liệu NGOÀI content_json (public/static/motion/*.json, xem
+ * scripts/pe-v3/motion.py). Mặc định tắt: ai gọi buildScreens(lesson) như cũ vẫn ra đúng luồng cũ.
+ */
+export type ScreenExtras = {
+  /** Có hoạt hình cho ví dụ minh hoạ của bài này. */
+  motion?: boolean;
+  /** Có bài trước để nhắc lại. */
+  recall?: boolean;
+};
+
 /** Trải nội dung bài thành danh sách màn hình, bỏ phần tài liệu không có. */
-export function buildScreens(lesson: StudioLesson): LessonScreen[] {
-  if (lesson.play?.games?.length) return buildPlayScreens(lesson, lesson.play);
+export function buildScreens(lesson: StudioLesson, extras: ScreenExtras = {}): LessonScreen[] {
+  if (lesson.play?.games?.length) return buildPlayScreens(lesson, lesson.play, extras);
   const out: LessonScreen[] = [];
   const one = lesson.step_1;
+  if (extras.recall) out.push(screen('s0-recall', 'recall', 1));
   if (one?.brief?.task) out.push(screen('s1-brief', 'brief', 1));
   else if (one?.context?.body || one?.code?.source) out.push(screen('s1-context', 'context', 1));
+  if (extras.motion && one?.explain?.length) out.push(screen('s1-motion', 'motion', 1));
   if (one?.explain?.length) out.push(screen('s1-explain', 'explain', 1));
   if (one?.memory) out.push(screen('s1-memory', 'memory', 1));
   if (one?.misconception?.body) out.push(screen('s1-misconception', 'misconception', 1));
