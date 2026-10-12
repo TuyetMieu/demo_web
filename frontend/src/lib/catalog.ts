@@ -11,6 +11,7 @@
  * Sửa seed thì phải sửa cả file này (xem bẫy "hai nguồn danh sách bài" trong
  * AGENTS.md — đây là nguồn thứ ba của cùng một loại lệch).
  */
+import type { GlyphKind } from '@/components/CourseGlyph';
 import CURRICULA_JSON from '@/lib/curricula.json';
 
 type Curriculum = { modules?: { title: string; lessons: string[] }[] };
@@ -35,8 +36,8 @@ export type CatalogCourse = {
   /** Hai màu thương hiệu của khóa — vẽ biểu tượng ở trang chủ. */
   color: string;
   accent: string;
-  /** 1–3 ký tự in trên biểu tượng. */
-  mark: string;
+  /** Hình biểu tượng riêng của khóa (xem CourseGlyph.tsx). */
+  icon: GlyphKind;
   /** Trang bài học của khóa. */
   lessonUrl: string;
 };
@@ -69,9 +70,9 @@ export const COURSES: CatalogCourse[] = [
     lessons: lessonCount('python', 40),
     rating: 4.8,
     image: '/static/images/python.webp',
-    color: '#3776AB',
-    accent: '#FFD43B',
-    mark: 'Py',
+    color: '#2563EB',
+    accent: '#E5334B',
+    icon: 'python',
     lessonUrl: '/lesson/python',
   },
   {
@@ -88,65 +89,10 @@ export const COURSES: CatalogCourse[] = [
     lessons: lessonCount('python_advanced', 40),
     rating: 4.8,
     image: '/static/images/python.webp',
-    color: '#7C3AED',
-    accent: '#F472B6',
-    mark: 'Py+',
+    color: '#E5334B',
+    accent: '#FB7185',
+    icon: 'game',
     lessonUrl: '/lesson/python_advanced',
-  },
-  {
-    id: 'cpp',
-    label: 'C/C++',
-    title: 'Lập trình C/C++ nền tảng',
-    subtitle: 'Con trỏ, cấu trúc dữ liệu và OOP từ gốc',
-    description:
-      'Nắm chắc nền tảng của C/C++: kiểu dữ liệu, con trỏ và bộ nhớ, cấu trúc dữ liệu cơ bản '
-      + 'và lập trình hướng đối tượng.',
-    tag: 'NGÔN NGỮ LẬP TRÌNH',
-    level: 'beginner',
-    duration: '~35 giờ',
-    lessons: lessonCount('cpp', 40),
-    rating: 4.8,
-    image: '/static/images/cpp.webp',
-    color: '#00599C',
-    accent: '#659AD2',
-    mark: 'C++',
-    lessonUrl: '/interface',
-  },
-  {
-    id: 'java',
-    label: 'Java',
-    title: 'Java & Spring Boot chuyên nghiệp',
-    subtitle: 'OOP, Spring Boot và kiến trúc Microservices',
-    description:
-      'Từ OOP trong Java tới xây dựng dịch vụ với Spring Boot và tổ chức hệ thống theo kiến trúc Microservices.',
-    tag: 'NGÔN NGỮ LẬP TRÌNH',
-    level: 'intermediate',
-    duration: '~45 giờ',
-    lessons: lessonCount('java', 40),
-    rating: 4.8,
-    image: '/static/images/java.webp',
-    color: '#E76F00',
-    accent: '#5382A1',
-    mark: 'Jv',
-    lessonUrl: '/lesson/java',
-  },
-  {
-    id: 'htmlcss',
-    label: 'HTML & CSS',
-    title: 'HTML & CSS — Nền tảng Web',
-    subtitle: 'Xây giao diện web responsive từ con số 0',
-    description:
-      'Dựng trang web hoàn chỉnh từ thẻ HTML đến bố cục Flexbox/Grid và giao diện responsive trên mọi thiết bị.',
-    tag: 'FRONTEND',
-    level: 'beginner',
-    duration: '~30 giờ',
-    lessons: lessonCount('htmlcss', 40),
-    rating: 4.8,
-    image: '/static/images/htmlcss.webp',
-    color: '#E44D26',
-    accent: '#264DE4',
-    mark: '</>',
-    lessonUrl: '/lesson/htmlcss',
   },
   {
     id: 'db_design',
@@ -161,9 +107,9 @@ export const COURSES: CatalogCourse[] = [
     lessons: 20,
     rating: 4.8,
     image: '/static/images/db_design.webp',
-    color: '#06B6D4',
-    accent: '#0E7490',
-    mark: 'DB',
+    color: '#1E40AF',
+    accent: '#38BDF8',
+    icon: 'db',
     lessonUrl: '/lesson/db_design',
   },
   {
@@ -180,9 +126,9 @@ export const COURSES: CatalogCourse[] = [
     lessons: 21,
     rating: 4.8,
     image: '/static/images/db_design_tc.webp',
-    color: '#0C4A6E',
-    accent: '#38BDF8',
-    mark: 'SQL',
+    color: '#2563EB',
+    accent: '#E5334B',
+    icon: 'table',
     lessonUrl: '/lesson/db_design_tc',
   },
   {
@@ -198,9 +144,9 @@ export const COURSES: CatalogCourse[] = [
     lessons: 25,
     rating: 4.8,
     image: '/static/images/db_design_nc.webp',
-    color: '#7C2D12',
-    accent: '#FB923C',
-    mark: 'TX',
+    color: '#BE123C',
+    accent: '#F87171',
+    icon: 'engine',
     lessonUrl: '/lesson/db_design_nc',
   },
 ];

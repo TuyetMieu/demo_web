@@ -508,21 +508,21 @@ body.dark .section-card:hover, body.dark .course-card:hover, body.dark .stat-car
    nền, dưới mọi nội dung. */
 html::before, html::after {
   content: ''; position: fixed; left: 0; top: 0; pointer-events: none; z-index: -1;
-  border-radius: 50%; opacity: 0; transition: opacity .6s ease; will-change: transform;
+  border-radius: 50%; opacity: 0; transition: opacity .35s ease; will-change: transform;
 }
 html::before {
-  width: 560px; height: 560px;
-  transform: translate3d(calc(var(--ax, 50vw) - 280px), calc(var(--ay, 30vh) - 280px), 0);
-  background: radial-gradient(circle, rgba(37,99,235,.17) 0%, rgba(37,99,235,0) 68%);
+  width: 440px; height: 440px;
+  transform: translate3d(calc(var(--ax, 50vw) - 220px), calc(var(--ay, 30vh) - 220px), 0);
+  background: radial-gradient(circle, rgba(37,99,235,.42) 0%, rgba(37,99,235,.16) 38%, rgba(37,99,235,0) 70%);
 }
 html::after {
-  width: 320px; height: 320px;
-  transform: translate3d(calc(var(--bx, 50vw) - 160px), calc(var(--by, 30vh) - 160px), 0);
-  background: radial-gradient(circle, rgba(229,51,75,.13) 0%, rgba(229,51,75,0) 68%);
+  width: 300px; height: 300px;
+  transform: translate3d(calc(var(--bx, 50vw) - 150px), calc(var(--by, 30vh) - 150px), 0);
+  background: radial-gradient(circle, rgba(229,51,75,.36) 0%, rgba(229,51,75,.13) 40%, rgba(229,51,75,0) 70%);
 }
 html.fx-on::before, html.fx-on::after { opacity: 1; }
-html:has(body.dark)::before { background: radial-gradient(circle, rgba(60,120,255,.22) 0%, rgba(60,120,255,0) 68%); }
-html:has(body.dark)::after { background: radial-gradient(circle, rgba(255,80,105,.16) 0%, rgba(255,80,105,0) 68%); }
+html:has(body.dark)::before { background: radial-gradient(circle, rgba(70,130,255,.5) 0%, rgba(70,130,255,.2) 38%, rgba(70,130,255,0) 70%); }
+html:has(body.dark)::after { background: radial-gradient(circle, rgba(255,80,105,.44) 0%, rgba(255,80,105,.16) 40%, rgba(255,80,105,0) 70%); }
 @media (hover: none), (prefers-reduced-motion: reduce) {
   html::before, html::after { display: none; }
   .course-card { transform: none; }
@@ -736,12 +736,6 @@ html:has(body.dark)::after { background: radial-gradient(circle, rgba(255,80,105
 :root { --fx-blue: #2563eb; --fx-red: #e5334b; --fx-sky: #0b86c9; }
 body.dark { --fx-blue: #6aa5ff; --fx-red: #ff6b81; --fx-sky: #4cc2ff; }
 
-/* chữ ký: vạch ngắn xanh (2/3) + đỏ (1/3) dưới tiêu đề trang */
-.edu-page-title::after, .page h2::after {
-  content: ''; display: block; width: 52px; height: 4px; border-radius: 4px; margin-top: 14px;
-  background: linear-gradient(90deg, var(--edu-accent) 0 64%, var(--edu-red) 64% 100%);
-}
-
 /* thanh bên: nền hơi chuyển màu + mục đang chọn có vạch dọc và vệt sáng */
 .topbar.edu-sidebar-shell {
   background-image: linear-gradient(180deg, rgba(var(--edu-spot-rgb), .09) 0%, rgba(var(--edu-spot-rgb), 0) 38%, rgba(229,51,75,.06) 100%);
@@ -808,3 +802,27 @@ body.dark { --fx-blue: #6aa5ff; --fx-red: #ff6b81; --fx-sky: #4cc2ff; }
   .dash-prog-bar-fill, .prog-bar-fill, .cd-prog-fill, .prof-ci-fill, .prof-xp-bar-fill,
   .rm-my-header-bar-fill, .rm-drawer-course-fill { animation: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   BRAND — bộ gradient dùng chung cho logo, tiêu đề, biểu tượng, viền.
+   Xanh chiếm phần lớn, đỏ là điểm nhấn; đoạn chuyển xanh→đỏ để RẤT ngắn
+   (52%→64%) để không ra một dải tím nhoè ở giữa.
+   ══════════════════════════════════════════════════════════════ */
+:root {
+  --edu-g-blue: linear-gradient(135deg, #1e40af 0%, #2563eb 48%, #4f8dff 100%);
+  --edu-g-red: linear-gradient(135deg, #be123c 0%, #e5334b 52%, #ff6b81 100%);
+  --edu-g-brand: linear-gradient(120deg, #1d4ed8 0%, #3b82f6 52%, #e5334b 64%, #ff5a6e 100%);
+  --edu-brand-glow: rgba(37,99,235,.35);
+}
+body.dark {
+  --edu-g-blue: linear-gradient(135deg, #3b6fe0 0%, #5b9bff 55%, #9cc2ff 100%);
+  --edu-g-red: linear-gradient(135deg, #f0405a 0%, #ff6b81 55%, #ff9aa8 100%);
+  --edu-g-brand: linear-gradient(120deg, #4f8dff 0%, #8fbcff 52%, #ff5a6e 64%, #ff9aa8 100%);
+  --edu-brand-glow: rgba(79,141,255,.45);
+}
+::selection { background: rgba(37,99,235,.28); }
+body.dark ::selection { background: rgba(79,141,255,.4); }
+html { scrollbar-color: rgba(37,99,235,.45) transparent; }
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(37,99,235,.55), rgba(229,51,75,.45)); border-radius: 8px; border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-track { background: transparent; }

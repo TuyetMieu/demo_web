@@ -19,7 +19,7 @@ const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 // python_stdlib.zip bằng fetch CÙNG ORIGIN. Domain này vẫn phải ở lại
 // script-src và style-src vì lớp legacy còn nạp mermaid, svg-pan-zoom,
 // canvas-confetti và CodeMirror 5 (js + css) từ đó — xem dashboard/page.tsx,
-// interface/page.tsx, lesson/{htmlcss,java}/page.tsx, LessonDbDesign.tsx.
+// LessonDbDesign.tsx.
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' 'inline-speculation-rules' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ""} https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.tailwindcss.com`,

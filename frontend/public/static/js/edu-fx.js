@@ -33,8 +33,8 @@
 
   var CARD = '.section-card,.study-cal-card,.mini-rm-card,.lb-card,.dash-progress-card,.edu-lb-teaser,' +
              '.cd-block,.cd-card,.stat-card,.prof-stat-card,.course-card,.sk-set,.forum-post-card,' +
-             '.card,.brand-canvas';
-  var TILT = '.course-card';
+             '.card,.brand-canvas,[data-fx]';
+  var TILT = '.course-card,[data-fx="tilt"]';
   var MAGNET = '.btn-main,.btn-primary,.card-btn-enroll,.card-btn-enrolled,.dash-hero-btn,.continue-btn,' +
                '.dash-progress-btn,.dash-prog-cta,.cd-enroll-btn';
 
@@ -44,12 +44,13 @@
     var tx = innerWidth / 2, ty = innerHeight / 3;
     var ax = tx, ay = ty, bx = tx, by = ty, raf = 0;
     function frame() {
-      ax += (tx - ax) * 0.07; ay += (ty - ay) * 0.07;
-      bx += (tx - bx) * 0.14; by += (ty - by) * 0.14;
+      // đèn xanh bám sát con trỏ; đèn đỏ đuổi theo chậm hơn → vệt sáng xanh-đỏ phía sau chuột
+      ax += (tx - ax) * 0.3; ay += (ty - ay) * 0.3;
+      bx += (tx - bx) * 0.11; by += (ty - by) * 0.11;
       root.style.setProperty('--ax', ax.toFixed(1) + 'px');
       root.style.setProperty('--ay', ay.toFixed(1) + 'px');
-      root.style.setProperty('--bx', (bx + 90).toFixed(1) + 'px');
-      root.style.setProperty('--by', (by + 70).toFixed(1) + 'px');
+      root.style.setProperty('--bx', bx.toFixed(1) + 'px');
+      root.style.setProperty('--by', by.toFixed(1) + 'px');
       raf = (Math.abs(tx - ax) + Math.abs(ty - ay) > 0.5) ? requestAnimationFrame(frame) : 0;
     }
 

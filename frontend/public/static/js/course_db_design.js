@@ -42,7 +42,7 @@ function toggleModule(hd) {
  * C8 — Course Detail Improvements
  * - Hero time: compute total minutes from lessons.min, update #cd-hero-time
  * - Skills: progressive unlock animation when module completed
- * - Prereq: green ✓ if user enrolled in any cpp/java/python course (proxy for SQL basics)
+ * - Prereq: green ✓ if user enrolled in the python course (proxy for SQL basics)
  * Files: course_db_design.html + .css + .js
  * ========================================================================== */
 
@@ -391,10 +391,10 @@ function applySkillUnlocks(completedSet) {
   });
 }
 
-/** C8-3: Prereq indicator — green ✓ if user has SQL basics (proxy: enrolled in cpp/java/python) */
+/** C8-3: Prereq indicator — green ✓ if user has SQL basics (proxy: enrolled in python) */
 function applyPrereqStatus(enrolledList) {
   var hasProgrammingBasics = (enrolledList || []).some(function (e) {
-    return e && (e.id === 'cpp' || e.id === 'java' || e.id === 'python');
+    return e && (e.id === 'python');
   });
 
   var item = document.querySelector('[data-prereq="sql"]');

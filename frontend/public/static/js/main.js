@@ -27,11 +27,8 @@ var levelSuggestions = ["Phù hợp người mới", "Trung cấp", "Nâng cao"]
 
 // Bảng liên kết khóa học → trang bài học
 var COURSE_URLS = {
-  cpp: "/interface",
   python: "/lesson/python",
   python_advanced: "/lesson/python_advanced",
-  java: "/lesson/java",
-  htmlcss: "/lesson/htmlcss",
   db_design: "/lesson/db_design",
   // Hai khoá này ĐÃ có trang học (route động /lesson/[courseId] xử lý cả ba khoá
   // db_design*), nhưng trước đây thiếu ở bảng này nên nút "Tiếp tục học" không

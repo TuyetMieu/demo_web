@@ -1,4 +1,4 @@
-// Trang chi tiết khóa học (python, python_advanced, cpp, java, htmlcss).
+// Trang chi tiết khóa học (python, python_advanced, db_design*).
 // Ba khóa db_design* có route tĩnh riêng (courses/db_design*/page.tsx) và được
 // Next ưu tiên trước route động này.
 //
