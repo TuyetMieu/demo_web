@@ -1078,3 +1078,14 @@ a:focus:not(:focus-visible) { outline: none; }
 .project-card > strong { padding: 0 16px; font-size: 16px; color: #fff; }
 .project-card > p { padding: 0 16px; margin: 0; color: rgba(229, 231, 235, 0.78); font-size: 13px; line-height: 1.55; }
 .project-tag { margin: 8px 16px 16px; padding: 4px 10px; align-self: flex-start; border-radius: 6px; background: rgba(255, 255, 255, 0.08); color: #94A3B8; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; }
+
+/* Trang chủ ở khổ điện thoại: .landing-nav là flex KHÔNG xuống dòng, nên logo
+   cộng hai nút rộng hơn chỗ còn lại và tràn ngang 107px ở khổ 375px — người
+   dùng phải cuộn ngang ngay màn hình đầu tiên. Cho nhóm nút rơi xuống dòng
+   dưới và căn giữa, thay vì thu nhỏ chữ tới mức khó bấm.
+   Đặt ở CUỐI FILE: file này có hai khối @media 640px trùng nhau, nên quy tắc
+   phải nằm sau cả hai mới chắc chắn có hiệu lực. */
+@media (max-width: 480px) {
+  .landing-nav { flex-wrap: wrap; row-gap: 12px; }
+  .nav-actions { width: 100%; justify-content: center; }
+}

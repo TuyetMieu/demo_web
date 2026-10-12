@@ -1,15 +1,20 @@
 /* Python executes in a disposable browser worker, never in the NestJS process. */
 /* global importScripts, loadPyodide */
+
+// Runtime Pyodide tự host trong repo, cùng origin — xem chú thích trong
+// studio-lesson.worker.js. Trước đây nạp từ cdn.jsdelivr.net.
+const PYODIDE_DIR = '/pyodide/v0.27.7/';
+
 self.onmessage = async ({ data }) => {
   try {
-    importScripts('https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js');
+    importScripts(PYODIDE_DIR + 'pyodide.js');
     let output = '';
     const write = (line) => {
       if (output.length < 12000)
         output += line.slice(0, 12000 - output.length) + '\n';
     };
     const py = await loadPyodide({
-      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.7/full/',
+      indexURL: PYODIDE_DIR,
       stdout: write,
       stderr: write,
     });
@@ -17,8 +22,35 @@ self.onmessage = async ({ data }) => {
     const started = performance.now();
     py.globals.set('_studio_source', data.code);
     py.globals.set('_studio_submit', Boolean(data.submit));
+    // stdin: các dòng input() sẽ đọc lần lượt. Tên trường cố định — hợp đồng
+    // với phía React, giống studio-lesson.worker.js.
+    py.globals.set(
+      '_studio_stdin_json',
+      JSON.stringify(Array.isArray(data.stdin) ? data.stdin.map(String) : []),
+    );
     const json = await py.runPythonAsync(`
-import json, traceback, sys
+import builtins, io, json, traceback, sys
+
+# Worker không có stdin: trước đây mọi bài dùng input() chết ngay bằng
+# OSError/EOF khó hiểu. Nay input() lấy lần lượt các dòng client cấp sẵn
+# (cách Python Tutor dùng), hết dòng thì EOFError — đúng như CPython khi
+# chạy \`python main.py < input.txt\` mà file hết dòng.
+_studio_stdin = io.StringIO(
+    ''.join(str(line).rstrip('\\r\\n') + '\\n' for line in json.loads(_studio_stdin_json))
+)
+sys.stdin = _studio_stdin
+
+def _studio_input(prompt=''):
+    # Prompt phải ra stdout TRƯỚC khi đọc (và cả khi hết dòng rồi EOFError),
+    # để console hiện đúng thứ tự như terminal thật.
+    sys.stdout.write(str(prompt))
+    _line = _studio_stdin.readline()
+    if _line == '':
+        raise EOFError('EOF when reading a line')
+    return _line[:-1] if _line.endswith('\\n') else _line
+
+builtins.input = _studio_input
+
 _results = []
 _error = None
 try:

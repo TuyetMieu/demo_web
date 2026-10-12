@@ -1,0 +1,5 @@
+# Runtime Pyodide lấy nguyên bản từ cdn.jsdelivr.net. Phải giữ ĐÚNG TỪNG BYTE
+# như bản gốc thì sau này mới đối chiếu được với upstream và nâng cấp an toàn.
+# Không có dòng này, git tự đổi LF thành CRLF khi checkout trên Windows và file
+# vendor lệch khỏi bản gốc.
+frontend/public/pyodide/** -text

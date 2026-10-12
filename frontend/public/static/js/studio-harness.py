@@ -13,6 +13,13 @@ Vì sao cần nhiều hơn `eval(call) == eval(expect)`:
   không đụng chuỗi nên học viên viết `year=1991` hay `year = 1991` đều được.
 * Bài file đọc/ghi `data.txt`, `palindromes.txt`: mỗi lần chạy có thư mục
   riêng, fixture ghi sẵn, đọc lại file kết quả sau khi chạy.
+* Pyodide KHÔNG có stdin: `input()` nổ ngay, nên mọi bài dạy nhập liệu đều
+  chết. Thay bằng stdin CẤP SẴN (cách Python Tutor làm): client gửi
+  `stdin: ["Hoa", "20"]`, mỗi lần chạy nhận một bản sao các dòng đó và
+  `input()` đọc lần lượt. Hết dòng thì `EOFError` — đúng như CPython khi
+  `python main.py < input.txt` mà file hết dòng. Không dùng
+  SharedArrayBuffer + Atomics.wait để hỏi người dùng giữa lúc chạy: cách đó
+  buộc bật COOP/COEP cho cả site và làm vỡ lớp JS legacy.
 * Pyodide KHÔNG mở được thread thật (`can't start new thread`) và không có
   fork. Thread được thay bằng bản mô phỏng chạy target ngay lúc start() và ghi
   lại thứ tự tạo/start/join — đủ để chấm hợp đồng "start hết rồi join hết".
@@ -119,7 +126,9 @@ class Ctx:
         self.timeline = []          # (loại, dữ liệu, vị trí trong out)
         self.threads = []
         self.out = io.StringIO()
-        self.mark = 0               # child: vị trí out lúc tách khỏi parent
+        # stdin riêng của process mô phỏng này, đọc lại từ dòng đầu.
+        self.stdin = _new_stdin()
+        self.mark = 0              # child: vị trí out lúc tách khỏi parent
         self.exit_code = None
         self.violation = None
         self.current_thread = None
@@ -146,6 +155,76 @@ def _perf_counter():
 
 def _monotonic():
     return _ORIG.monotonic() + _Clock.offset
+
+
+# ---------------------------------------------------------------- stdin cấp sẵn
+
+# Các dòng stdin của CẢ bài (client gửi kèm lần chạy). `_JOB['stdin']` ghi đè
+# khi một ca chấm muốn chạy lại chương trình với bộ input khác
+# (`_studio.run(stdin=[...])`).
+_STDIN = {'lines': [], 'loose': None}
+
+
+def _stdin_text(lines):
+    # Client gửi MẢNG DÒNG, không phải một chuỗi: tự thêm '\n' và bỏ ký tự
+    # xuống dòng lẫn trong dòng để '\r\n' của Windows không dính vào giá trị
+    # input() trả về.
+    return ''.join(str(line).rstrip('\r\n') + '\n' for line in lines)
+
+
+def _new_stdin():
+    """Luồng stdin RIÊNG cho một lần chạy.
+
+    Mỗi lần chạy (kể cả lần chạy lại để mô phỏng fork, và mỗi `_studio.run`)
+    đọc stdin từ đầu — giống như chạy lại `python main.py < input.txt`, chứ
+    không phải chia nhau một con trỏ đọc duy nhất.
+    """
+    lines = _JOB.get('stdin')
+    if lines is None:
+        lines = _STDIN['lines']
+    return io.StringIO(_stdin_text(lines))
+
+
+def _loose_stdin():
+    # Ca chấm gọi input() TRỰC TIẾP trong `call`/`expect` thì không có lần chạy
+    # nào bọc ngoài; cấp một luồng dùng chung cho cả bài để nó vẫn đọc được.
+    if _STDIN['loose'] is None:
+        _STDIN['loose'] = io.StringIO(_stdin_text(_STDIN['lines']))
+    return _STDIN['loose']
+
+
+def _input(prompt=''):
+    ctx = _ctx()
+    stream = ctx.stdin if ctx is not None else _loose_stdin()
+    # Prompt ra stdout TRƯỚC khi đọc — và vẫn ra cả khi sắp EOFError — để
+    # console hiện đúng thứ tự "Nhập tên: Hoa" như terminal thật. Ghi qua
+    # sys.stdout (đang bị redirect_stdout trỏ vào ctx.out) chứ không qua
+    # print() để không tự thêm '\n'.
+    sys.stdout.write(str(prompt))
+    line = stream.readline()
+    if line == '':
+        # Đúng hành vi CPython khi stdin cạn. Cố ý KHÔNG trả '' hay treo máy:
+        # trả '' thì chương trình sai âm thầm, còn treo thì worker bị
+        # terminate() sau 5 giây và học viên không hiểu vì sao.
+        raise EOFError('EOF when reading a line')
+    return line[:-1] if line.endswith('\n') else line
+
+
+class _redirect_stdin:
+    """contextlib không có redirect_stdin, tự làm cho gọn."""
+
+    def __init__(self, stream):
+        self._stream = stream
+        self._saved = None
+
+    def __enter__(self):
+        self._saved = sys.stdin
+        sys.stdin = self._stream
+        return self._stream
+
+    def __exit__(self, *exc):
+        sys.stdin = self._saved
+        return False
 
 
 # ---------------------------------------------------------------- thread mô phỏng
@@ -425,6 +504,9 @@ def _getppid():
 
 
 def _install():
+    # input() thay toàn cục giống os.fork/threading.Thread bên dưới: namespace
+    # của học viên dùng chính module builtins nên không chèn riêng được.
+    builtins.input = _input
     time.time = _time
     time.perf_counter = _perf_counter
     time.monotonic = _monotonic
@@ -523,7 +605,7 @@ def _execute(ctx, source, files, vars=None, entry=None, setup=None):
             return outcome
         ns = {'__name__': '__main__' if entry is None else 'solution', '__builtins__': builtins}
         outcome['ns'] = ns
-        with redirect_stdout(ctx.out), redirect_stderr(ctx.out):
+        with redirect_stdout(ctx.out), redirect_stderr(ctx.out), _redirect_stdin(ctx.stdin):
             try:
                 exec(code, ns)
                 if setup:
@@ -674,12 +756,17 @@ class Studio:
         self.main = None
         self._main_dir = main_dir
 
-    def run(self, vars=None, files=None, entry=None, setup=None, fail_fork_at=None, child_exit=None):
-        """Chạy lại CẢ chương trình (thư mục mới), có thể thay dữ liệu đề cấp."""
+    def run(self, vars=None, files=None, entry=None, setup=None, fail_fork_at=None, child_exit=None,
+            stdin=None):
+        """Chạy lại CẢ chương trình (thư mục mới), có thể thay dữ liệu đề cấp.
+
+        `stdin=['Hoa', '20']` cho ca chấm đổi bộ input như đang đổi `vars` —
+        bỏ trống thì dùng lại stdin client gửi cho cả bài.
+        """
         merged = dict(self.files)
         merged.update(files or {})
         options = {'fail_fork_at': fail_fork_at, 'child_exit': child_exit or {}}
-        return _run_program(self.source, merged, vars, entry, setup, options)
+        return _run_program(self.source, merged, vars, entry, setup, options, stdin)
 
     def call(self, fn, *args, **kwargs):
         """Gọi một hàm, ghi lại stdout/lỗi/thread phát sinh trong lời gọi."""
@@ -690,7 +777,7 @@ class Studio:
         old = os.getcwd()
         try:
             os.chdir(self._main_dir)
-            with redirect_stdout(ctx.out), redirect_stderr(ctx.out):
+            with redirect_stdout(ctx.out), redirect_stderr(ctx.out), _redirect_stdin(ctx.stdin):
                 try:
                     outcome['value'] = fn(*args, **kwargs)
                 except _Exit as stop:
@@ -739,11 +826,15 @@ class Studio:
             return None
 
 
-def _run_program(source, files, vars=None, entry=None, setup=None, options=None):
+def _run_program(source, files, vars=None, entry=None, setup=None, options=None, stdin=None):
     saved_job = dict(_JOB)
     _JOB.clear()
-    _JOB.update({'source': source, 'files': files, 'vars': vars, 'entry': entry, 'setup': setup})
+    _JOB.update({'source': source, 'files': files, 'vars': vars, 'entry': entry, 'setup': setup,
+                 'stdin': stdin})
     saved_clock = _Clock.offset
+    # Ctx đọc _JOB['stdin'] trong __init__ nên phải dựng SAU khi _JOB đã cập
+    # nhật; _simulate_child cũng dựng Ctx trong lúc _JOB còn là job này, nhờ
+    # vậy child chạy lại nhận đúng bộ input đó từ dòng đầu.
     ctx = Ctx(options=options or {})
     try:
         outcome = _execute(ctx, source, files, vars, entry, setup)
@@ -784,9 +875,13 @@ def _notes(result):
 
 # ---------------------------------------------------------------- điểm vào
 
-def _studio_main(source, cases_json, files_json):
+def _studio_main(source, cases_json, files_json, stdin_json='[]'):
+    # stdin_json có mặc định để check-pyodide.mjs (và mọi chỗ gọi cũ) vẫn gọi
+    # được bằng 3 tham số.
     _install()
     os.makedirs(WORK_ROOT, exist_ok=True)
+    _STDIN['lines'] = json.loads(stdin_json or '[]') or []
+    _STDIN['loose'] = None
     files = {}
     for item in json.loads(files_json or '[]'):
         files[item['name']] = item.get('content', '')
@@ -815,7 +910,7 @@ def _studio_main(source, cases_json, files_json):
             try:
                 os.chdir(main.dir)
                 sink = io.StringIO()
-                with redirect_stdout(sink), redirect_stderr(sink):
+                with redirect_stdout(sink), redirect_stderr(sink), _redirect_stdin(_loose_stdin()):
                     actual = eval(case['call'], ns)
                     expected = eval(case['expect'], ns)
                 ok = actual == expected

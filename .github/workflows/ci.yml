@@ -95,19 +95,80 @@ jobs:
 
       - run: npm run build
 
-      # Chưa đưa `npm run test:e2e` (Playwright) vào CI, vì ba lý do cụ thể:
-      #  1. e2e/playwright.config.ts không có `webServer` — nó giả định người
-      #     chạy đã tự `npm run dev` ở cổng 3000. Muốn vào CI thì phải sửa
-      #     chính file config đó, hoặc tự dựng server + vòng chờ trong workflow.
-      #  2. python-advanced.spec.ts giả lập hết API bằng page.route nên KHÔNG
-      #     cần backend, nhưng Pyodide thì vẫn tải ~10 MB từ CDN thật mỗi lần
-      #     chạy (AGENTS.md: "Pyodide tải lại mỗi lần chạy") — phụ thuộc mạng
-      #     ngoài trong test có giới hạn thời gian là nguồn đỏ giả.
-      #  3. Các spec còn lại trong e2e/ (pe-run-sql, drag-regression,
-      #     mobile-responsive) cần Django cổng 9000 + tài khoản thật, nên không
-      #     thể chạy cả thư mục.
-      # Khi nào thêm: cho `webServer` vào playwright.config.ts, cache
-      # ~/.cache/ms-playwright, và nạp Pyodide từ local thay vì CDN.
+      # `npm run test:e2e` (Playwright) đã chuyển sang job `e2e` riêng bên dưới.
+      # Vì sao tách khỏi job này: e2e phải tải Chromium (~115 MB) và tự build
+      # lại để `webServer` khởi động được — không nên bắt mọi PR chờ thêm chừng
+      # đó chỉ để biết typecheck/lint có sạch. Tách ra thì hai job chạy song
+      # song, và khi đỏ thì nhìn tên job là biết đỏ ở đâu.
+
+  # Bộ e2e Playwright. Hai lý do cũ khiến e2e nằm ngoài CI đều đã hết:
+  #  1. `frontend/e2e/playwright.config.ts` giờ có `webServer` — Playwright tự
+  #     `npm run build && npm run start` rồi chờ cổng 3000, không còn giả định
+  #     người chạy đã mở `npm run dev` sẵn.
+  #  2. Pyodide 0.27.7 đã tự host trong repo (`frontend/public/pyodide/v0.27.7/`,
+  #     13,2 MB, cùng origin) nên không còn tải ~10 MB từ CDN trong lúc test
+  #     đang bị bấm đồng hồ — nguồn đỏ giả vì mạng đã mất.
+  #
+  # CHỈ chạy `python-advanced` (8 ca). Ba spec còn lại CỐ Ý không chạy: cả ba đều
+  # gọi `helpers.login()` đăng nhập UI thật, tức cần backend Django cổng 9000 +
+  # DB có content_json + tài khoản E2E_EMAIL/E2E_PASSWORD — runner không có.
+  # Đo ở máy ngày 12/10/2026 với đúng cấu hình này, không có backend:
+  #  - pe-run-sql        1 ca, trượt: `openLesson()` hết 30s chờ `LESSON_CONTENT`.
+  #  - drag-regression   1 ca, trượt: cùng lý do trên.
+  #  - mobile-responsive 6 ca, 4 đạt / 2 trượt. Một ca cần login (`.topbar`
+  #    không bao giờ hiện); ca `/` trượt vì LỖI THẬT, không phải thiếu backend:
+  #    ở viewport 375px, `div.nav-actions` (cùng `a.btn-outline`,
+  #    `a.btn-primary`) nằm từ x=286 tới x=482 — tràn ngang 107px ở trang chủ.
+  #    Chưa gộp spec này khi lỗi đó còn, vì job luôn đỏ còn tệ hơn không có job
+  #    (cùng lý lẽ với mốc trần ở gate lint backend). Sửa trang chủ xong thì
+  #    thêm 5 ca không-cần-login vào đây.
+  e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+
+      # Trình duyệt của Playwright nằm ngoài node_modules nên `cache: npm` ở
+      # trên không giữ nó. Khoá cache phải gắn với package-lock.json: nâng
+      # @playwright/test mà dùng lại trình duyệt cũ thì nó từ chối chạy
+      # ("Executable doesn't exist at …chromium_headless_shell-<bản mới>" —
+      # đúng lỗi đã gặp ở máy khi lên 1.63.0).
+      - uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ms-playwright-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+
+      # Vẫn gọi install dù cache hit, vì `--with-deps` cài thư viện hệ thống qua
+      # apt mà cái đó không nằm trong ~/.cache; cache chỉ bỏ được phần tải về.
+      - name: Cài Chromium cho Playwright
+        run: npx playwright install --with-deps chromium
+
+      # `test:e2e` trong package.json đã lọc sẵn `python-advanced`. Không cần
+      # bước `npm run build` riêng: `webServer` trong config tự build.
+      - run: npm run test:e2e
+        env:
+          CI: '1'
+
+      # Chỉ khi đỏ. Test chơi hết cả bài học nên log dạng list không nói được
+      # nó gãy ở màn nào; báo cáo HTML + trace (`retain-on-failure`) thì xem
+      # lại được từng bước.
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            frontend/playwright-report
+            frontend/test-results
+          retention-days: 7
 
   # GitHub chỉ cho lọc `paths` ở mức workflow, không ở mức job; cả repo dùng một
   # file ci.yml nên phải tự so diff rồi bật/tắt job giáo trình bên dưới. Lý do

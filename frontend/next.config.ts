@@ -13,6 +13,13 @@ const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 // Khi JS legacy đã chuyển hết sang React thì bỏ 'unsafe-inline' và dùng nonce.
 //
 // 'wasm-unsafe-eval': Pyodide (Python Studio) biên dịch WebAssembly.
+//
+// connect-src KHÔNG còn cdn.jsdelivr.net: runtime Pyodide đã nằm trong repo
+// (frontend/public/pyodide/v0.27.7/) nên hai worker Python nạp .wasm +
+// python_stdlib.zip bằng fetch CÙNG ORIGIN. Domain này vẫn phải ở lại
+// script-src và style-src vì lớp legacy còn nạp mermaid, svg-pan-zoom,
+// canvas-confetti và CodeMirror 5 (js + css) từ đó — xem dashboard/page.tsx,
+// interface/page.tsx, lesson/{htmlcss,java}/page.tsx, LessonDbDesign.tsx.
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' 'inline-speculation-rules' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ""} https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.tailwindcss.com`,
@@ -20,7 +27,7 @@ const csp = [
   "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net",
   // Avatar OAuth (Google/Facebook) là URL https bất kỳ.
   "img-src 'self' data: blob: https:",
-  `connect-src 'self' ${API_ORIGIN} https://cdn.jsdelivr.net`,
+  `connect-src 'self' ${API_ORIGIN}`,
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",

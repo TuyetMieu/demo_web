@@ -43,6 +43,8 @@ export default function LoginPage() {
           {/* LEFT 50%: Form */}
           <div className="auth-form-side">
             <div className="card">
+              {/* <a> thường (tải lại cả trang) như các link /login /register khác: trang legacy nạp script theo từng route. */}
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
               <a className="logo" href="/" aria-label="Về trang chủ Programming Edu" onMouseOver={() => W().prefetchRoute?.('/')}>
                 <div className="logo-icon">
                   <svg viewBox="0 0 24 24" fill="white">
