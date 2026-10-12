@@ -3,22 +3,20 @@
 // Port course_db_design.html — trang chi tiết 3 khóa DB Design (db_design /
 // db_design_tc / db_design_nc dùng CHUNG markup; course_db_design.js đọc
 // data-course trên <body> để render roadmap đúng khóa — giữ nguyên cơ chế).
-// Jinja server bơm (user_name, enrollment, streak, pct) → fetch API client-side.
-import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+//
+// Không còn gọi API: trang đăng nhập đã gỡ nên /api/enrolled, /api/stats, /api/user
+// đều trả 401. Mọi chữ trên trang đến từ course_db_design.js (COURSE_PAGE_META);
+// thẻ bên phải chỉ còn nút "Bắt đầu học" vì Đăng ký/Hủy đăng ký/tiến độ cần tài khoản.
+import { useCallback, useEffect, useSyncExternalStore } from 'react';
 
-import Chatbot from '@/components/Chatbot';
-import HeaderBar from '@/components/HeaderBar';
+import shell from '@/components/CourseShell.module.css';
 import LegacyScripts from '@/components/LegacyScripts';
-import PeRouterBridge from '@/components/PeRouterBridge';
-import Sidebar from '@/components/Sidebar';
-import { apiFetch, asList, findEnrollment } from '@/lib/api';
+import SiteHeader from '@/components/SiteHeader';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const W = () => window as any;
 
 export default function CourseDbDesign({ courseId }: { courseId: string }) {
-  const [data, setData] = useState<any>(null);
-
   /* course_db_design.js dựng toàn bộ nội dung thật (tên khóa, lộ trình, yêu
    * cầu, thành tựu) đè lên markup mặc định trong JSX — mà markup mặc định đó là
    * của khóa CƠ BẢN. Chưa chờ tín hiệu thì mở khóa Trung cấp/Nâng cao vẫn thấy
@@ -54,73 +52,14 @@ export default function CourseDbDesign({ courseId }: { courseId: string }) {
     };
   }, [courseId]);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        // apiFetch (không phải fetch tương đối): pe-bridge chưa nạp ở thời điểm này
-        const [enrolled, stats, user]: any[] = await Promise.all([
-          apiFetch('/api/enrolled').then((r) => (r.ok ? r.json() : [])),
-          apiFetch('/api/stats').then((r) => (r.ok ? r.json() : {})),
-          apiFetch('/api/user').then((r) => (r.ok ? r.json() : {})),
-        ]);
-        // Backend trả {ok, enrolled:[...]} chứ không phải mảng trần -> phải bóc vỏ.
-        // Kiểm tra Array.isArray thẳng vào response luôn sai, khiến trang này
-        // không bao giờ nhận ra người dùng đã đăng ký và luôn hiện "Đăng ký ngay".
-        const enrollment = findEnrollment(asList(enrolled, 'enrolled'), courseId);
-        // /api/stats trả trường `streak` (không phải `streakDays`).
-        setData({ enrollment, streak: stats.streak ?? 0, userName: user.name || '—' });
-      } catch {
-        setData({ enrollment: null, streak: 0, userName: '—' });
-      }
-    })();
-  }, [courseId]);
-
-  // Script legacy được nạp NGAY (không đợi API) nên hai biến toàn cục phụ thuộc
-  // dữ liệu người dùng ban đầu là 0; sửa lại khi API trả về. goLesson() đọc
-  // CURRENT_LESSON_IDX để nhảy đúng bài đang học, _renderCtaEnrolled() đọc
-  // USER_STREAK khi vẽ lại thẻ sau lúc đăng ký.
-  useEffect(() => {
-    if (!data) return;
-    const w = W();
-    w.CURRENT_LESSON_IDX = data.enrollment ? data.enrollment.completedLessons || 0 : 0;
-    w.USER_STREAK = data.streak;
-  }, [data]);
-
-  // KHÔNG chờ API mới dựng trang. Toàn bộ nội dung trang này (hero, lộ trình,
-  // tổng quan, yêu cầu, thành tựu) đến từ COURSE_PAGE_META trong
-  // course_db_design.js — KHÔNG có chữ nào phụ thuộc API. Chỉ thẻ tiến độ bên
-  // phải mới cần /enrolled + /stats + /user.
-  //
-  // Bản trước chặn cả trang để đợi 3 lệnh gọi đó, nên mạng chậm (Neon nguội có
-  // thể mất vài giây) là người dùng ngồi nhìn một trang toàn vạch chờ dù nội
-  // dung đã sẵn sàng ngay từ đầu. Giờ chỉ ô đăng ký/tiến độ là chờ.
-  const loading = !data;
-  const enrollment = data?.enrollment;
-  const streak = data?.streak ?? 0;
-  const userName = data?.userName;
-  // Jinja: done = min(completed_lessons, 20); pct = round(done*100/20, 1)
-  const done = enrollment ? Math.min(enrollment.completedLessons || 0, 20) : 0;
-  const pct = done > 0 ? Math.round((done * 100) / 20 * 10) / 10 : 0;
 
   return (
     <>
       <title>Database Design – Programming EDU</title>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-      <PeRouterBridge />
-      <Sidebar activePage="courses" />
-
-      <div id="main">
-        {/* HeaderBar dùng chung với dashboard/trang khóa học chi tiết. Tiêu đề khởi
-            tạo bằng tên khóa Cơ bản (khớp giá trị JSX mặc định của .cd-hero-title
-            bên dưới) — course_db_design.js applyCourseContent() sửa lại đúng tên
-            theo courseId ngay khi script chạy, cho tc/nc. */}
-        {/* Phụ đề ở header là DÒNG META (số bài · cấp độ), không phải phụ đề của
-            hero — trước đây cả hai cùng là CD_META.heroSubtitle nên câu mô tả dài
-            hiện lặp y hệt hai lần, cách nhau đúng một khoảng. */}
-        {/* hideTitle: hero ngay bên dưới đã có tên khóa + phụ đề — giống trang
-            chi tiết khóa học chung, không lặp chữ ở header nữa. */}
-        <HeaderBar userName={userName} streak={streak} hideTitle />
+      <div className={shell.shell}>
+        <SiteHeader />
 
         {/* Page content */}
         {/* Nội dung trang — bố cục 2 cột y như trang chi tiết khóa học chung
@@ -128,11 +67,12 @@ export default function CourseDbDesign({ courseId }: { courseId: string }) {
             thẻ đăng ký/tiến độ bên phải. Các class .cd-* bên trong GIỮ NGUYÊN vì
             course_db_design.js tìm đúng những selector đó để đổ nội dung. */}
         <div className="page active">
-          {/* Quay lại danh sách khóa học — giống hệt trang chi tiết chung */}
-          <button type="button" className="edu-cd-back" onClick={() => W().peGoTab('courses')}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+          {/* Quay lại trang chủ — <a> thường (tải lại trang), xem SiteHeader. */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <a className={shell.back} href="/">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
             <span>Tất cả khóa học</span>
-          </button>
+          </a>
 
           {/* Vệt chờ y như trang chi tiết khóa học chung — hiện cho tới khi
               course_db_design.js đổ xong nội dung đúng khóa. Bố cục trùng khớp
@@ -170,11 +110,9 @@ export default function CourseDbDesign({ courseId }: { courseId: string }) {
                     <div className="cd-meta-item">📖 <span className="val">20</span> bài học</div>
                     <div className="cd-meta-item">🎯 <span className="val cd-difficulty-gradient">Cơ bản → Nâng cao</span></div>
                   </div>
-                  {enrollment && (
-                    <div className="edu-cd-hero-cta">
-                      <button type="button" className="edu-cd-btn primary" onClick={() => W().goLesson()}>▶ Tiếp tục học</button>
-                    </div>
-                  )}
+                  <div className="edu-cd-hero-cta">
+                    <button type="button" className="edu-cd-btn primary" onClick={() => W().goLesson()}>▶ Bắt đầu học</button>
+                  </div>
                 </div>
                 {/* không kèm .cd-hero-visual: class cũ ép ô vuông 150px, chọi
                     với khung 220×158 của design (không JS nào dùng class đó).
@@ -406,66 +344,17 @@ export default function CourseDbDesign({ courseId }: { courseId: string }) {
                 khóa học chung. Bỏ .cd-card-image (khối tối 130px chỉ để chứa
                 emoji 🗄️): hero đã có ảnh rồi, design không có ảnh thứ hai ở đây. */}
             <div className="edu-cd-side">
-              {/* Ruột thẻ dùng ĐÚNG bộ class .edu-cd-* của trang chi tiết chung:
-                  trước đây vẫn là .cd-card-stats/.cd-enroll-btn của bộ cũ nên hai
-                  trang chi tiết nhìn khác hẳn nhau — rõ nhất là "Hủy đăng ký" bên
-                  này là nút hồng to đùng, bên kia chỉ là dòng chữ mờ.
-                  course_db_design.js dựng lại khối này sau khi đăng ký/hủy nên
-                  _renderCtaEnrolled/_renderCtaGuest cũng đã đổi theo. */}
+              {/* Chỉ còn nút "Bắt đầu học": Đăng ký/Hủy đăng ký/tiến độ cần tài khoản,
+                  mà frontend không còn trang đăng nhập. goLesson() của
+                  course_db_design.js nhảy tới bài đầu theo LESSON_URL. */}
               <div className="edu-cd-card">
                 <div>
                   <div className="edu-cd-price">Miễn phí</div>
                   <div className="edu-cd-price-free">🎉 Hoàn toàn không mất phí</div>
 
-                  <div id="cd-cta-area" aria-busy={loading || undefined}>
-                    {loading ? (
-                      /* chỉ RIÊNG ô này chờ API — phần còn lại của trang đã hiện */
-                      <>
-                        <div className="edu-skel" style={{ height: 62, marginTop: 18 }} />
-                        <div className="edu-skel" style={{ height: 86, marginTop: 10 }} />
-                        <div className="edu-skel" style={{ height: 50, marginTop: 18, borderRadius: 999 }} />
-                      </>
-                    ) : enrollment ? (
-                      <>
-                        <div className="edu-cd-progress-row">
-                          <div className="edu-cd-progress-top">
-                            <span className="edu-cd-progress-pct">{pct}%</span>
-                            <span className="edu-cd-progress-frac">{done}/20 bài</span>
-                          </div>
-                          <div className="edu-cd-progress-bar">
-                            <div className="edu-cd-progress-fill" id="prog-fill" style={{ width: `${pct}%` }}></div>
-                          </div>
-                        </div>
-
-                        <div className="edu-cd-stats">
-                          <div className="edu-cd-stat">
-                            <div className="v">{done}</div>
-                            <div className="l">Bài đã học</div>
-                          </div>
-                          <div className="edu-cd-stat">
-                            <div className="v">{Math.max(20 - (enrollment.completedLessons || 0), 0)}</div>
-                            <div className="l">Còn lại</div>
-                          </div>
-                          <div className="edu-cd-stat">
-                            <div className="v">{enrollment.timeSpent || '0h'}</div>
-                            <div className="l">Đã học</div>
-                          </div>
-                          <div className="edu-cd-stat">
-                            <div className="v">{streak}</div>
-                            <div className="l">🔥 Streak</div>
-                          </div>
-                        </div>
-
-                        <button type="button" className="edu-cd-btn primary" style={{ width: '100%', marginTop: 18 }} onClick={() => W().goLesson()}>▶ Tiếp tục học</button>
-                        <button type="button" className="edu-cd-unenroll" id="unenroll-btn" onClick={() => W().unenroll()}>Hủy đăng ký</button>
-                      </>
-                    ) : (
-                      <button type="button" className="edu-cd-btn primary" style={{ width: '100%', marginTop: 18 }} id="enroll-btn" onClick={() => W().enroll()}>
-                        Đăng ký ngay – Miễn phí
-                      </button>
-                    )}
+                  <div id="cd-cta-area">
+                    <button type="button" className="edu-cd-btn primary" style={{ width: '100%', marginTop: 18 }} onClick={() => W().goLesson()}>▶ Bắt đầu học</button>
                   </div>
-                  <div id="cd-cta-error" role="alert" aria-live="polite" style={{ display: 'none', marginTop: 8, color: '#EF4444', fontSize: '0.8rem' }}></div>
 
                   <div className="edu-cd-includes">
                     <div className="edu-cd-includes-title">KHÓA HỌC BAO GỒM</div>
@@ -484,15 +373,12 @@ export default function CourseDbDesign({ courseId }: { courseId: string }) {
         </div>
       </div>
 
-      <Chatbot />
       {/* Globals cho course_db_design.js (thay inline script Jinja gốc):
           <script> trong JSX không bao giờ được React thực thi, nên phải gán
-          qua LegacyScripts trước khi nạp file legacy.
-          Nạp NGAY, không đợi API: script này dựng hero/lộ trình/yêu cầu/thành
-          tựu từ dữ liệu viết sẵn trong chính nó. CURRENT_LESSON_IDX và
-          USER_STREAK phải chờ API nên được cập nhật ở effect ngay bên dưới. */}
+          qua LegacyScripts trước khi nạp file legacy. Không còn nạp edu-chrome.js
+          (menu người dùng/chuông của HeaderBar) và chatbot.js — hai thứ đó đã gỡ. */}
       <LegacyScripts
-        srcs={['/static/js/edu-chrome.js', '/static/js/course_db_design.js', '/static/js/chatbot.js']}
+        srcs={['/static/js/course_db_design.js']}
         globals={{
           COURSE_ID: courseId,
           USER_STREAK: 0,

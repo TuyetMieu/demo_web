@@ -1,0 +1,63 @@
+/* Khung trang chi tiết — thay cho #main + Sidebar cũ. Chỉ dùng token edu-theme. */
+.shell {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  font-family: var(--edu-font);
+}
+
+/* .page của style.css đặt padding 24px; ở đây khung đã tự canh lề. */
+.content { padding: 0 24px 72px; }
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 0;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--edu-t3);
+  text-decoration: none;
+  transition: color 0.15s ease, gap 0.15s ease;
+}
+.back:hover { color: var(--edu-accent-text); gap: 11px; }
+.back:focus-visible {
+  outline: 2px solid var(--edu-accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* <a> bài học: trung hoà gạch chân/màu mặc định của thẻ liên kết. */
+.lessonLink { color: inherit; text-decoration: none; }
+
+/* <button> tiêu đề module: trung hoà style mặc định (CSS của trang viết cho <div>). */
+.moduleHead {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.blockMeta {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--edu-t4);
+}
+
+.startBtn {
+  display: inline-flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 18px;
+  text-decoration: none;
+}
+
+@media (max-width: 639.98px) {
+  .content { padding: 0 16px 56px; }
+}

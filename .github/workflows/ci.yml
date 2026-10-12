@@ -109,19 +109,15 @@ jobs:
   #     13,2 MB, cùng origin) nên không còn tải ~10 MB từ CDN trong lúc test
   #     đang bị bấm đồng hồ — nguồn đỏ giả vì mạng đã mất.
   #
-  # CHỈ chạy `python-advanced` (8 ca). Ba spec còn lại CỐ Ý không chạy: cả ba đều
-  # gọi `helpers.login()` đăng nhập UI thật, tức cần backend Django cổng 9000 +
-  # DB có content_json + tài khoản E2E_EMAIL/E2E_PASSWORD — runner không có.
-  # Đo ở máy ngày 12/10/2026 với đúng cấu hình này, không có backend:
-  #  - pe-run-sql        1 ca, trượt: `openLesson()` hết 30s chờ `LESSON_CONTENT`.
-  #  - drag-regression   1 ca, trượt: cùng lý do trên.
-  #  - mobile-responsive 6 ca, 4 đạt / 2 trượt. Một ca cần login (`.topbar`
-  #    không bao giờ hiện); ca `/` trượt vì LỖI THẬT, không phải thiếu backend:
-  #    ở viewport 375px, `div.nav-actions` (cùng `a.btn-outline`,
-  #    `a.btn-primary`) nằm từ x=286 tới x=482 — tràn ngang 107px ở trang chủ.
-  #    Chưa gộp spec này khi lỗi đó còn, vì job luôn đỏ còn tệ hơn không có job
-  #    (cùng lý lẽ với mốc trần ở gate lint backend). Sửa trang chủ xong thì
-  #    thêm 5 ca không-cần-login vào đây.
+  # Chạy `python-advanced` (8 ca) và `mobile-responsive` (5 ca). Hai spec còn lại
+  # (`pe-run-sql`, `drag-regression`) CỐ Ý không chạy: cả hai gọi `helpers.login()`
+  # đăng nhập UI thật, tức cần backend Django cổng 9000 + DB có content_json +
+  # tài khoản E2E_EMAIL/E2E_PASSWORD — runner không có, và trang /login đã gỡ
+  # khỏi frontend nên hiện không chạy được ở đâu cả. Đo ở máy ngày 12/10/2026,
+  # không có backend: cả hai trượt vì `openLesson()` hết 30s chờ `LESSON_CONTENT`.
+  # `mobile-responsive` được viết lại chỉ đo trang chủ + trang chi tiết khóa
+  # (không cần login, không cần backend) — bản cũ đo cả dashboard/login/
+  # questionaire, những trang đã bị gỡ.
   e2e:
     runs-on: ubuntu-latest
     defaults:

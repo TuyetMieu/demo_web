@@ -66,12 +66,9 @@ export default function PythonStudio() {
 
   async function json(path: string, options?: RequestInit) {
     const response = await apiFetch(path, options);
-    if (response.status === 401) {
-      window.location.assign(
-        '/login?next=' + encodeURIComponent('/lesson/python?demo=list'),
-      );
-      throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-    }
+    // /login đã gỡ khỏi frontend — chuyển hướng sẽ ra 404, nên chỉ báo lỗi.
+    if (response.status === 401)
+      throw new Error('Bài demo này cần phiên đăng nhập hợp lệ từ API.');
     const body = await response.json().catch(() => ({}));
     if (!response.ok || body.ok === false)
       throw new Error(
@@ -336,7 +333,7 @@ export default function PythonStudio() {
           >
             <Icon step={d.step} n={headerIcons[0]} />
           </a>
-          <a className={s.brand} href="/dashboard">
+          <a className={s.brand} href="/">
             Programming Edu
           </a>
           <div className={s.breadcrumb}>
@@ -358,7 +355,7 @@ export default function PythonStudio() {
               <Icon step={d.step} n={headerIcons[3]} />
             </button>
             <a
-              href="/dashboard#profile"
+              href="/"
               className={s.avatar}
               title={user?.name || 'Tài khoản'}
             >

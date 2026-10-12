@@ -6,9 +6,9 @@
 //  1. `python-advanced` — giả lập toàn bộ API bằng `page.route`, Pyodide tự host
 //     trong repo (`public/pyodide/v0.27.7/`), nên KHÔNG cần backend, DB, mạng:
 //       cd frontend && npx playwright test -c e2e/playwright.config.ts python-advanced
-//     Đây là nhóm duy nhất chạy trong CI.
+//     `mobile-responsive` cũng không cần backend (chỉ đo trang chủ + chi tiết khóa) nên chạy chung nhóm này trong CI.
 //
-//  2. `pe-run-sql`, `drag-regression`, `mobile-responsive` — dùng `helpers.login()`
+//  2. `pe-run-sql`, `drag-regression` — dùng `helpers.login()`
 //     đăng nhập UI thật, nên cần backend Django (cổng 9000) + DB có content_json
 //     + tài khoản test (E2E_EMAIL/E2E_PASSWORD). Chỉ chạy được ở máy có môi
 //     trường đó:

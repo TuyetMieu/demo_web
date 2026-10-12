@@ -74,12 +74,10 @@ export function useLessonData({
   const json = useCallback(
     async (path: string, options?: RequestInit) => {
       const response = await apiFetch(path, options);
-      if (response.status === 401) {
-        window.location.assign(
-          '/login?next=' + encodeURIComponent(`/lesson/${courseId}?lesson=${lessonNo - 1}`),
-        );
-        throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-      }
+      // Frontend không còn trang đăng nhập (/login đã gỡ) nên không đá đi đâu
+      // được nữa — chuyển hướng sẽ ra 404. Báo lỗi tại chỗ để loadError hiện lên.
+      if (response.status === 401)
+        throw new Error('Bài học này cần phiên đăng nhập hợp lệ từ API.');
       const body = await response.json().catch(() => ({}));
       if (!response.ok || body.ok === false)
         throw new Error(
@@ -92,7 +90,7 @@ export function useLessonData({
         );
       return body;
     },
-    [courseId, lessonNo],
+    [],
   );
 
   const load = useCallback(async () => {

@@ -1,0 +1,54 @@
+/* Thanh đầu trang — chỉ dùng token của edu-theme.css (lint:tokens cấm hex). */
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  font-family: var(--edu-font);
+}
+
+.brand {
+  display: inline-flex;
+  gap: 6px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+.brand:focus-visible,
+.theme:focus-visible {
+  outline: 2px solid var(--edu-accent);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.brandName { color: var(--edu-t1); }
+.brandAccent { color: var(--edu-accent-text); }
+
+.theme {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  color: var(--edu-t2);
+  background: var(--edu-pill-bg);
+  border: 1px solid var(--edu-pill-border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.theme:hover { color: var(--edu-accent-text); border-color: var(--edu-accent); }
+
+/* Hành động sẽ xảy ra khi bấm: đang sáng → hiện trăng, đang tối → hiện mặt trời. */
+.sun { display: none; }
+:global(body.dark) .moon { display: none; }
+:global(body.dark) .sun { display: block; }
+
+@media (max-width: 639.98px) {
+  .bar { padding: 16px; }
+}

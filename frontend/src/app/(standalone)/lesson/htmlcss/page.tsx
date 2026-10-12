@@ -56,8 +56,10 @@ export default function LessonHtmlcssPage() {
             <i className="fa-solid fa-gem text-brand-primary"></i>
             <span id="gems-count" className="font-bold text-brand-primary">0</span>
           </div>
-          <a href="/dashboard" className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-2xl text-sm font-bold text-gray-600 hover:bg-gray-200 transition-colors">
-            <i className="fa-solid fa-arrow-left"></i> Dashboard
+          {/* <a> thường: lối ra khỏi bài học tải lại trang để bỏ các script legacy của bài (main.js, tailwind CDN). */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <a href="/" className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-2xl text-sm font-bold text-gray-600 hover:bg-gray-200 transition-colors">
+            <i className="fa-solid fa-arrow-left"></i> Khóa học
           </a>
         </div>
       </nav>

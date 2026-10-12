@@ -80,6 +80,11 @@ Ghi lại để không ai vấp lại. Mỗi dòng là một lỗi có thật đ
 - **Hai nguồn danh sách bài.** Trang khoá học đọc `frontend/src/lib/curricula.json` (file tĩnh,
   chép tay từ `scripts/pe-v3/out/curriculum-python.json`), còn nội dung bài đọc từ DB. Sau mỗi
   lần seed phải kiểm hai nguồn có lệch không.
+- **Frontend không còn đăng nhập, nhưng backend vẫn đòi JWT.** Trang chủ `/` và `/courses/*` đọc
+  danh mục tĩnh `frontend/src/lib/catalog.ts` (chép từ `prisma/seed-courses.js`, số bài lấy từ
+  `curricula.json`) chứ không gọi `/api/courses` — gọi thì khách nhận 401. Sửa seed khoá học thì
+  sửa cả file này. Trang bài học (`/lesson/*`) vẫn gọi API có JWT: khách không có phiên sẽ thấy
+  lỗi chứ không bị đá sang `/login` (route đó đã gỡ).
 - **`prisma/seed-courses.js` vẫn tạo 40 bài rỗng mã `python-1…python-40`.** Chạy nhầm sau khi
   seed v3 sẽ sinh bài trùng thứ tự.
 - **527 lỗi lint backend KHÔNG phải lỗi định dạng.** Đã đo: chỉ 6% chạy `--fix` là xong. 89%
